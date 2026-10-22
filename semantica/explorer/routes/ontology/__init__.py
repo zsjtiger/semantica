@@ -34,8 +34,6 @@ router = APIRouter(prefix="/api/ontology", tags=["ontology"])
 from . import registry  # noqa: F401
 from . import wildcard  # noqa: F401
 from . import _common  # noqa: F401
-from . import registry  # noqa: F401
-from . import wildcard  # noqa: F401
 from . import drafts  # noqa: F401
 from . import proposals  # noqa: F401
 from . import versions  # noqa: F401
