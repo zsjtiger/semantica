@@ -43,6 +43,7 @@ import numpy as np
 
 from ..utils.exceptions import ProcessingError, ValidationError
 from ..utils.logging import get_logger
+from .backend import VectorBackend
 
 # Optional psycopg imports - prefer psycopg3, fallback to psycopg2
 try:
@@ -77,7 +78,7 @@ except (ImportError, OSError):
     register_vector = None
 
 
-class PgVectorStore:
+class PgVectorStore(VectorBackend):
     """
     PostgreSQL pgvector store for vector storage and similarity search.
 

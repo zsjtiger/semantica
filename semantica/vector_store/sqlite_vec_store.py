@@ -50,6 +50,7 @@ from ..utils.exceptions import ProcessingError, ValidationError
 from ..utils.logging import get_logger
 
 import logging
+from .backend import VectorBackend
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +63,7 @@ sqlite_vec = None
 SQLITE_VEC_AVAILABLE = importlib.util.find_spec("sqlite_vec") is not None
 
 
-class SQLiteVecStore:
+class SQLiteVecStore(VectorBackend):
     """
     SQLite vector store using the sqlite-vec extension for similarity search.
 
