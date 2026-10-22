@@ -159,8 +159,7 @@ class TestBug1ExcInfoOnMethodFailure(unittest.TestCase):
             f"Unexpected extraction_method values after fallback: {methods}",
         )
 
-    @patch("semantica.semantic_extract.methods.EntitiesResponse",
-           _StubEntitiesResponse, create=True)
+    @patch("semantica.semantic_extract.methods.EntitiesResponse", _StubEntitiesResponse)
     @patch("semantica.semantic_extract.methods.SCHEMAS_AVAILABLE", True)
     @patch("semantica.semantic_extract.methods.create_provider")
     def test_llm_success_returns_llm_typed_metadata(self, mock_create):
@@ -463,8 +462,7 @@ class TestIssue554EndToEnd(unittest.TestCase):
       - Returned entities must carry extraction_method="llm_typed", not "pattern"
     """
 
-    @patch("semantica.semantic_extract.methods.EntitiesResponse",
-           _StubEntitiesResponse, create=True)
+    @patch("semantica.semantic_extract.methods.EntitiesResponse", _StubEntitiesResponse)
     @patch("semantica.semantic_extract.methods.SCHEMAS_AVAILABLE", True)
     @patch("semantica.semantic_extract.methods.create_provider")
     def test_custom_gateway_returns_llm_entities_not_pattern(self, mock_create):
@@ -539,8 +537,7 @@ class TestIssue554EndToEnd(unittest.TestCase):
         )
         self.assertIsInstance(result, list)
 
-    @patch("semantica.semantic_extract.methods.EntitiesResponse",
-           _StubEntitiesResponse, create=True)
+    @patch("semantica.semantic_extract.methods.EntitiesResponse", _StubEntitiesResponse)
     @patch("semantica.semantic_extract.methods.SCHEMAS_AVAILABLE", True)
     @patch("semantica.semantic_extract.methods.create_provider")
     def test_fallback_chain_llm_then_pattern(self, mock_create):

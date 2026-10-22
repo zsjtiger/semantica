@@ -54,8 +54,6 @@ def _owner_of(name):
     for module in _SUBMODULES:
         if name in vars(module):
             return module
-    # A name removed by delattr (e.g. at the end of mock.patch) is restored to
-    # the module that held it, not onto this package object.
     return _LAST_OWNER.get(name)
 
 
@@ -74,6 +72,7 @@ class _CLIModule(types.ModuleType):
             setattr(owner, name, value)
 
     def __delattr__(self, name):
+        # mock.patch removes a patched name and then restores the original itself.
         for module in _SUBMODULES:
             if name in vars(module):
                 _LAST_OWNER[name] = module
