@@ -20,9 +20,9 @@ import json
 import unittest
 from unittest import mock
 
-from semantica_mcp.mcp import server as mcp_server
-from semantica_mcp.mcp import session
-from semantica_mcp.mcp.tools.graph import handle_get_graph_analytics as _tool_get_graph_analytics
+from semantica.mcp import server as mcp_server
+from semantica.mcp import session
+from semantica.mcp.tools.graph import handle_get_graph_analytics as _tool_get_graph_analytics
 from semantica.context import ContextGraph
 from semantica.kg import CentralityCalculator
 

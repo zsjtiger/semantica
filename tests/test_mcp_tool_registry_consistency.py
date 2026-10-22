@@ -30,12 +30,12 @@ class TestSchemaInfoToolList(unittest.TestCase):
     """semantica://schema/info must expose exactly the tools in TOOL_DEFINITIONS."""
 
     def _schema_info_tools(self):
-        from semantica_mcp.mcp.resources.registry import _read_schema_info
+        from semantica.mcp.resources.registry import _read_schema_info
         resource = _read_schema_info("semantica://schema/info")
         return json.loads(resource["text"])["tools"]
 
     def _defined_tool_names(self):
-        from semantica_mcp.mcp.tools import TOOL_DEFINITIONS
+        from semantica.mcp.tools import TOOL_DEFINITIONS
         return [t["name"] for t in TOOL_DEFINITIONS]
 
     def test_schema_info_tool_list_matches_tool_definitions(self):
@@ -74,7 +74,7 @@ class TestExportGraphSchemaEnum(unittest.TestCase):
     actually accepts (was missing graphml and parquet)."""
 
     def _export_graph_enum(self):
-        from semantica_mcp.mcp.tools import TOOL_DEFINITIONS
+        from semantica.mcp.tools import TOOL_DEFINITIONS
         tool = next(t for t in TOOL_DEFINITIONS if t["name"] == "export_graph")
         return tool["inputSchema"]["properties"]["format"]["enum"]
 
@@ -112,8 +112,8 @@ class TestExportGraphSchemaEnum(unittest.TestCase):
         _FORMAT_ALIASES mapping (RDF inputs) plus the four non-RDF branches
         (json, csv, graphml, parquet).
         """
-        from semantica_mcp.mcp.tools.export import _FORMAT_ALIASES, handle_export_graph
-        import semantica_mcp.mcp.session as _session
+        from semantica.mcp.tools.export import _FORMAT_ALIASES, handle_export_graph
+        import semantica.mcp.session as _session
 
         # Derive the authoritative handler-accepted set from the implementation,
         # not from a hard-coded list that could drift.

@@ -12,8 +12,8 @@ import unittest
 from unittest.mock import patch
 
 from semantica.context import ContextGraph
-from semantica_mcp.mcp import session
-from semantica_mcp.mcp.tools.graph import handle_delete_node, handle_update_node
+from semantica.mcp import session
+from semantica.mcp.tools.graph import handle_delete_node, handle_update_node
 
 
 def _graph_with_task() -> ContextGraph:

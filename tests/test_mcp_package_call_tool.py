@@ -1,6 +1,6 @@
 """Tests for the shared in-process tool entry point (issue #1355).
 
-``semantica_mcp.mcp.server.call_tool`` is the dispatch used by both the
+``semantica.mcp.server.call_tool`` is the dispatch used by both the
 JSON-RPC ``tools/call`` handler and the ``semantica mcp call`` CLI command,
 so the two surfaces cannot expose different tool sets.
 """
@@ -12,8 +12,8 @@ from unittest.mock import patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from semantica_mcp.mcp import server
-from semantica_mcp.mcp.server import UnknownToolError, _handle_tools_call, call_tool
+from semantica.mcp import server
+from semantica.mcp.server import UnknownToolError, _handle_tools_call, call_tool
 
 
 class TestCallTool(unittest.TestCase):

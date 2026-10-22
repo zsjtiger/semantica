@@ -19,8 +19,8 @@ import json
 import unittest
 
 import semantica
-from semantica_mcp.mcp import server as mcp_server
-from semantica_mcp.mcp.resources.registry import handle_resource_read
+from semantica.mcp import server as mcp_server
+from semantica.mcp.resources.registry import handle_resource_read
 
 _EXPECTED = semantica.__version__
 

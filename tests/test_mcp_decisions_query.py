@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from semantica_mcp.mcp.tools.decisions import (
+from semantica.mcp.tools.decisions import (
     _get_decision_field,
     handle_query_decisions,
 )
@@ -39,7 +39,7 @@ class TestMCPQueryDecisions(unittest.TestCase):
         # 5. Non-dict input
         self.assertIsNone(_get_decision_field(None, "category"))
 
-    @patch("semantica_mcp.mcp.tools.decisions.get_graph")
+    @patch("semantica.mcp.tools.decisions.get_graph")
     def test_filter_by_category_nested_metadata(self, mock_get_graph):
         """Issue #1247: verify category filter correctly finds nodes where category is in metadata."""
         mock_graph = MagicMock()
@@ -64,7 +64,7 @@ class TestMCPQueryDecisions(unittest.TestCase):
         self.assertEqual(len(res["decisions"]), 1)
         self.assertEqual(res["decisions"][0]["id"], "dec_1")
 
-    @patch("semantica_mcp.mcp.tools.decisions.get_graph")
+    @patch("semantica.mcp.tools.decisions.get_graph")
     def test_filter_by_outcome_nested_metadata(self, mock_get_graph):
         """Issue #1247: verify outcome filter correctly evaluates nested metadata."""
         mock_graph = MagicMock()
@@ -87,7 +87,7 @@ class TestMCPQueryDecisions(unittest.TestCase):
         self.assertEqual(len(res["decisions"]), 1)
         self.assertEqual(res["decisions"][0]["id"], "dec_2")
 
-    @patch("semantica_mcp.mcp.tools.decisions.get_graph")
+    @patch("semantica.mcp.tools.decisions.get_graph")
     def test_combined_category_and_outcome_filter(self, mock_get_graph):
         """Verify combined category and outcome filtering acts as an intersection."""
         mock_graph = MagicMock()
@@ -115,7 +115,7 @@ class TestMCPQueryDecisions(unittest.TestCase):
         self.assertEqual(len(res["decisions"]), 1)
         self.assertEqual(res["decisions"][0]["id"], "dec_1")
 
-    @patch("semantica_mcp.mcp.tools.decisions.get_graph")
+    @patch("semantica.mcp.tools.decisions.get_graph")
     def test_query_with_category_and_outcome(self, mock_get_graph):
         """Verify natural language query passes category and filters outcome.
 
@@ -155,7 +155,7 @@ class TestMCPQueryDecisions(unittest.TestCase):
         self.assertEqual(res["count"], 1)
         self.assertEqual(res["decisions"][0]["decision"]["id"], "dec_1")
 
-    @patch("semantica_mcp.mcp.tools.decisions.get_graph")
+    @patch("semantica.mcp.tools.decisions.get_graph")
     def test_query_outcome_filter_does_not_drop_lower_ranked_matches(
         self, mock_get_graph
     ):
@@ -197,7 +197,7 @@ class TestMCPQueryDecisions(unittest.TestCase):
         self.assertEqual(res["count"], 1)
         self.assertEqual(res["decisions"][0]["decision"]["id"], "dec_match")
 
-    @patch("semantica_mcp.mcp.tools.decisions.get_graph")
+    @patch("semantica.mcp.tools.decisions.get_graph")
     def test_query_no_match_returns_empty_list(self, mock_get_graph):
         """Verify non-matching filter returns 0 count and empty list without errors."""
         mock_graph = MagicMock()
@@ -213,7 +213,7 @@ class TestMCPQueryDecisions(unittest.TestCase):
         res = handle_query_decisions({"category": "nonexistent"})
         self.assertEqual(res, {"decisions": [], "count": 0})
 
-    @patch("semantica_mcp.mcp.tools.decisions.get_graph")
+    @patch("semantica.mcp.tools.decisions.get_graph")
     def test_query_exception_returns_error_shape(self, mock_get_graph):
         """Verify exception returns standardized error shape."""
         mock_get_graph.side_effect = RuntimeError("Graph unavailable")

@@ -99,7 +99,7 @@ class TestGraphAnalyticsTool(unittest.TestCase):
         cls.graph = _make_context_graph()
 
     def _call_handler(self, args):
-        from semantica_mcp.mcp.tools import graph as graph_tools
+        from semantica.mcp.tools import graph as graph_tools
 
         with patch.object(graph_tools, "get_graph", return_value=self.graph):
             return graph_tools.handle_get_graph_analytics(args)
@@ -141,7 +141,7 @@ class TestGraphAnalyticsTool(unittest.TestCase):
         four keys have nothing to do with the grouping, and ``communities``
         was forced to ``[]`` because the wrapper is not a list.
         """
-        from semantica_mcp.mcp.tools import graph as graph_tools
+        from semantica.mcp.tools import graph as graph_tools
 
         graph = _make_two_node_graph()
         with patch.object(graph_tools, "get_graph", return_value=graph):

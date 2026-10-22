@@ -60,12 +60,12 @@ class TestMCPExportGraphML(unittest.TestCase):
     valid GraphML XML."""
 
     def setUp(self):
-        import semantica_mcp.mcp.session as _session
+        import semantica.mcp.session as _session
         self._orig = _session._graph
         _session._graph = _make_graph()
 
     def tearDown(self):
-        import semantica_mcp.mcp.session as _session
+        import semantica.mcp.session as _session
         _session._graph = self._orig
 
     # ------------------------------------------------------------------
@@ -76,7 +76,7 @@ class TestMCPExportGraphML(unittest.TestCase):
         """The old code: ``from semantica.export import GraphMLExporter`` —
         that class does not exist.  Result must not contain 'GraphMLExporter'
         in the error message."""
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         if "error" in result:
             self.assertNotIn(
@@ -89,31 +89,31 @@ class TestMCPExportGraphML(unittest.TestCase):
     # ------------------------------------------------------------------
 
     def test_graphml_returns_success_not_error(self):
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         self.assertNotIn("error", result, f"GraphML export returned error: {result}")
 
     def test_graphml_format_key_is_correct(self):
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         self.assertNotIn("error", result, result)
         self.assertEqual(result.get("format"), "graphml")
 
     def test_graphml_data_is_non_empty_string(self):
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         self.assertNotIn("error", result, result)
         self.assertIsInstance(result.get("data"), str)
         self.assertGreater(len(result["data"]), 0)
 
     def test_graphml_data_contains_xml_declaration(self):
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         self.assertNotIn("error", result, result)
         self.assertIn('<?xml version="1.0"', result["data"])
 
     def test_graphml_data_contains_graphml_element(self):
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         self.assertNotIn("error", result, result)
         self.assertIn("<graphml", result["data"])
@@ -122,7 +122,7 @@ class TestMCPExportGraphML(unittest.TestCase):
     def test_graphml_data_is_not_the_string_None(self):
         """The old code called ``str(exporter.export(graph))`` which returns
         ``'None'`` because ``export()`` returns ``None``."""
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         self.assertNotIn("error", result, result)
         self.assertNotEqual(result.get("data"), "None")
@@ -130,7 +130,7 @@ class TestMCPExportGraphML(unittest.TestCase):
     def test_graphml_is_parseable_xml(self):
         """The response must be well-formed XML, not an error string."""
         import xml.etree.ElementTree as ET
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         self.assertNotIn("error", result, result)
         try:
@@ -141,7 +141,7 @@ class TestMCPExportGraphML(unittest.TestCase):
     def test_graphml_no_contextgraph_attribute_error(self):
         """The old code passed the ContextGraph object directly.  Verify the
         error 'ContextGraph' object has no attribute 'get' (or similar) is gone."""
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         if "error" in result:
             self.assertNotIn("ContextGraph", result["error"])
@@ -171,7 +171,7 @@ class TestMCPExportGraphML(unittest.TestCase):
 
     def test_graphml_label_key_is_declared(self):
         """label key must be declared; pre-fix it was missing entirely."""
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         self.assertNotIn("error", result, result)
         keys = self._graphml_key_declarations(result["data"])
@@ -183,7 +183,7 @@ class TestMCPExportGraphML(unittest.TestCase):
     def test_graphml_label_key_scope_covers_edges(self):
         """label is written on both nodes (node label) and edges (edge type).
         Its for= scope must be 'all' or 'edge'.  Pre-fix it was not declared."""
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         self.assertNotIn("error", result, result)
         keys = self._graphml_key_declarations(result["data"])
@@ -198,7 +198,7 @@ class TestMCPExportGraphML(unittest.TestCase):
         """confidence is written on both nodes and edges when include_attributes
         is True.  Pre-fix the key was declared for='node' only, making every
         edge confidence reference schema-invalid."""
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         self.assertNotIn("error", result, result)
         keys = self._graphml_key_declarations(result["data"])
@@ -257,7 +257,7 @@ class TestMCPExportGraphML(unittest.TestCase):
         Pre-fix: exporter.export(kg_dict) read 'nodes' key (absent in
         to_kg_dict()); export_knowledge_graph() converts entities -> nodes."""
         import xml.etree.ElementTree as ET
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         self.assertNotIn("error", result, result)
         root = ET.fromstring(result["data"])
@@ -272,7 +272,7 @@ class TestMCPExportGraphML(unittest.TestCase):
     def test_graphml_contains_graph_edges(self):
         """Relationships in the source graph must appear as <edge> elements."""
         import xml.etree.ElementTree as ET
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         self.assertNotIn("error", result, result)
         root = ET.fromstring(result["data"])
@@ -287,7 +287,7 @@ class TestMCPExportGraphML(unittest.TestCase):
     def test_graphml_node_ids_match_source_graph(self):
         """The <node id=...> values must match the entity IDs from the source graph."""
         import xml.etree.ElementTree as ET
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "graphml"})
         self.assertNotIn("error", result, result)
         root = ET.fromstring(result["data"])
@@ -308,8 +308,8 @@ class TestMCPExportGraphML(unittest.TestCase):
         the output remains well-formed XML.  Pre-fix this produced
         <node id="a&b"> which is a parse error."""
         import xml.etree.ElementTree as ET
-        import semantica_mcp.mcp.session as _session
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        import semantica.mcp.session as _session
+        from semantica.mcp.tools.export import handle_export_graph
         from semantica.context.context_graph import ContextGraph
 
         g = ContextGraph()
@@ -387,8 +387,8 @@ class TestMCPExportGraphML(unittest.TestCase):
         """A node id containing double-quotes must not break the id=\" attribute
         boundary.  Pre-fix: <node id="say "hi""> is malformed."""
         import xml.etree.ElementTree as ET
-        import semantica_mcp.mcp.session as _session
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        import semantica.mcp.session as _session
+        from semantica.mcp.tools.export import handle_export_graph
         from semantica.context.context_graph import ContextGraph
 
         g = ContextGraph()
@@ -418,8 +418,8 @@ class TestMCPExportGraphML(unittest.TestCase):
     def test_graphml_xml_special_chars_in_edge_source_target_produce_well_formed_xml(self):
         """Edge source= and target= attributes must also be escaped."""
         import xml.etree.ElementTree as ET
-        import semantica_mcp.mcp.session as _session
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        import semantica.mcp.session as _session
+        from semantica.mcp.tools.export import handle_export_graph
         from semantica.context.context_graph import ContextGraph
 
         g = ContextGraph()
@@ -453,12 +453,12 @@ class TestMCPExportParquet(unittest.TestCase):
     Parquet bytes, and clean up temporary files."""
 
     def setUp(self):
-        import semantica_mcp.mcp.session as _session
+        import semantica.mcp.session as _session
         self._orig = _session._graph
         _session._graph = _make_graph()
 
     def tearDown(self):
-        import semantica_mcp.mcp.session as _session
+        import semantica.mcp.session as _session
         _session._graph = self._orig
 
     def _skip_if_no_pyarrow(self):
@@ -475,7 +475,7 @@ class TestMCPExportParquet(unittest.TestCase):
         """The old code: ``str(exporter.export(graph, include_metadata))``
         always produced ``"None"``."""
         self._skip_if_no_pyarrow()
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "parquet"})
         self.assertNotIn("error", result, result)
         self.assertNotEqual(result.get("data"), "None")
@@ -489,7 +489,7 @@ class TestMCPExportParquet(unittest.TestCase):
         """The old code passed a ContextGraph as ``data`` and bool as
         ``file_path``.  Ensure neither TypeError appears in the result."""
         self._skip_if_no_pyarrow()
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "parquet"})
         if "error" in result:
             self.assertNotIn("ContextGraph", result["error"])
@@ -501,27 +501,27 @@ class TestMCPExportParquet(unittest.TestCase):
 
     def test_parquet_returns_success_not_error(self):
         self._skip_if_no_pyarrow()
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "parquet"})
         self.assertNotIn("error", result, f"Parquet export returned error: {result}")
 
     def test_parquet_format_key_is_correct(self):
         self._skip_if_no_pyarrow()
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "parquet"})
         self.assertNotIn("error", result, result)
         self.assertEqual(result.get("format"), "parquet")
 
     def test_parquet_encoding_is_base64(self):
         self._skip_if_no_pyarrow()
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "parquet"})
         self.assertNotIn("error", result, result)
         self.assertEqual(result.get("encoding"), "base64")
 
     def test_parquet_data_is_dict_of_filenames_to_strings(self):
         self._skip_if_no_pyarrow()
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "parquet"})
         self.assertNotIn("error", result, result)
         data = result.get("data")
@@ -532,7 +532,7 @@ class TestMCPExportParquet(unittest.TestCase):
 
     def test_parquet_data_contains_at_least_one_parquet_file(self):
         self._skip_if_no_pyarrow()
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "parquet"})
         self.assertNotIn("error", result, result)
         data = result.get("data", {})
@@ -544,7 +544,7 @@ class TestMCPExportParquet(unittest.TestCase):
         """Each base64 value must decode to bytes starting with the Parquet
         magic number b'PAR1' (first 4 bytes)."""
         self._skip_if_no_pyarrow()
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "parquet"})
         self.assertNotIn("error", result, result)
         data = result.get("data", {})
@@ -560,7 +560,7 @@ class TestMCPExportParquet(unittest.TestCase):
         """When pyarrow is absent the handler must return a dict with 'error'
         key, not raise an exception.  Simulate by patching the import."""
         import sys
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         # Temporarily hide pyarrow
         real_pyarrow = sys.modules.pop("pyarrow", None)
         # Also hide the real ParquetExporter so the import inside the handler fails
@@ -585,16 +585,16 @@ class TestMCPExportPreservesExistingFormats(unittest.TestCase):
     """Adding GraphML/Parquet fixes must not regress JSON, CSV, or RDF."""
 
     def setUp(self):
-        import semantica_mcp.mcp.session as _session
+        import semantica.mcp.session as _session
         self._orig = _session._graph
         _session._graph = _make_graph()
 
     def tearDown(self):
-        import semantica_mcp.mcp.session as _session
+        import semantica.mcp.session as _session
         _session._graph = self._orig
 
     def test_json_still_works(self):
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "json"})
         self.assertNotIn("error", result, result)
         self.assertEqual(result.get("format"), "json")
@@ -604,28 +604,28 @@ class TestMCPExportPreservesExistingFormats(unittest.TestCase):
         self.assertIn("relationships", payload)
 
     def test_csv_still_works(self):
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "csv"})
         self.assertNotIn("error", result, result)
         self.assertEqual(result.get("format"), "csv")
         self.assertIn("id,label,type", result.get("data", ""))
 
     def test_turtle_still_works(self):
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "turtle"})
         self.assertNotIn("error", result, result)
         self.assertIsInstance(result.get("data"), str)
         self.assertIn("@prefix", result["data"])
 
     def test_nt_still_works(self):
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "nt"})
         self.assertNotIn("error", result, result)
         self.assertIsInstance(result.get("data"), str)
         self.assertGreater(len(result["data"]), 0)
 
     def test_unsupported_format_still_returns_error(self):
-        from semantica_mcp.mcp.tools.export import handle_export_graph
+        from semantica.mcp.tools.export import handle_export_graph
         result = handle_export_graph({"format": "yaml"})
         self.assertIn("error", result)
 

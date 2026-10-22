@@ -203,7 +203,7 @@ def mcp_start(cli_ctx: _common.CLIContext, transport: str, port: int) -> None:
 
     def _action() -> None:
         import subprocess as sp
-        cmd = [sys.executable, "-m", "semantica_mcp.mcp.server"]
+        cmd = [sys.executable, "-m", "semantica.mcp.server"]
         if transport == "http":
             raise click.ClickException("HTTP transport is not supported (stdio only).")
         proc = sp.Popen(cmd)
@@ -247,7 +247,7 @@ def mcp_list_tools(cli_ctx: _common.CLIContext, local_json: bool) -> None:
     def _action() -> None:
         # Same catalog the server exposes via tools/list, so `list-tools`
         # and `mcp start` can't drift (issue #1355).
-        from semantica_mcp.mcp.tools import TOOL_DEFINITIONS
+        from semantica.mcp.tools import TOOL_DEFINITIONS
         tools = [t["name"] for t in TOOL_DEFINITIONS]
         if _common._is_json(cli_ctx, local_json):
             _common._jecho({"tools": list(tools)})
@@ -285,7 +285,7 @@ def mcp_call(cli_ctx: _common.CLIContext, tool_name: str, args: str, local_json:
             raise click.ClickException("--args must be a JSON object")
         # Dispatch through the same server `mcp start` spawns; its session
         # module never defined MCPSession (issue #1355).
-        from semantica_mcp.mcp.server import UnknownToolError, call_tool
+        from semantica.mcp.server import UnknownToolError, call_tool
         try:
             result = call_tool(tool_name, tool_args)
         except UnknownToolError as exc:

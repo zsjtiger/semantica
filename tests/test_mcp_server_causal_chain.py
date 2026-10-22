@@ -15,8 +15,8 @@ import json
 import unittest
 from datetime import datetime
 
-from semantica_mcp.mcp import server as mcp_server
-from semantica_mcp.mcp import session
+from semantica.mcp import server as mcp_server
+from semantica.mcp import session
 from semantica.context import ContextGraph
 
 SCENARIOS = ("Adopt HIPAA program", "Require BAA from vendors", "Host on AWS")

@@ -18,9 +18,9 @@ import json
 import os
 import unittest
 
-from semantica_mcp.mcp import server as mcp_server
-from semantica_mcp.mcp import session
-from semantica_mcp.mcp.tools.export import handle_export_graph as _tool_export_graph
+from semantica.mcp import server as mcp_server
+from semantica.mcp import session
+from semantica.mcp.tools.export import handle_export_graph as _tool_export_graph
 from semantica.context import ContextGraph
 
 

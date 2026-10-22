@@ -3913,7 +3913,7 @@ class TestMCP:
     def test_list_tools_reads_server_catalog(self, runner, monkeypatch):
         """list-tools must read TOOL_DEFINITIONS (what the server serves via
         tools/list), not the module's ``__all__`` (issue #1355)."""
-        import semantica_mcp.mcp.tools as tools_mod
+        import semantica.mcp.tools as tools_mod
         fake = [{"name": "fake_tool_from_catalog", "description": "", "inputSchema": {},
                  "_handler": lambda a: {}}]
         monkeypatch.setattr(tools_mod, "TOOL_DEFINITIONS", fake)
@@ -3964,7 +3964,7 @@ class TestMCP:
 
     def test_call_dispatches_through_packaged_server(self, runner):
         """Regression for issue #1355: ``mcp call`` dispatches in-process through
-        ``semantica_mcp.mcp.server`` (the server ``mcp start`` spawns) instead
+        ``semantica.mcp.server`` (the server ``mcp start`` spawns) instead
         of importing the nonexistent ``MCPSession``."""
         result = runner.invoke(
             cli_module.main, ["--json", "mcp", "call", "extract_entities"]
@@ -3990,7 +3990,7 @@ class TestMCP:
 
     def test_list_tools_json_matches_server_catalog(self, runner):
         """The CLI catalog and the MCP server catalog must be the same list."""
-        from semantica_mcp.mcp.tools import TOOL_DEFINITIONS
+        from semantica.mcp.tools import TOOL_DEFINITIONS
         result = runner.invoke(cli_module.main, ["mcp", "list-tools", "--json"])
         _ok(result)
         data = _json_output(result)

@@ -1,8 +1,8 @@
-"""Regression tests for version reporting in the `semantica_mcp.mcp` package
+"""Regression tests for version reporting in the `semantica.mcp` package
 (issue #863).
 
 Covers the same stale-version bug as `test_mcp_server_version.py` for the
-standalone MCP server (run via `python -m semantica_mcp.mcp.server`), which
+standalone MCP server (run via `python -m semantica.mcp.server`), which
 is a separate implementation from `semantica.mcp_server` and was not covered
 by that fix. `semantica.__version__` is the authoritative package
 version (see semantica/mcp_server/__init__.py), so all three surfaces
@@ -17,9 +17,9 @@ import unittest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import semantica
-import semantica_mcp.mcp as mcp
-from semantica_mcp.mcp.resources.registry import _read_schema_info
-from semantica_mcp.mcp.server import _handle_initialize
+import semantica.mcp as mcp
+from semantica.mcp.resources.registry import _read_schema_info
+from semantica.mcp.server import _handle_initialize
 
 _EXPECTED = semantica.__version__
 

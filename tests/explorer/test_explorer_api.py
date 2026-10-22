@@ -790,7 +790,7 @@ class TestImportExport:
         
         Canary: if either alias table drifts such that an alias becomes unsupported,
         this test will catch it."""
-        from semantica_mcp.mcp.tools.export import _FORMAT_ALIASES as MCP_ALIASES
+        from semantica.mcp.tools.export import _FORMAT_ALIASES as MCP_ALIASES
         from semantica.explorer.routes.export_import import _RDF_FORMATS
         
         # Verify all MCP aliases are present in Explorer

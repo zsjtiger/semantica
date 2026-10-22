@@ -81,7 +81,7 @@ tests/ingest/test_ingestors.py::TestUnifiedIngest::test_ingest_web_dispatch
 tests/ingest/test_ingestors.py::TestWebIngestor::test_ingest_url
 
 # --- Progress tracking is forced off for the whole process --------------------
-# `semantica_mcp/mcp/__init__.py` sets `SEMANTICA_DISABLE_PROGRESS=1` at import
+# `semantica/mcp/__init__.py` sets `SEMANTICA_DISABLE_PROGRESS=1` at import
 # and `tests/test_mcp_package_export_graphml_parquet.py` sets it at module scope
 # as well, so the variable is already set while pytest collects the suite.
 # `ProgressTracker.enabled` then latches disabled for the process

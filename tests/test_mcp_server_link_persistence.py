@@ -7,8 +7,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from semantica_mcp.mcp import server as mcp_server
-from semantica_mcp.mcp import session
+from semantica.mcp import server as mcp_server
+from semantica.mcp import session
 from semantica.context import ContextGraph
 
 

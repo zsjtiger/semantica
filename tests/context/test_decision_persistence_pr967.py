@@ -47,10 +47,10 @@ from semantica.context.context_graph import ContextGraph
 
 
 _GRAPH_PATCH_TARGETS = (
-    "semantica_mcp.mcp.tools.decisions.get_graph",
-    "semantica_mcp.mcp.tools.graph.get_graph",
-    "semantica_mcp.mcp.tools.export.get_graph",
-    "semantica_mcp.mcp.tools.retrieval.get_graph",
+    "semantica.mcp.tools.decisions.get_graph",
+    "semantica.mcp.tools.graph.get_graph",
+    "semantica.mcp.tools.export.get_graph",
+    "semantica.mcp.tools.retrieval.get_graph",
 )
 
 
@@ -607,7 +607,7 @@ class TestQueryGraphLimitSemantics(unittest.TestCase):
 
     def test_limit_none_returns_all(self):
         """limit=None must return all neighbours (outbound + inbound)."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = self._make_graph_and_patch()
         with _patch_graph(g):
             result = _tool_query_graph({
@@ -621,7 +621,7 @@ class TestQueryGraphLimitSemantics(unittest.TestCase):
 
     def test_limit_zero_returns_empty(self):
         """limit=0 must return an empty neighbors list, not bypass the cap."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = self._make_graph_and_patch()
         with _patch_graph(g):
             result = _tool_query_graph({
@@ -636,7 +636,7 @@ class TestQueryGraphLimitSemantics(unittest.TestCase):
 
     def test_limit_one_caps_result(self):
         """limit=1 must return exactly 1 neighbour regardless of total."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = self._make_graph_and_patch()
         with _patch_graph(g):
             result = _tool_query_graph({
@@ -650,7 +650,7 @@ class TestQueryGraphLimitSemantics(unittest.TestCase):
 
     def test_limit_larger_than_available(self):
         """limit > total results must return all available without error."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = self._make_graph_and_patch()
         with _patch_graph(g):
             result = _tool_query_graph({
@@ -666,7 +666,7 @@ class TestQueryGraphLimitSemantics(unittest.TestCase):
 
     def test_outbound_only_topology(self):
         """Nodes with only outbound edges must return outbound neighbours."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = ContextGraph(advanced_analytics=False)
         g.add_node("source", "hub")
         g.add_node("dest1", "leaf")
@@ -685,7 +685,7 @@ class TestQueryGraphLimitSemantics(unittest.TestCase):
 
     def test_inbound_only_topology(self):
         """Nodes with only inbound edges must return inbound neighbours."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = ContextGraph(advanced_analytics=False)
         g.add_node("sink", "hub")
         g.add_node("src1", "feeder")
@@ -705,7 +705,7 @@ class TestQueryGraphLimitSemantics(unittest.TestCase):
 
     def test_mixed_inbound_outbound(self):
         """A node with both inbound and outbound edges returns both directions."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = ContextGraph(advanced_analytics=False)
         g.add_node("mid", "hub")
         g.add_node("up", "parent")
@@ -732,7 +732,7 @@ class TestMCPGetGraphLoadsFromPath(unittest.TestCase):
 
     def test_get_graph_loads_kg_path(self):
         """When SEMANTICA_KG_PATH is set, _get_graph must load it."""
-        import semantica_mcp.mcp.session as mcp_mod
+        import semantica.mcp.session as mcp_mod
 
         g = ContextGraph(advanced_analytics=False)
         g.add_node("kg_node_1", "entity", label="Loaded from file")
@@ -788,7 +788,7 @@ class TestUpdateDeleteNodeMCP(unittest.TestCase):
 
     def test_update_node_returns_updated_properties(self):
         """update_node must reflect new property values in its response."""
-        from semantica_mcp.mcp.tools.graph import handle_update_node as _tool_update_node
+        from semantica.mcp.tools.graph import handle_update_node as _tool_update_node
         g, _ = self._fresh_graph_with_decision()
         with _patch_graph(g):
             result = _tool_update_node({
@@ -803,7 +803,7 @@ class TestUpdateDeleteNodeMCP(unittest.TestCase):
 
     def test_update_node_nonexistent_returns_error(self):
         """update_node on a nonexistent node must return an error dict."""
-        from semantica_mcp.mcp.tools.graph import handle_update_node as _tool_update_node
+        from semantica.mcp.tools.graph import handle_update_node as _tool_update_node
         g, _ = self._fresh_graph_with_decision()
         with _patch_graph(g):
             result = _tool_update_node({
@@ -814,7 +814,7 @@ class TestUpdateDeleteNodeMCP(unittest.TestCase):
 
     def test_delete_node_soft_archives(self):
         """delete_node must mark the node status='archived', not remove it."""
-        from semantica_mcp.mcp.tools.graph import handle_delete_node as _tool_delete_node
+        from semantica.mcp.tools.graph import handle_delete_node as _tool_delete_node
         g, _ = self._fresh_graph_with_decision()
         with _patch_graph(g):
             result = _tool_delete_node({"node_id": "task_1"})
@@ -826,7 +826,7 @@ class TestUpdateDeleteNodeMCP(unittest.TestCase):
 
     def test_delete_node_nonexistent_returns_error(self):
         """delete_node on a nonexistent node must return an error dict."""
-        from semantica_mcp.mcp.tools.graph import handle_delete_node as _tool_delete_node
+        from semantica.mcp.tools.graph import handle_delete_node as _tool_delete_node
         g, _ = self._fresh_graph_with_decision()
         with _patch_graph(g):
             result = _tool_delete_node({"node_id": "ghost_id"})
@@ -834,7 +834,7 @@ class TestUpdateDeleteNodeMCP(unittest.TestCase):
 
     def test_update_decision_node_syncs_index(self):
         """update_node on a decision node must keep _decisions consistent."""
-        from semantica_mcp.mcp.tools.graph import handle_update_node as _tool_update_node
+        from semantica.mcp.tools.graph import handle_update_node as _tool_update_node
         g, did = self._fresh_graph_with_decision()
         with _patch_graph(g):
             _tool_update_node({
@@ -848,8 +848,8 @@ class TestUpdateDeleteNodeMCP(unittest.TestCase):
 
     def test_update_delete_persist_after_reload(self):
         """Changes made by update_node / delete_node must survive save → load."""
-        from semantica_mcp.mcp.tools.graph import handle_update_node as _tool_update_node
-        from semantica_mcp.mcp.tools.graph import handle_delete_node as _tool_delete_node
+        from semantica.mcp.tools.graph import handle_update_node as _tool_update_node
+        from semantica.mcp.tools.graph import handle_delete_node as _tool_delete_node
         g, _ = self._fresh_graph_with_decision()
         with _patch_graph(g):
             _tool_update_node({"node_id": "task_1",
@@ -878,7 +878,7 @@ class TestEntityExtractionSurfaceText(unittest.TestCase):
 
     def test_extract_entities_returns_text_field(self):
         """extract_entities must include a 'text' key with the surface form."""
-        from semantica_mcp.mcp.tools.extraction import handle_extract_entities as _tool_extract_entities
+        from semantica.mcp.tools.extraction import handle_extract_entities as _tool_extract_entities
 
         # Minimal smoke test: verify the response shape regardless of whether
         # spaCy models are available.  If no entities are found we skip the
@@ -904,13 +904,13 @@ class TestEntityExtractionSurfaceText(unittest.TestCase):
 
     def test_extract_entities_missing_text_returns_error(self):
         """extract_entities with no text must return an error dict."""
-        from semantica_mcp.mcp.tools.extraction import handle_extract_entities as _tool_extract_entities
+        from semantica.mcp.tools.extraction import handle_extract_entities as _tool_extract_entities
         result = _tool_extract_entities({})
         self.assertIn("error", result)
 
     def test_extract_relations_missing_text_returns_error(self):
         """extract_relations with no text must return an error dict."""
-        from semantica_mcp.mcp.tools.extraction import handle_extract_relations as _tool_extract_relations
+        from semantica.mcp.tools.extraction import handle_extract_relations as _tool_extract_relations
         result = _tool_extract_relations({})
         self.assertIn("error", result)
 
@@ -918,7 +918,7 @@ class TestEntityExtractionSurfaceText(unittest.TestCase):
         """extract_relations must not raise TypeError for missing `entities`
         (RelationExtractor.extract_relations requires an `entities` arg;
         the tool must supply one, e.g. by running NER first)."""
-        from semantica_mcp.mcp.tools.extraction import handle_extract_relations as _tool_extract_relations
+        from semantica.mcp.tools.extraction import handle_extract_relations as _tool_extract_relations
 
         try:
             result = _tool_extract_relations({"text": "Apple announced new iPhone"})
@@ -946,7 +946,7 @@ class TestQueryGraphNodeAndSearch(unittest.TestCase):
 
     def test_node_mode_existing(self):
         """node mode must return the node dict for an existing id."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = self._make_graph()
         with _patch_graph(g):
             result = _tool_query_graph({"mode": "node", "node_id": "alpha"})
@@ -955,7 +955,7 @@ class TestQueryGraphNodeAndSearch(unittest.TestCase):
 
     def test_node_mode_missing_id(self):
         """node mode with no node_id must return an error."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = self._make_graph()
         with _patch_graph(g):
             result = _tool_query_graph({"mode": "node"})
@@ -963,7 +963,7 @@ class TestQueryGraphNodeAndSearch(unittest.TestCase):
 
     def test_search_mode_finds_matching(self):
         """search mode must return nodes whose id or content contains the query."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = self._make_graph()
         with _patch_graph(g):
             result = _tool_query_graph({"mode": "search", "query": "alpha"})
@@ -974,7 +974,7 @@ class TestQueryGraphNodeAndSearch(unittest.TestCase):
 
     def test_search_mode_limit_respected(self):
         """search mode must respect the limit parameter."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = ContextGraph(advanced_analytics=False)
         for i in range(20):
             g.add_node(f"item_{i}", "thing", label=f"item {i}")
@@ -984,7 +984,7 @@ class TestQueryGraphNodeAndSearch(unittest.TestCase):
 
     def test_search_mode_limit_zero_returns_empty(self):
         """search mode with limit=0 must return no results."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = ContextGraph(advanced_analytics=False)
         for i in range(5):
             g.add_node(f"alpha_{i}", "thing", label=f"alpha item {i}")
@@ -995,7 +995,7 @@ class TestQueryGraphNodeAndSearch(unittest.TestCase):
 
     def test_unknown_mode_returns_error(self):
         """An unknown mode string must return an error."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = self._make_graph()
         with _patch_graph(g):
             result = _tool_query_graph({"mode": "invalid_mode"})
@@ -1004,7 +1004,7 @@ class TestQueryGraphNodeAndSearch(unittest.TestCase):
     def test_inbound_no_duplicates_when_multiple_edges(self):
         """Multiple edges between same source→target must produce only one
         inbound entry for the source node."""
-        from semantica_mcp.mcp.tools.graph import handle_query_graph as _tool_query_graph
+        from semantica.mcp.tools.graph import handle_query_graph as _tool_query_graph
         g = ContextGraph(advanced_analytics=False)
         g.add_node("hub", "center")
         g.add_node("src", "node")
@@ -1073,21 +1073,21 @@ class TestMCPServerMutationPersistence(unittest.TestCase):
 
     def _isolated_mcp_graph(self):
         """Return a fresh ContextGraph injected as the mcp_server singleton."""
-        import semantica_mcp.mcp.session as mcp_mod
+        import semantica.mcp.session as mcp_mod
         g = ContextGraph(advanced_analytics=False)
         self._original_graph = mcp_mod._graph
         mcp_mod._graph = g
         return g
 
     def _restore_mcp_graph(self):
-        import semantica_mcp.mcp.session as mcp_mod
+        import semantica.mcp.session as mcp_mod
         mcp_mod._graph = self._original_graph
 
     # ---- record_decision ------------------------------------------------
 
     def test_record_decision_persists_to_kg_path(self):
         """_tool_record_decision must write the graph to SEMANTICA_KG_PATH."""
-        from semantica_mcp.mcp.tools.decisions import handle_record_decision as _tool_record_decision
+        from semantica.mcp.tools.decisions import handle_record_decision as _tool_record_decision
 
         g = self._isolated_mcp_graph()
         try:
@@ -1126,7 +1126,7 @@ class TestMCPServerMutationPersistence(unittest.TestCase):
 
     def test_record_decision_works_without_kg_path(self):
         """_tool_record_decision must succeed when SEMANTICA_KG_PATH is unset."""
-        from semantica_mcp.mcp.tools.decisions import handle_record_decision as _tool_record_decision
+        from semantica.mcp.tools.decisions import handle_record_decision as _tool_record_decision
 
         g = self._isolated_mcp_graph()
         try:
@@ -1148,7 +1148,7 @@ class TestMCPServerMutationPersistence(unittest.TestCase):
 
     def test_add_entity_persists_to_kg_path(self):
         """_tool_add_entity must write the graph to SEMANTICA_KG_PATH."""
-        from semantica_mcp.mcp.tools.graph import handle_add_entity as _tool_add_entity
+        from semantica.mcp.tools.graph import handle_add_entity as _tool_add_entity
 
         g = self._isolated_mcp_graph()
         try:
@@ -1178,7 +1178,7 @@ class TestMCPServerMutationPersistence(unittest.TestCase):
 
     def test_add_entity_works_without_kg_path(self):
         """_tool_add_entity must succeed when SEMANTICA_KG_PATH is unset."""
-        from semantica_mcp.mcp.tools.graph import handle_add_entity as _tool_add_entity
+        from semantica.mcp.tools.graph import handle_add_entity as _tool_add_entity
 
         g = self._isolated_mcp_graph()
         try:
@@ -1194,8 +1194,8 @@ class TestMCPServerMutationPersistence(unittest.TestCase):
 
     def test_add_relationship_persists_to_kg_path(self):
         """_tool_add_relationship must write the graph to SEMANTICA_KG_PATH."""
-        from semantica_mcp.mcp.tools.graph import handle_add_entity as _tool_add_entity
-        from semantica_mcp.mcp.tools.graph import handle_add_relationship as _tool_add_relationship
+        from semantica.mcp.tools.graph import handle_add_entity as _tool_add_entity
+        from semantica.mcp.tools.graph import handle_add_relationship as _tool_add_relationship
 
         g = self._isolated_mcp_graph()
         try:
@@ -1228,8 +1228,8 @@ class TestMCPServerMutationPersistence(unittest.TestCase):
 
     def test_add_relationship_works_without_kg_path(self):
         """_tool_add_relationship must succeed when SEMANTICA_KG_PATH is unset."""
-        from semantica_mcp.mcp.tools.graph import handle_add_entity as _tool_add_entity
-        from semantica_mcp.mcp.tools.graph import handle_add_relationship as _tool_add_relationship
+        from semantica.mcp.tools.graph import handle_add_entity as _tool_add_entity
+        from semantica.mcp.tools.graph import handle_add_relationship as _tool_add_relationship
 
         g = self._isolated_mcp_graph()
         try:

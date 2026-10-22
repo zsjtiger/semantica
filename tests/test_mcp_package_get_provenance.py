@@ -52,14 +52,14 @@ class _FakeGraph:
 
 class _GraphSessionMixin:
     def setUp(self):
-        import semantica_mcp.mcp.session as _session
+        import semantica.mcp.session as _session
 
         self._orig_graph = _session._graph
         _session._graph = _FakeGraph()
         _DummyTracker.calls = []
 
     def tearDown(self):
-        import semantica_mcp.mcp.session as _session
+        import semantica.mcp.session as _session
 
         _session._graph = self._orig_graph
         _DummyTracker.calls = []
@@ -69,14 +69,14 @@ class TestGetProvenanceSchema(unittest.TestCase):
     """tools/list must keep advertising entity_id, not node_id."""
 
     def test_schema_requires_entity_id(self):
-        from semantica_mcp.mcp.schemas import GET_PROVENANCE
+        from semantica.mcp.schemas import GET_PROVENANCE
 
         self.assertEqual(GET_PROVENANCE["required"], ["entity_id"])
         self.assertIn("entity_id", GET_PROVENANCE["properties"])
         self.assertNotIn("node_id", GET_PROVENANCE["properties"])
 
     def test_tools_list_advertises_entity_id(self):
-        from semantica_mcp.mcp.server import _handle_tools_list
+        from semantica.mcp.server import _handle_tools_list
 
         response = _handle_tools_list(1, {})
         tools = response["result"]["tools"]
@@ -91,7 +91,7 @@ class TestGetProvenanceArgs(_GraphSessionMixin, unittest.TestCase):
     """Handler reads entity_id (schema) and node_id (alias)."""
 
     def _call(self, args):
-        from semantica_mcp.mcp.tools.export import handle_get_provenance
+        from semantica.mcp.tools.export import handle_get_provenance
 
         with patch("semantica.kg.ProvenanceTracker", _DummyTracker):
             return handle_get_provenance(args)
@@ -151,7 +151,7 @@ class TestGetProvenanceDispatch(_GraphSessionMixin, unittest.TestCase):
     """JSON-RPC tools/call and call_tool use the same handler."""
 
     def test_call_tool_with_entity_id_is_not_an_error(self):
-        from semantica_mcp.mcp.server import call_tool
+        from semantica.mcp.server import call_tool
 
         with patch("semantica.kg.ProvenanceTracker", _DummyTracker):
             result = call_tool("get_provenance", {"entity_id": "apple_inc"})
@@ -159,7 +159,7 @@ class TestGetProvenanceDispatch(_GraphSessionMixin, unittest.TestCase):
         self.assertEqual(result["node_id"], "apple_inc")
 
     def test_tools_call_entity_id_is_not_iserror(self):
-        from semantica_mcp.mcp.server import _handle_tools_call
+        from semantica.mcp.server import _handle_tools_call
 
         with patch("semantica.kg.ProvenanceTracker", _DummyTracker):
             response = _handle_tools_call(
@@ -172,7 +172,7 @@ class TestGetProvenanceDispatch(_GraphSessionMixin, unittest.TestCase):
         self.assertEqual(payload["node_id"], "apple_inc")
 
     def test_tools_call_missing_id_is_error_content(self):
-        from semantica_mcp.mcp.server import _handle_tools_call
+        from semantica.mcp.server import _handle_tools_call
 
         response = _handle_tools_call(1, {"name": "get_provenance", "arguments": {}})
         self.assertTrue(response["result"]["isError"])
@@ -184,7 +184,7 @@ class TestGetProvenanceGraphFallback(_GraphSessionMixin, unittest.TestCase):
     """Production path: kg.ProvenanceTracker has no get_provenance method."""
 
     def test_entity_id_reaches_graph_fallback(self):
-        from semantica_mcp.mcp.tools.export import handle_get_provenance
+        from semantica.mcp.tools.export import handle_get_provenance
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)

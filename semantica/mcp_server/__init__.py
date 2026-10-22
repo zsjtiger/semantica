@@ -7,7 +7,7 @@ over stdio — compatible with Claude Desktop, Windsurf, Cline, Continue, VS Cod
 Roo Code, and any other MCP-aware tool.
 
 This package is a compatibility entry point. The implementation lives in
-``semantica_mcp.mcp``; keeping ``python -m semantica.mcp_server`` and the
+``semantica.mcp``; keeping ``python -m semantica.mcp_server`` and the
 ``semantica-mcp`` script working means existing client configurations need no
 change.
 
@@ -44,7 +44,7 @@ Environment variables:
     SEMANTICA_LOG_LEVEL — log level: DEBUG, INFO, WARNING (default: WARNING)
 """
 
-from semantica_mcp.mcp.server import (
+from semantica.mcp.server import (
     TOOL_DEFINITIONS as TOOLS,
     UnknownToolError,
     call_tool,

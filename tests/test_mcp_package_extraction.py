@@ -13,7 +13,7 @@ from semantica.semantic_extract import (
 )
 from semantica.semantic_extract.coreference_resolver import CoreferenceChain, Mention
 from semantica.semantic_extract.types import Entity, Relation, Triplet
-from semantica_mcp.mcp.server import call_tool
+from semantica.mcp.server import call_tool
 
 
 def test_extract_entities_preserves_input_text_and_serializes_entity_fields():

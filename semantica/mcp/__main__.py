@@ -1,4 +1,4 @@
-"""Entry point: python -m semantica_mcp.mcp"""
+"""Entry point: python -m semantica.mcp"""
 from .server import main
 
 if __name__ == "__main__":
