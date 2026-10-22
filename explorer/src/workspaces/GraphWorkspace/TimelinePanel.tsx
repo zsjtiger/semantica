@@ -184,7 +184,7 @@ export function TimelinePanel({ onTimeChange, minDate, maxDate }: TimelinePanelP
       </div>
 
       <div style={{ position: "absolute", top: 5, left: 100, fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", color: GRAPH_THEME.ui.text.subtle, textTransform: "uppercase", pointerEvents: "none", zIndex: 2 }}>
-        Temporal Scrubber · {minBound.getFullYear()}-{maxBound.getFullYear()}
+        {t('graph.timeline.scrubberLabel', { from: minBound.getFullYear(), to: maxBound.getFullYear() })}
       </div>
 
       <div className="sem-timeline-wrap" style={{ flex: 1, overflow: "hidden", position: "relative" }}>

@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import { UploadCloud, Download, FileJson, FileText, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { logEvent } from "../../store/registryStore";
 
@@ -37,13 +38,13 @@ export function ImportExportWorkspace() {
       const fd = new FormData();
       fd.append("file", file);
       const res = await fetch("/api/import", { method: "POST", body: fd });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.detail || "Import failed"); }
+      if (!res.ok) { const e = await res.json(); throw new Error(e.detail || t('dataTools.importExport.importFailed')); }
       const data = await res.json();
-      showToast("success", `Imported ${data.nodes_imported} nodes · ${data.edges_imported} edges`);
-      logEvent("import", `Imported ${data.nodes_imported} nodes · ${data.edges_imported} edges from ${file.name}`, { file: file.name });
+      showToast("success", t('dataTools.importExport.importedToast', { nodes: data.nodes_imported, edges: data.edges_imported }));
+      logEvent("import", i18next.t('dataTools.importExport.importedLog', { nodes: data.nodes_imported, edges: data.edges_imported, file: file.name }), { file: file.name });
       setFile(null);
     } catch (e: unknown) {
-      showToast("error", e instanceof Error ? e.message : "Import failed");
+      showToast("error", e instanceof Error ? e.message : t('dataTools.importExport.importFailed'));
     } finally { setIsUploading(false); }
   }
 
@@ -55,7 +56,7 @@ export function ImportExportWorkspace() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ format: exportFormat }),
       });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.detail || "Export failed"); }
+      if (!res.ok) { const e = await res.json(); throw new Error(e.detail || t('dataTools.importExport.exportFailed')); }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -65,10 +66,10 @@ export function ImportExportWorkspace() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showToast("success", `Export ready — semantica_export.${exportFormat}`);
-      logEvent("export", `Exported graph as ${exportFormat.toUpperCase()}`, { format: exportFormat });
+      showToast("success", t('dataTools.importExport.exportReady', { file: `semantica_export.${exportFormat}` }));
+      logEvent("export", i18next.t('dataTools.importExport.exportedLog', { format: exportFormat.toUpperCase() }), { format: exportFormat });
     } catch (e: unknown) {
-      showToast("error", e instanceof Error ? e.message : "Export failed");
+      showToast("error", e instanceof Error ? e.message : t('dataTools.importExport.exportFailed'));
     } finally { setIsExporting(false); }
   }
 
@@ -81,8 +82,8 @@ export function ImportExportWorkspace() {
             <UploadCloud size={20} />
           </div>
           <div>
-            <h2 className="ws-title" style={{ fontSize: 18 }}>Import &amp; Export</h2>
-            <div className="ws-body" style={{ marginTop: 2 }}>Ingest new graph datasets or extract the current knowledge base.</div>
+            <h2 className="ws-title" style={{ fontSize: 18 }}>{t('dataTools.importExport.title')}</h2>
+            <div className="ws-body" style={{ marginTop: 2 }}>{t('dataTools.importExport.subtitle')}</div>
           </div>
         </div>
 
@@ -91,7 +92,7 @@ export function ImportExportWorkspace() {
           <div className="ws-card" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 18 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <UploadCloud size={16} color="var(--ws-accent)" />
-              <div style={{ color: "var(--ws-text)", fontWeight: 700, fontSize: 14 }}>Import Entities &amp; Relations</div>
+              <div style={{ color: "var(--ws-text)", fontWeight: 700, fontSize: 14 }}>{t('dataTools.importExport.importTitle')}</div>
             </div>
 
             {/* Dropzone */}
@@ -116,14 +117,14 @@ export function ImportExportWorkspace() {
                 <>
                   {file.name.endsWith(".json") ? <FileJson size={40} color="#4cc38a" /> : <FileText size={40} color="#4cc38a" />}
                   <div style={{ color: "var(--ws-text)", fontWeight: 700 }}>{file.name}</div>
-                  <div className="ws-body" style={{ fontSize: 11 }}>{(file.size / 1024).toFixed(1)} KB — click to replace</div>
+                  <div className="ws-body" style={{ fontSize: 11 }}>{t('dataTools.importExport.replaceHint', { size: (file.size / 1024).toFixed(1) })}</div>
                 </>
               ) : (
                 <>
                   <UploadCloud size={36} color="var(--ws-accent)" style={{ opacity: 0.7 }} />
-                  <div style={{ color: "var(--ws-text)", fontWeight: 600 }}>Drag &amp; drop or click to browse</div>
+                  <div style={{ color: "var(--ws-text)", fontWeight: 600 }}>{t('dataTools.importExport.dropzoneHint')}</div>
                   <div className="ws-pill ws-pill--mono">.json</div>
-                  <span style={{ color: "var(--ws-text-dim)", fontSize: 11 }}>or</span>
+                  <span style={{ color: "var(--ws-text-dim)", fontSize: 11 }}>{t('dataTools.importExport.or')}</span>
                   <div className="ws-pill ws-pill--mono">.csv</div>
                 </>
               )}
@@ -143,11 +144,11 @@ export function ImportExportWorkspace() {
           <div className="ws-card" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 18 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Download size={16} color="var(--ws-purple)" />
-              <div style={{ color: "var(--ws-text)", fontWeight: 700, fontSize: 14 }}>Export Graph Snapshot</div>
+              <div style={{ color: "var(--ws-text)", fontWeight: 700, fontSize: 14 }}>{t('dataTools.importExport.exportTitle')}</div>
             </div>
 
             <div>
-              <label className="ws-label">Format</label>
+              <label className="ws-label">{t('dataTools.importExport.formatLabel')}</label>
               <div style={{ display: "flex", gap: 8 }}>
                 {(["json", "csv"] as const).map((fmt) => (
                   <button
@@ -164,11 +165,11 @@ export function ImportExportWorkspace() {
             </div>
 
             <div style={{ flex: 1, padding: "14px 16px", borderRadius: "var(--ws-radius-sm)", background: "rgba(0,0,0,0.22)", border: "1px solid var(--ws-border)" }}>
-              <div style={{ color: "var(--ws-text-muted)", fontWeight: 700, fontSize: 12, marginBottom: 6 }}>What's included</div>
+              <div style={{ color: "var(--ws-text-muted)", fontWeight: 700, fontSize: 12, marginBottom: 6 }}>{t('dataTools.importExport.includedTitle')}</div>
               <div className="ws-body" style={{ fontSize: 12 }}>
                 {exportFormat === "json"
-                  ? "Full graph snapshot: all node properties, edge weights, entity metadata and semantic groups in a standardized JSON payload."
-                  : "Flattened CSV: nodes and edges as rows. Complex nested properties are stringified. Best for spreadsheet analysis."}
+                  ? t('dataTools.importExport.includedJson')
+                  : t('dataTools.importExport.includedCsv')}
               </div>
             </div>
 

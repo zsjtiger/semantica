@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
+import i18next from "i18next";
 import type { CSSProperties } from "react";
 import { Download, HeartPulse, Loader2, Wrench } from "lucide-react";
 import { loadOntologyHealth, loadOntologyRegistry } from "./api";
@@ -27,7 +28,7 @@ export function HealthTab({ onFixInEditor }: HealthTabProps) {
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Failed to load ontology registry.");
+        setError(err instanceof Error ? err.message : i18next.t('ontologyTools.common.loadRegistryFailed'));
       });
     return () => {
       cancelled = true;
@@ -77,15 +78,14 @@ export function HealthTab({ onFixInEditor }: HealthTabProps) {
     <div style={pageStyle}>
       <section style={heroStyle}>
         <div>
-          <div style={kickerStyle}><HeartPulse size={14} /> Ontology Health</div>
-          <h2 style={titleStyle}>Quality and governance signals</h2>
+          <div style={kickerStyle}><HeartPulse size={14} /> {t('ontologyTools.health.kicker')}</div>
+          <h2 style={titleStyle}>{t('ontologyTools.health.title')}</h2>
           <p style={textStyle}>
-            Score completeness, consistency, SHACL readiness, alignment coverage,
-            and documentation quality for the selected ontology.
+            {t('ontologyTools.health.text')}
           </p>
         </div>
         <div style={selectorShellStyle}>
-          <label style={labelStyle}>Ontology</label>
+          <label style={labelStyle}>{t('ontologyTools.common.ontology')}</label>
           <select style={inputStyle} value={selectedUri} onChange={(event) => setSelectedUri(event.target.value)}>
             {registry.map((entry) => <option key={entry.uri} value={entry.uri}>{entry.name}</option>)}
           </select>
@@ -95,20 +95,20 @@ export function HealthTab({ onFixInEditor }: HealthTabProps) {
       {error ? <div style={errorStyle}>{error}</div> : null}
 
       {loading ? (
-        <div style={loadingStyle}><Loader2 size={18} className="ws-spin" /> Computing health dashboard...</div>
+        <div style={loadingStyle}><Loader2 size={18} className="ws-spin" /> {t('ontologyTools.health.computing')}</div>
       ) : health ? (
         <>
           <section style={{ ...scoreGridStyle, gridTemplateColumns: `220px repeat(${health.dimensions.length}, minmax(180px, 1fr))` }}>
             <div style={scoreCardStyle}>
               <span style={scoreValueStyle}>{Math.round(health.total_score)}</span>
-              <span style={mutedStyle}>Total health score</span>
+              <span style={mutedStyle}>{t('ontologyTools.health.totalScore')}</span>
               <button style={secondaryButtonStyle} onClick={exportReport}><Download size={14} /> {t('ontologyTools.health.exportReport')}</button>
             </div>
             {health.dimensions.map((dimension) => (
               <div key={dimension.key} style={dimensionCardStyle}>
                 <div style={dimensionHeadStyle}>
                   <span style={{ color: "#ebf3ff", fontWeight: 900 }}>{dimension.label}</span>
-                  <span style={statusBadgeStyle(dimension.status)}>{dimension.status}</span>
+                  <span style={statusBadgeStyle(dimension.status)}>{t(`ontologyTools.health.statuses.${dimension.status}`, { defaultValue: dimension.status })}</span>
                 </div>
                 <div style={barTrackStyle}>
                   <div style={{ ...barFillStyle, width: `${dimension.score}%`, background: dimensionColor(dimension.score, dimension.status) }} />
@@ -122,17 +122,17 @@ export function HealthTab({ onFixInEditor }: HealthTabProps) {
           </section>
 
           <section style={cardStyle}>
-            <h3 style={sectionTitleStyle}>Actionable issues</h3>
+            <h3 style={sectionTitleStyle}>{t('ontologyTools.health.actionableIssues')}</h3>
             <div style={issueListStyle}>
               {health.issues.map((issue) => (
                 <IssueRow key={issue.id} issue={issue} onFixInEditor={onFixInEditor} />
               ))}
-              {!health.issues.length ? <p style={mutedStyle}>No actionable issues reported for this ontology.</p> : null}
+              {!health.issues.length ? <p style={mutedStyle}>{t('ontologyTools.health.noIssues')}</p> : null}
             </div>
           </section>
         </>
       ) : (
-        <div style={emptyStyle}>Select an ontology to compute health signals.</div>
+        <div style={emptyStyle}>{t('ontologyTools.health.selectOntology')}</div>
       )}
     </div>
   );

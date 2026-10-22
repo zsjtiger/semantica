@@ -80,7 +80,7 @@ export function SparqlWorkspace() {
       }
       const data = await res.json();
       if (res.status === 207) {
-        data.error = data.message || "Warning: Partial success running query.";
+        data.error = data.message || t('misc.sparql.partialWarning');
       }
 
       if (data.error && data.error_line && monaco && editorRef.current) {
@@ -97,7 +97,7 @@ export function SparqlWorkspace() {
       }
       setResult(data);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Network error — could not reach the SPARQL endpoint.";
+      const msg = e instanceof Error ? e.message : t('misc.sparql.networkError');
       setResult({ error: msg });
     } finally {
       setIsLoading(false);
@@ -135,7 +135,7 @@ export function SparqlWorkspace() {
         {/* ── Toolbar ── */}
         <div style={{ padding: "10px 16px", borderBottom: "1px solid var(--ws-border)", display: "flex", alignItems: "center", gap: 8, flexShrink: 0, background: "rgba(0,0,0,0.18)" }}>
           <div style={{ display: "flex", gap: 6, flex: 1, flexWrap: "wrap" }}>
-            <span className="ws-eyebrow" style={{ alignSelf: "center", marginRight: 4 }}>Templates:</span>
+            <span className="ws-eyebrow" style={{ alignSelf: "center", marginRight: 4 }}>{t('misc.sparql.templatesLabel')}</span>
             {TEMPLATES.map((tpl) => (
               <button
                 key={tpl.labelKey}
@@ -195,8 +195,8 @@ export function SparqlWorkspace() {
             <div style={{ padding: "10px 16px", borderBottom: "1px solid var(--ws-border)", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 7, color: "var(--ws-text-muted)", fontSize: 13, fontWeight: 700 }}>
                 <Table2 size={14} />
-                Results
-                {result?.rows && <span className="ws-pill ws-pill--accent">{result.rows.length} rows</span>}
+                {t('misc.sparql.resultsTitle')}
+                {result?.rows && <span className="ws-pill ws-pill--accent">{t('misc.sparql.rows', { count: result.rows.length })}</span>}
               </div>
               {result?.rows && result.rows.length > 0 && (
                 <button className="ws-btn ws-btn--ghost" style={{ marginLeft: "auto", padding: "4px 10px", fontSize: 11 }} onClick={handleExportCSV}>
@@ -223,8 +223,8 @@ export function SparqlWorkspace() {
                 <div className="ws-animate-in" style={{ overflowX: "auto" }}>
                   {result.rows.length === 0 ? (
                     <div className="ws-empty">
-                      <div className="ws-empty-title">No results</div>
-                      <div className="ws-empty-body">The query returned 0 rows. Try a broader query or check your data.</div>
+                      <div className="ws-empty-title">{t('misc.sparql.noResults')}</div>
+                      <div className="ws-empty-body">{t('misc.sparql.noRowsBody')}</div>
                     </div>
                   ) : (
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, color: "var(--ws-text)" }}>
@@ -260,8 +260,8 @@ export function SparqlWorkspace() {
               {!result && !isLoading && (
                 <div className="ws-empty">
                   <div className="ws-empty-icon"><Table2 size={28} /></div>
-                  <div className="ws-empty-title">Run a query</div>
-                  <div className="ws-empty-body">Write SPARQL above or pick a template, then click Run Query to see results here.</div>
+                  <div className="ws-empty-title">{t('misc.sparql.emptyTitle')}</div>
+                  <div className="ws-empty-body">{t('misc.sparql.emptyBody')}</div>
                 </div>
               )}
             </div>

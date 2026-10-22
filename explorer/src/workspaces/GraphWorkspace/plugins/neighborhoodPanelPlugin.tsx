@@ -15,9 +15,9 @@ function maxWeightBetween(graphRef: any, sourceId: string, targetId: string): nu
 }
 
 function formatNeighborMeta(neighbor: { nodeType: string; degree: number; weight: number }) {
-  const parts = [neighbor.nodeType, `degree ${neighbor.degree}`];
+  const parts = [neighbor.nodeType, i18next.t('graph.plugins.neighborhood.degree', { value: neighbor.degree })];
   if (neighbor.weight > 0) {
-    parts.push(`weight ${neighbor.weight.toFixed(2)}`);
+    parts.push(i18next.t('graph.plugins.neighborhood.weight', { value: neighbor.weight.toFixed(2) }));
   }
   return parts.join(" · ");
 }
@@ -53,7 +53,7 @@ export const neighborhoodPanelPlugin: GraphPlugin = {
         defaultOpen: false,
         preferredWidth: 360,
         preferredHeight: 260,
-        content: <div style={emptyTextStyle}>Select a node to inspect its local neighborhood.</div>,
+        content: <div style={emptyTextStyle}>{i18next.t('graph.plugins.neighborhood.emptyHint')}</div>,
       };
     }
 
@@ -102,7 +102,7 @@ export const neighborhoodPanelPlugin: GraphPlugin = {
         <div style={panelBodyStyle}>
           <div style={panelEyebrowStyle}>{selected.label}</div>
           <div style={summaryStyle}>
-            {selected.neighborCount.toLocaleString()} direct neighbors in the full graph
+            {i18next.t('graph.plugins.neighborhood.directNeighbors', { value: selected.neighborCount.toLocaleString() })}
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button
@@ -124,12 +124,15 @@ export const neighborhoodPanelPlugin: GraphPlugin = {
           </div>
           {hiddenNeighborCount > 0 ? (
             <div style={summaryStyle}>
-              {hiddenNeighborCount.toLocaleString()} lower-priority neighbors are collapsed in the current view.
+              {i18next.t('graph.plugins.neighborhood.collapsedHint', { value: hiddenNeighborCount.toLocaleString() })}
             </div>
           ) : null}
           {aggregatedEdgeCount > 0 ? (
             <div style={summaryStyle}>
-              {aggregatedEdgeCount.toLocaleString()} aggregated structural bundle{aggregatedEdgeCount === 1 ? "" : "s"} visible.
+              {i18next.t('graph.plugins.neighborhood.aggregatedBundle', {
+                count: aggregatedEdgeCount,
+                value: aggregatedEdgeCount.toLocaleString(),
+              })}
             </div>
           ) : null}
           {neighbors.length ? (
@@ -156,7 +159,7 @@ export const neighborhoodPanelPlugin: GraphPlugin = {
               ))}
             </div>
           ) : (
-            <div style={emptyTextStyle}>No direct neighbors are available for this node.</div>
+            <div style={emptyTextStyle}>{i18next.t('graph.plugins.neighborhood.noNeighbors')}</div>
           )}
         </div>
       ),

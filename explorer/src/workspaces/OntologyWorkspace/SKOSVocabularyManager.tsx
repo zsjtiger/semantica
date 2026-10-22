@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
+import i18next from "i18next";
 import {
   AlertCircle,
   BookOpen,
@@ -74,6 +75,7 @@ function ConceptDetailPanel({
   onClose: () => void;
   onNavigate: (uri: string) => void;
 }) {
+  const { t } = useTranslation();
   const [detail, setDetail] = useState<SKOSConceptDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -90,9 +92,9 @@ function ConceptDetailPanel({
     let ignore = false;
     fetch(`/api/ontology/skos/concept/${encodeURIComponent(uri)}`)
       .then(async (r) => {
-        if (!r.ok) throw new Error("Concept not found");
+        if (!r.ok) throw new Error(i18next.t('ontologyTools.skos.conceptNotFound'));
         const data = await r.json();
-        if (r.status === 207) setError(data.message || "Warning: Partial success loading concept.");
+        if (r.status === 207) setError(data.message || i18next.t('ontologyTools.skos.loadConceptPartial'));
         return data;
       })
       .then((data) => {
@@ -134,7 +136,7 @@ function ConceptDetailPanel({
       <div style={detailHeaderStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <BookOpen size={13} color="#9ee8d7" />
-          <span style={{ color: "#ebf3ff", fontSize: 13, fontWeight: 700 }}>Concept Detail</span>
+          <span style={{ color: "#ebf3ff", fontSize: 13, fontWeight: 700 }}>{t('ontologyTools.skos.conceptDetail')}</span>
         </div>
         <button onClick={onClose} style={iconBtnStyle}>
           <X size={14} />
@@ -178,7 +180,7 @@ function ConceptDetailPanel({
           </div>
 
           {detail.definition && (
-            <PropSection label="Definition">
+            <PropSection label={t('ontologyTools.skos.definition')}>
               <p style={{ margin: 0, color: "#c6d4e3", fontSize: 13, lineHeight: 1.6 }}>
                 {detail.definition}
               </p>
@@ -186,7 +188,7 @@ function ConceptDetailPanel({
           )}
 
           {detail.scope_note && (
-            <PropSection label="Scope Note">
+            <PropSection label={t('ontologyTools.skos.scopeNote')}>
               <p style={{ margin: 0, color: "#8fa8c6", fontSize: 12, lineHeight: 1.5 }}>
                 {detail.scope_note}
               </p>
@@ -194,23 +196,23 @@ function ConceptDetailPanel({
           )}
 
           {detail.editorial_note && (
-            <PropSection label="Editorial Note">
+            <PropSection label={t('ontologyTools.skos.editorialNote')}>
               <p style={{ margin: 0, color: "#8fa8c6", fontSize: 12, lineHeight: 1.5 }}>
                 {detail.editorial_note}
               </p>
             </PropSection>
           )}
 
-          {renderUriList("Broader", detail.broader)}
-          {renderUriList("Narrower", detail.narrower)}
-          {renderUriList("Related", detail.related)}
-          {renderUriList("Exact Match", detail.exact_match)}
-          {renderUriList("Close Match", detail.close_match)}
-          {renderUriList("Broad Match", detail.broad_match)}
-          {renderUriList("Narrow Match", detail.narrow_match)}
+          {renderUriList(t('ontologyTools.skos.broader'), detail.broader)}
+          {renderUriList(t('ontologyTools.skos.narrower'), detail.narrower)}
+          {renderUriList(t('ontologyTools.skos.related'), detail.related)}
+          {renderUriList(t('ontologyTools.skos.exactMatch'), detail.exact_match)}
+          {renderUriList(t('ontologyTools.skos.closeMatch'), detail.close_match)}
+          {renderUriList(t('ontologyTools.skos.broadMatch'), detail.broad_match)}
+          {renderUriList(t('ontologyTools.skos.narrowMatch'), detail.narrow_match)}
 
           {detail.scheme_uri && (
-            <PropSection label="Concept Scheme">
+            <PropSection label={t('ontologyTools.skos.conceptScheme')}>
               <span style={{ color: "#c6d4e3", fontSize: 11, fontFamily: "monospace", wordBreak: "break-all" }}>
                 {detail.scheme_uri}
               </span>
@@ -366,7 +368,7 @@ function SchemePanel({
       .then(async (r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const data = await r.json();
-        if (r.status === 207 && !ignore) setError(data.message || "Warning: Partial success loading hierarchy.");
+        if (r.status === 207 && !ignore) setError(data.message || i18next.t('ontologyTools.skos.loadHierarchyPartial'));
         return data;
       })
       .then((data) => {
@@ -375,7 +377,7 @@ function SchemePanel({
       .catch((err) => {
         if (!ignore) {
           setHierarchy([]);
-          setError(err instanceof Error ? err.message : "Failed to load hierarchy.");
+          setError(err instanceof Error ? err.message : i18next.t('ontologyTools.skos.loadHierarchyFailed'));
         }
       })
       .finally(() => {
@@ -422,11 +424,11 @@ function SchemePanel({
           {loading ? (
             <div style={{ padding: "10px 20px", display: "flex", alignItems: "center", gap: 8 }}>
               <Loader2 size={12} color="#4aa3ff" style={{ animation: "spin 0.8s linear infinite" }} />
-              <span style={{ color: "#6a7f97", fontSize: 12 }}>Loading concepts…</span>
+              <span style={{ color: "#6a7f97", fontSize: 12 }}>{t('ontologyTools.skos.loadingConcepts')}</span>
             </div>
           ) : displayedConcepts.length === 0 ? (
             <div style={{ padding: "8px 24px", color: "#6a7f97", fontSize: 12, fontStyle: "italic" }}>
-              {searchQuery ? "No matching concepts" : "No concepts in this scheme"}
+              {searchQuery ? t('ontologyTools.skos.noMatchingConcepts') : t('ontologyTools.skos.noConcepts')}
             </div>
           ) : (
             <div style={{ paddingTop: 2 }}>
@@ -456,6 +458,7 @@ interface Props {
 }
 
 export function SKOSVocabularyManager({ schemeUri }: Props) {
+  const { t } = useTranslation();
   const [schemes, setSchemes] = useState<SKOSScheme[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -465,9 +468,9 @@ export function SKOSVocabularyManager({ schemeUri }: Props) {
   useEffect(() => {
     fetch("/api/ontology/skos/schemes")
       .then(async (r) => {
-        if (!r.ok) throw new Error(`Failed to load schemes (${r.status})`);
+        if (!r.ok) throw new Error(i18next.t('ontologyTools.skos.loadSchemesFailed', { status: r.status }));
         const data = await r.json();
-        if (r.status === 207) setError(data.message || "Warning: Partial success loading schemes.");
+        if (r.status === 207) setError(data.message || i18next.t('ontologyTools.skos.loadSchemesPartial'));
         return data;
       })
       .then(setSchemes)
@@ -489,7 +492,7 @@ export function SKOSVocabularyManager({ schemeUri }: Props) {
           <input
             value={searchQ}
             onChange={(e) => setSearchQ(e.target.value)}
-            placeholder="Search labels and definitions…"
+            placeholder={t('ontologyTools.skos.searchPlaceholder')}
             style={skosSearchInputStyle}
           />
           {searchQ && (
@@ -520,10 +523,10 @@ export function SKOSVocabularyManager({ schemeUri }: Props) {
             <div style={{ ...centerStyle, textAlign: "center", padding: 28 }}>
               <BookOpen size={28} color="rgba(158,232,215,0.15)" />
               <span style={{ color: "#8fa8c6", fontSize: 12, marginTop: 10 }}>
-                No SKOS concept schemes found
+                {t('ontologyTools.skos.noSchemes')}
               </span>
               <span style={{ color: "#6a7f97", fontSize: 11, marginTop: 4, maxWidth: 220 }}>
-                Import a SKOS vocabulary to browse concepts here
+                {t('ontologyTools.skos.importHint')}
               </span>
             </div>
           )}

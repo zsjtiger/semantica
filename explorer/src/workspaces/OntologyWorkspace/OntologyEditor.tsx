@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
@@ -308,7 +309,7 @@ export function OntologyEditor() {
         setNodes([]);
         setEdges([]);
         setSelectedElement(null);
-        setGraphError(error instanceof Error ? error.message : "Failed to load ontology graph");
+        setGraphError(error instanceof Error ? error.message : i18next.t('ontologyEditor.editor.graphLoadFailed'));
       })
       .finally(() => {
         if (!controller.signal.aborted) setIsLoadingGraph(false);
@@ -347,7 +348,7 @@ export function OntologyEditor() {
 
   const addProperty = useCallback(() => {
     if (nodes.length < 2) {
-      alert("Add at least two classes before creating a property edge.");
+      alert(t('ontologyEditor.editor.needTwoClasses'));
       return;
     }
     const newId = `prop_${Date.now()}`;
@@ -364,7 +365,7 @@ export function OntologyEditor() {
       ...prev,
       added_properties: [...prev.added_properties, newId],
     }));
-  }, [nodes, setEdges]);
+  }, [nodes, setEdges, t]);
 
   const addIndividual = useCallback(() => {
     const newId = `ind_${Date.now()}`;
@@ -402,7 +403,7 @@ export function OntologyEditor() {
 
   const saveDraft = useCallback(async () => {
     if (!ontologyUri) {
-      alert("Please select an ontology first");
+      alert(t('ontologyEditor.editor.selectOntologyFirst'));
       return;
     }
     setIsSaving(true);
@@ -419,15 +420,15 @@ export function OntologyEditor() {
       });
       if (response.ok) {
         const data = await response.json();
-        alert(`Draft saved: ${data.draft_id}`);
+        alert(t('ontologyEditor.editor.draftSaved', { id: data.draft_id }));
       }
     } catch (error) {
       console.error("Failed to save draft:", error);
-      alert("Failed to save draft");
+      alert(t('ontologyEditor.editor.saveFailed'));
     } finally {
       setIsSaving(false);
     }
-  }, [ontologyUri, draftDiff]);
+  }, [ontologyUri, draftDiff, t]);
 
   const handleNodeContextMenu = useCallback((event: React.MouseEvent, node: OntologyNode) => {
     event.preventDefault();
@@ -464,7 +465,7 @@ export function OntologyEditor() {
   const renameSelected = useCallback(() => {
     const target = showContext?.element ?? selectedElement;
     if (target && !("source" in target) && isEditableEntityType(target.data.entityType)) {
-      const newLabel = prompt("Enter new name:", String(target.data.label ?? ""));
+      const newLabel = prompt(t('ontologyEditor.editor.renamePrompt'), String(target.data.label ?? ""));
       if (newLabel) {
         setNodes((nds) =>
           nds.map((n) => (n.id === target.id ? { ...n, data: { ...n.data, label: newLabel } } : n))
@@ -481,7 +482,7 @@ export function OntologyEditor() {
       }
     }
     setShowContext(null);
-  }, [selectedElement, setNodes, showContext]);
+  }, [selectedElement, setNodes, showContext, t]);
 
   useEffect(() => {
     const handleClick = () => setShowContext(null);
@@ -562,7 +563,7 @@ export function OntologyEditor() {
       <style>{ontologyFlowThemeCss}</style>
       <div style={toolbarStyle}>
         <select
-          aria-label="Active ontology"
+          aria-label={t('ontologyEditor.editor.activeOntology')}
           value={ontologyUri}
           onChange={(event) => {
             setOntologyUri(event.target.value);
@@ -572,7 +573,7 @@ export function OntologyEditor() {
           }}
           style={selectStyle}
         >
-          <option value="">Select ontology...</option>
+          <option value="">{t('ontologyEditor.editor.selectOntology')}</option>
           {registry.map((entry) => (
             <option key={entry.uri} value={entry.uri}>
               {entry.name || entry.uri}
@@ -634,18 +635,18 @@ export function OntologyEditor() {
           </ReactFlow>
 
           {isLoadingGraph && (
-            <div style={canvasMessageStyle}>Loading ontology structure…</div>
+            <div style={canvasMessageStyle}>{t('ontologyEditor.editor.loadingStructure')}</div>
           )}
           {!isLoadingGraph && graphError && (
             <div style={{ ...canvasMessageStyle, color: "#ff9a8d" }}>{graphError}</div>
           )}
           {!isLoadingGraph && !graphError && unownedEntity && (
             <div style={{ ...canvasMessageStyle, color: "#f2b66d" }}>
-              No registered ontology owns {unownedEntity}. Pick an ontology above to start editing.
+              {t('ontologyEditor.editor.unowned', { entity: unownedEntity })}
             </div>
           )}
           {!isLoadingGraph && !graphError && !unownedEntity && ontologyUri && nodes.length === 0 && (
-            <div style={canvasMessageStyle}>This ontology has no editable classes or properties.</div>
+            <div style={canvasMessageStyle}>{t('ontologyEditor.editor.noEditable')}</div>
           )}
 
           {showContext && (
@@ -655,17 +656,17 @@ export function OntologyEditor() {
                   {!("source" in showContext.element) && (
                     <div style={contextItemStyle} onClick={renameSelected}>
                       <Pencil size={14} />
-                      Rename
+                      {t('ontologyEditor.editor.rename')}
                     </div>
                   )}
                   <div style={contextItemStyle} onClick={deleteSelected}>
                     <Trash2 size={14} />
-                    Delete
+                    {t('ontologyEditor.editor.delete')}
                   </div>
                 </>
               ) : (
                 <div style={{ ...contextItemStyle, cursor: "default", color: "#8fa8c6" }}>
-                  This term is read-only
+                  {t('ontologyEditor.editor.readOnly')}
                 </div>
               )}
             </div>
@@ -676,14 +677,14 @@ export function OntologyEditor() {
           <div style={detailPanelStyle}>
             <h3 style={{ margin: "0 0 16px", color: "#ebf3ff", fontSize: "16px" }}>
               {"source" in selectedElement
-                ? "Relationship Details"
+                ? t('ontologyEditor.editor.detailTitle.relationship')
                 : selectedElement.data.entityType === "property"
-                  ? "Property Details"
+                  ? t('ontologyEditor.editor.detailTitle.property')
                   : selectedElement.data.entityType === "ontology"
-                    ? "Ontology Details"
+                    ? t('ontologyEditor.editor.detailTitle.ontology')
                     : selectedElement.data.entityType === "external"
-                      ? "External Term Details"
-                      : "Class Details"}
+                      ? t('ontologyEditor.editor.detailTitle.external')
+                      : t('ontologyEditor.editor.detailTitle.class')}
             </h3>
             <div style={{ marginBottom: "12px" }}>
               <label style={{ display: "block", color: "#8fa8c6", fontSize: "12px", marginBottom: "4px" }}>
@@ -697,7 +698,7 @@ export function OntologyEditor() {
               <>
                 <div style={{ marginBottom: "12px" }}>
                   <label style={{ display: "block", color: "#8fa8c6", fontSize: "12px", marginBottom: "4px" }}>
-                    Label
+                    {t('ontologyEditor.editor.fieldLabel')}
                   </label>
                   <input
                     type="text"
@@ -742,7 +743,7 @@ export function OntologyEditor() {
                 </div>
                 <div style={{ marginBottom: "12px" }}>
                   <label style={{ display: "block", color: "#8fa8c6", fontSize: "12px", marginBottom: "4px" }}>
-                    Type
+                    {t('ontologyEditor.editor.fieldType')}
                   </label>
                   <div style={{ color: "#ebf3ff", fontSize: "13px" }}>
                     {selectedElement.data.type || "owl:Class"}

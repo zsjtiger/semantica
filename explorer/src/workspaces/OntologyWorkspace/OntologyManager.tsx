@@ -52,6 +52,7 @@ const FORMAT_COLORS: Record<string, string> = {
 };
 
 function StatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation();
   const color = STATUS_COLORS[status] || "#6a7f97";
   return (
     <span
@@ -67,7 +68,7 @@ function StatusBadge({ status }: { status: string }) {
         color,
       }}
     >
-      {status}
+      {t(`ontologyEditor.registry.status.${status}`, { defaultValue: status })}
     </span>
   );
 }
@@ -138,7 +139,7 @@ function RegistryRow({
 
   const handleRemove = async (ev: React.MouseEvent) => {
     ev.stopPropagation();
-    if (!window.confirm(`Remove "${entry.name}" from the registry?`)) return;
+    if (!window.confirm(t('ontologyEditor.registry.confirmRemove', { name: entry.name }))) return;
     setBusyRemove(true);
     await onRemove(entry.uri);
     setBusyRemove(false);
@@ -164,7 +165,7 @@ function RegistryRow({
           <StatusBadge status={entry.status} />
           <FormatBadge format={entry.format} />
           {!entry.enabled && (
-            <span style={disabledBadgeStyle}>Disabled</span>
+            <span style={disabledBadgeStyle}>{t('ontologyEditor.registry.disabled')}</span>
           )}
         </div>
         <div style={rowUriStyle}>{entry.uri}</div>
@@ -183,9 +184,9 @@ function RegistryRow({
       </div>
 
       <div style={rowStatsStyle}>
-        <Stat value={entry.class_count} label="Classes" />
-        <Stat value={entry.concept_count} label="Concepts" />
-        <Stat value={entry.property_count} label="Props" />
+        <Stat value={entry.class_count} label={t('ontologyEditor.registry.stats.classes')} />
+        <Stat value={entry.concept_count} label={t('ontologyEditor.registry.stats.concepts')} />
+        <Stat value={entry.property_count} label={t('ontologyEditor.registry.stats.props')} />
       </div>
 
       <div style={rowActionsStyle}>
@@ -273,14 +274,14 @@ export function OntologyManager() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setEntries(data);
-      if (res.status === 207) flashMsg("err", data.message || "Warning: Partial success loading registry.");
+      if (res.status === 207) flashMsg("err", data.message || t('ontologyEditor.registry.partialWarning'));
     } catch {
       setEntries([]);
-      flashMsg("err", "Failed to load ontology registry");
+      flashMsg("err", t('ontologyEditor.registry.loadFailed'));
     } finally {
       setLoading(false);
     }
-  }, [searchQ, flashMsg]);
+  }, [searchQ, flashMsg, t]);
 
   useEffect(() => {
     let ignore = false;
@@ -293,11 +294,11 @@ export function OntologyManager() {
         const data = await res.json();
         if (ignore) return;
         setEntries(data);
-        if (res.status === 207) flashMsg("err", data.message || "Warning: Partial success loading registry.");
+        if (res.status === 207) flashMsg("err", data.message || t('ontologyEditor.registry.partialWarning'));
       } catch {
         if (!ignore) {
           setEntries([]);
-          flashMsg("err", "Failed to load ontology registry");
+          flashMsg("err", t('ontologyEditor.registry.loadFailed'));
         }
       } finally {
         if (!ignore) setLoading(false);
@@ -305,7 +306,7 @@ export function OntologyManager() {
     }
     void fetchInitial();
     return () => { ignore = true; };
-  }, [searchQ, flashMsg]);
+  }, [searchQ, flashMsg, t]);
 
   const handleToggle = useCallback(async (uri: string) => {
     try {
@@ -318,9 +319,9 @@ export function OntologyManager() {
         prev.map((e) => (e.uri === uri ? { ...e, enabled: data.enabled } : e))
       );
     } catch {
-      flashMsg("err", "Could not toggle ontology");
+      flashMsg("err", t('ontologyEditor.registry.toggleFailed'));
     }
-  }, []);
+  }, [flashMsg, t]);
 
   const handleRefresh = useCallback(async (uri: string) => {
     try {
@@ -328,12 +329,12 @@ export function OntologyManager() {
         method: "POST",
       });
       if (!res.ok) throw new Error("Refresh failed");
-      flashMsg("ok", "Ontology refreshed");
+      flashMsg("ok", t('ontologyEditor.registry.refreshed'));
       fetchRegistry();
     } catch {
-      flashMsg("err", "Refresh failed — check source URL");
+      flashMsg("err", t('ontologyEditor.registry.refreshFailed'));
     }
-  }, [fetchRegistry]);
+  }, [fetchRegistry, flashMsg, t]);
 
   const handleRemove = useCallback(async (uri: string) => {
     try {
@@ -343,11 +344,11 @@ export function OntologyManager() {
       if (!res.ok) throw new Error("Remove failed");
       setEntries((prev) => prev.filter((e) => e.uri !== uri));
       if (selectedEntry?.uri === uri) setSelectedEntry(null);
-      flashMsg("ok", "Removed from registry");
+      flashMsg("ok", t('ontologyEditor.registry.removed'));
     } catch {
-      flashMsg("err", "Could not remove ontology");
+      flashMsg("err", t('ontologyEditor.registry.removeFailed'));
     }
-  }, [selectedEntry]);
+  }, [selectedEntry, flashMsg, t]);
 
   const handleSelect = (entry: OntologyEntry) => {
     setSelectedEntry((prev) => (prev?.uri === entry.uri ? null : entry));
@@ -386,7 +387,7 @@ export function OntologyManager() {
             <input
               value={searchQ}
               onChange={(e) => setSearchQ(e.target.value)}
-              placeholder="Search ontologies by name, URI, or namespace…"
+              placeholder={t('ontologyEditor.registry.searchPlaceholder')}
               style={searchInputStyle}
             />
           </div>
@@ -458,18 +459,18 @@ export function OntologyManager() {
             {loading ? (
               <div style={centerStyle}>
                 <Loader2 size={22} color="#4aa3ff" style={{ animation: "spin 1s linear infinite" }} />
-                <span style={{ color: "#8fa8c6", fontSize: 13, marginTop: 10 }}>Loading registry…</span>
+                <span style={{ color: "#8fa8c6", fontSize: 13, marginTop: 10 }}>{t('ontologyEditor.registry.loading')}</span>
               </div>
             ) : filteredEntries.length === 0 ? (
               <div style={emptyStateStyle}>
                 <BookMarked size={36} color="rgba(74,163,255,0.18)" />
                 <div style={{ color: "#8fa8c6", fontSize: 14, fontWeight: 600, marginTop: 14 }}>
-                  {searchQ ? "No ontologies match your search" : "No ontologies loaded yet"}
+                  {searchQ ? t('ontologyEditor.registry.emptyNoMatch') : t('ontologyEditor.registry.emptyNone')}
                 </div>
                 <div style={{ color: "#6a7f97", fontSize: 12, marginTop: 6, textAlign: "center", maxWidth: 300, lineHeight: 1.6 }}>
                   {searchQ
-                    ? "Try a different search term or clear the filter."
-                    : <>Import from a URL, upload a file, or create a new ontology to get started. Click <strong style={{ color: "#7fd0ff" }}>Load Ontology</strong> above.</>}
+                    ? t('ontologyEditor.registry.emptyNoMatchHint')
+                    : <>{t('ontologyEditor.registry.emptyHintPrefix')}<strong style={{ color: "#7fd0ff" }}>{t('ontologyEditor.registry.loadOntology')}</strong>{t('ontologyEditor.registry.emptyHintSuffix')}</>}
                 </div>
                 {!searchQ && (
                   <button onClick={() => setShowLoader(true)} style={{ ...primaryToolBtnStyle, marginTop: 18 }}>
@@ -482,7 +483,7 @@ export function OntologyManager() {
               <div style={listStyle}>
                 <div style={listHeaderStyle}>
                   <span style={listHeaderTextStyle}>
-                    {filteredEntries.length} ontolog{filteredEntries.length === 1 ? "y" : "ies"}
+                    {t('ontologyEditor.registry.count', { count: filteredEntries.length })}
                   </span>
                 </div>
                 {filteredEntries.map((entry) => (
@@ -504,7 +505,7 @@ export function OntologyManager() {
           {rightPanel === "search" && (
             <div style={rightPanelStyle}>
               <div style={rightPanelHeaderStyle}>
-                <span style={rightPanelTitleStyle}>Entity Search</span>
+                <span style={rightPanelTitleStyle}>{t('ontologyEditor.registry.entitySearch')}</span>
                 <button onClick={() => setRightPanel("none")} style={closePanelBtnStyle}>×</button>
               </div>
               <OntologySearch />
@@ -535,14 +536,14 @@ export function OntologyManager() {
                   </span>
                 </DetailSection>
                 {selectedEntry.description && (
-                  <DetailSection label="Description">
+                  <DetailSection label={t('ontologyEditor.registry.detail.description')}>
                     <span style={{ color: "#c6d4e3", fontSize: 13, lineHeight: 1.6 }}>
                       {selectedEntry.description}
                     </span>
                   </DetailSection>
                 )}
                 {selectedEntry.source_url && (
-                  <DetailSection label="Source URL">
+                  <DetailSection label={t('ontologyEditor.registry.detail.sourceUrl')}>
                     <a
                       href={selectedEntry.source_url}
                       target="_blank"
@@ -554,24 +555,24 @@ export function OntologyManager() {
                   </DetailSection>
                 )}
                 {selectedEntry.version && (
-                  <DetailSection label="Version">
+                  <DetailSection label={t('ontologyEditor.registry.detail.version')}>
                     <span style={{ color: "#c6d4e3", fontSize: 12 }}>{selectedEntry.version}</span>
                   </DetailSection>
                 )}
                 {selectedEntry.loaded_at && (
-                  <DetailSection label="Loaded at">
+                  <DetailSection label={t('ontologyEditor.registry.detail.loadedAt')}>
                     <span style={{ color: "#c6d4e3", fontSize: 12 }}>
                       {new Date(selectedEntry.loaded_at).toLocaleString()}
                     </span>
                   </DetailSection>
                 )}
                 <div style={statRowStyle}>
-                  <StatBlock value={selectedEntry.class_count} label="Classes" color="#d2a8ff" />
-                  <StatBlock value={selectedEntry.concept_count} label="Concepts" color="#9ee8d7" />
-                  <StatBlock value={selectedEntry.property_count} label="Properties" color="#f2b66d" />
+                  <StatBlock value={selectedEntry.class_count} label={t('ontologyEditor.registry.stats.classes')} color="#d2a8ff" />
+                  <StatBlock value={selectedEntry.concept_count} label={t('ontologyEditor.registry.stats.concepts')} color="#9ee8d7" />
+                  <StatBlock value={selectedEntry.property_count} label={t('ontologyEditor.registry.stats.properties')} color="#f2b66d" />
                 </div>
                 {selectedEntry.tags.length > 0 && (
-                  <DetailSection label="Tags">
+                  <DetailSection label={t('ontologyEditor.registry.detail.tags')}>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                       {selectedEntry.tags.map((tag) => (
                         <span key={tag} style={tagChipStyle}>{tag}</span>
@@ -586,7 +587,7 @@ export function OntologyManager() {
           {rightPanel === "skos" && selectedEntry && (
             <div style={rightPanelStyle}>
               <div style={rightPanelHeaderStyle}>
-                <span style={rightPanelTitleStyle}>SKOS — {selectedEntry.name}</span>
+                <span style={rightPanelTitleStyle}>{t('ontologyEditor.registry.skosTitle', { name: selectedEntry.name })}</span>
                 <div style={{ display: "flex", gap: 6 }}>
                   <button onClick={() => setRightPanel("none")} style={browseBtnStyle}>
                     <Layers size={12} />

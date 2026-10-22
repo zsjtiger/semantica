@@ -11,17 +11,17 @@ import { useRegistry, clearRegistry, type RegistryEntryOp } from "../../store/re
 
 const OP_META: Record<
   RegistryEntryOp,
-  { label: string; color: string; bg: string; border: string }
+  { labelKey: string; color: string; bg: string; border: string }
 > = {
-  import:       { label: "IMPORT",       color: "#4aa3ff", bg: "rgba(74,163,255,0.12)",  border: "rgba(74,163,255,0.28)" },
-  export:       { label: "EXPORT",       color: "#8fa8c6", bg: "rgba(143,168,198,0.08)", border: "rgba(143,168,198,0.18)" },
-  merge:        { label: "MERGE",        color: "#f2b66d", bg: "rgba(242,182,109,0.12)", border: "rgba(242,182,109,0.28)" },
-  "add-node":   { label: "ADD NODE",     color: "#4cc38a", bg: "rgba(76,195,138,0.12)",  border: "rgba(76,195,138,0.28)" },
-  "update-node": { label: "UPDATE NODE",  color: "#79c0ff", bg: "rgba(121,192,255,0.10)", border: "rgba(121,192,255,0.24)" },
-  "add-edge":   { label: "ADD EDGE",     color: "#4cc38a", bg: "rgba(76,195,138,0.10)",  border: "rgba(76,195,138,0.22)" },
-  delete:       { label: "DELETE",       color: "#ff7b72", bg: "rgba(255,123,114,0.12)", border: "rgba(255,123,114,0.28)" },
-  infer:        { label: "INFER",        color: "#d2a8ff", bg: "rgba(210,168,255,0.12)", border: "rgba(210,168,255,0.28)" },
-  "vocab-import": { label: "VOCAB",      color: "#79c0ff", bg: "rgba(121,192,255,0.12)", border: "rgba(121,192,255,0.28)" },
+  import:       { labelKey: "dataTools.registry.opFilter.import",      color: "#4aa3ff", bg: "rgba(74,163,255,0.12)",  border: "rgba(74,163,255,0.28)" },
+  export:       { labelKey: "dataTools.registry.opFilter.export",      color: "#8fa8c6", bg: "rgba(143,168,198,0.08)", border: "rgba(143,168,198,0.18)" },
+  merge:        { labelKey: "dataTools.registry.opFilter.merge",       color: "#f2b66d", bg: "rgba(242,182,109,0.12)", border: "rgba(242,182,109,0.28)" },
+  "add-node":   { labelKey: "dataTools.registry.opFilter.addNode",     color: "#4cc38a", bg: "rgba(76,195,138,0.12)",  border: "rgba(76,195,138,0.28)" },
+  "update-node": { labelKey: "dataTools.registry.opFilter.updateNode", color: "#79c0ff", bg: "rgba(121,192,255,0.10)", border: "rgba(121,192,255,0.24)" },
+  "add-edge":   { labelKey: "dataTools.registry.opFilter.addEdge",     color: "#4cc38a", bg: "rgba(76,195,138,0.10)",  border: "rgba(76,195,138,0.22)" },
+  delete:       { labelKey: "dataTools.registry.opFilter.delete",      color: "#ff7b72", bg: "rgba(255,123,114,0.12)", border: "rgba(255,123,114,0.28)" },
+  infer:        { labelKey: "dataTools.registry.opFilter.infer",       color: "#d2a8ff", bg: "rgba(210,168,255,0.12)", border: "rgba(210,168,255,0.28)" },
+  "vocab-import": { labelKey: "dataTools.registry.opFilter.vocabImport", color: "#79c0ff", bg: "rgba(121,192,255,0.12)", border: "rgba(121,192,255,0.28)" },
 };
 
 const ALL_OPS: (RegistryEntryOp | "all")[] = [
@@ -74,7 +74,7 @@ function EntryRow({ entry }: { entry: ReturnType<typeof useRegistry>[number] }) 
             marginTop: 1,
           }}
         >
-          {meta.label}
+          {t(meta.labelKey)}
         </span>
 
         {/* Content */}
@@ -125,15 +125,15 @@ export function RegistryTab() {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <ClipboardList size={18} color="#4aa3ff" />
           <div>
-            <div style={{ color: "#ebf3ff", fontSize: 16, fontWeight: 700 }}>Document Registry</div>
+            <div style={{ color: "#ebf3ff", fontSize: 16, fontWeight: 700 }}>{t('dataTools.registry.title')}</div>
             <div style={{ color: "#8b949e", fontSize: 12 }}>
-              Audit log of all KG and Ontology mutations this session
+              {t('dataTools.registry.subtitle')}
             </div>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ color: "#8fa8c6", fontSize: 12 }}>
-            {entries.length} event{entries.length !== 1 ? "s" : ""}
+            {t('dataTools.registry.eventCount', { count: entries.length })}
           </span>
           {entries.length > 0 ? (
             <button
@@ -190,10 +190,10 @@ export function RegistryTab() {
           <div style={emptyStateStyle}>
             <ClipboardList size={36} color="rgba(127,208,255,0.15)" />
             <div style={{ color: "#8b949e", fontSize: 14, marginTop: 12, fontWeight: 500 }}>
-              No events recorded yet
+              {t('dataTools.registry.noEvents')}
             </div>
             <div style={{ color: "#6a7f97", fontSize: 12, marginTop: 4, textAlign: "center", maxWidth: 300 }}>
-              Import a file, run reasoning, or merge entities to see activity appear here.
+              {t('dataTools.registry.emptyHint')}
             </div>
           </div>
         ) : (

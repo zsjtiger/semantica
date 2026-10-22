@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import type { CSSProperties } from "react";
 import { Loader2 } from "lucide-react";
 import { graph } from "../../store/graphStore";
 import { GRAPH_THEME, withAlpha } from "./graphTheme";
 import type { FocusedUnavailableReason, GraphSelectedNodeKind } from "./types";
-import { focusedUnavailableReasonText } from "./graphViewCopy";
 import { MarkdownContentViewer } from "./MarkdownContentViewer";
 import type { MarkdownApplyResult } from "./markdownResourceClient";
 
@@ -69,6 +69,7 @@ const BAND_COLORS: Record<string, string> = {
 };
 
 function PathDistanceIntelPanel({ result }: { result: PathResponse }) {
+  const { t } = useTranslation();
   const bandColor = BAND_COLORS[result.distance_band] ?? "#8b949e";
   const hasMetrics =
     result.confidence_decay != null ||
@@ -91,10 +92,10 @@ function PathDistanceIntelPanel({ result }: { result: PathResponse }) {
             fontWeight: 700,
           }}
         >
-          {result.distance_band} · {result.hop_count} hop{result.hop_count !== 1 ? "s" : ""}
+          {t('graph.inspector.bandHops', { band: result.distance_band, count: result.hop_count })}
         </span>
         {(result.alternative_path_count ?? 0) > 0 && (
-          <span style={subtleChipStyle}>{result.alternative_path_count} alt path{result.alternative_path_count !== 1 ? "s" : ""}</span>
+          <span style={subtleChipStyle}>{t('graph.inspector.altPaths', { count: result.alternative_path_count })}</span>
         )}
       </div>
 
@@ -102,7 +103,7 @@ function PathDistanceIntelPanel({ result }: { result: PathResponse }) {
       {hasMetrics && <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
         {result.confidence_decay != null && (
           <div style={metricCardStyle}>
-            <div style={metricLabelStyle}>Confidence Decay</div>
+            <div style={metricLabelStyle}>{t('graph.inspector.confidenceDecay')}</div>
             <div
               style={{
                 ...metricValueStyle,
@@ -125,7 +126,7 @@ function PathDistanceIntelPanel({ result }: { result: PathResponse }) {
         )}
         {result.semantic_similarity != null && (
           <div style={metricCardStyle}>
-            <div style={metricLabelStyle}>Semantic Sim.</div>
+            <div style={metricLabelStyle}>{t('graph.inspector.semanticSim')}</div>
             <div style={{ ...metricValueStyle, color: "#79c0ff" }}>
               {(result.semantic_similarity * 100).toFixed(1)}%
             </div>
@@ -136,7 +137,7 @@ function PathDistanceIntelPanel({ result }: { result: PathResponse }) {
         )}
         {result.path_coherence_score != null && (
           <div style={metricCardStyle}>
-            <div style={metricLabelStyle}>Path Coherence</div>
+            <div style={metricLabelStyle}>{t('graph.inspector.pathCoherence')}</div>
             <div style={{ ...metricValueStyle, color: "#a5d6a7" }}>
               {(result.path_coherence_score * 100).toFixed(1)}%
             </div>
@@ -144,7 +145,7 @@ function PathDistanceIntelPanel({ result }: { result: PathResponse }) {
         )}
         {result.bottleneck_node && (
           <div style={metricCardStyle}>
-            <div style={metricLabelStyle}>Bottleneck</div>
+            <div style={metricLabelStyle}>{t('graph.inspector.bottleneck')}</div>
             <div
               style={{
                 ...metricValueStyle,
@@ -183,6 +184,21 @@ function PathDistanceIntelPanel({ result }: { result: PathResponse }) {
 }
 
 /* ─── Path Flow Visualizer ──────────────────────────────────────── */
+
+function focusedReasonText(
+  t: TFunction,
+  reason: FocusedUnavailableReason | null | undefined,
+): string | null {
+  if (!reason) return null;
+  switch (reason.code) {
+    case "no-selection":
+      return t('graph.focusReason.noSelection');
+    case "grouped-unresolvable":
+      return t('graph.focusReason.groupedUnresolvable');
+    case "not-in-graph":
+      return t('graph.focusReason.notInGraph');
+  }
+}
 
 function getNodeLabel(nodeId: string): string {
   if (!graph.hasNode(nodeId)) return nodeId;
@@ -230,7 +246,7 @@ function PathFlowViz({
 }) {
   const { t } = useTranslation();
   if (path.length === 0) {
-    return <div style={emptyTextStyle}>No path found between the selected nodes.</div>;
+    return <div style={emptyTextStyle}>{t('graph.inspector.noPath')}</div>;
   }
 
   return (
@@ -282,10 +298,10 @@ function PathFlowViz({
 
       {/* Weight badge */}
       <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ color: "#6a7f97", fontSize: 11 }}>Total weight:</span>
+        <span style={{ color: "#6a7f97", fontSize: 11 }}>{t('graph.inspector.totalWeight')}</span>
         <span style={{ color: "#79c0ff", fontSize: 12, fontWeight: 700 }}>{totalWeight.toFixed(3)}</span>
         <span style={{ color: "#6a7f97", fontSize: 11 }}>·</span>
-        <span style={{ color: "#6a7f97", fontSize: 11 }}>{path.length} hops</span>
+        <span style={{ color: "#6a7f97", fontSize: 11 }}>{t('graph.inspector.hopCount', { count: path.length })}</span>
       </div>
     </div>
   );
@@ -321,7 +337,7 @@ export function GraphInspectorPanel({
           <div style={{ width: 14, height: 14, borderRadius: "50%", background: GRAPH_THEME.ui.timeline.playheadSoft }} />
         </div>
         <p style={{ color: GRAPH_THEME.ui.text.muted, fontSize: 14, margin: 0, lineHeight: 1.6 }}>
-          Search for a node or click one in the canvas to inspect its properties.
+          {t('graph.inspector.emptyHint')}
         </p>
       </div>
     );
@@ -339,7 +355,7 @@ export function GraphInspectorPanel({
         <div style={{ borderBottom: `1px solid ${GRAPH_THEME.ui.surface.divider}`, paddingBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
             <span style={{ background: GRAPH_THEME.ui.timeline.playhead, boxShadow: "0 0 10px rgba(98, 226, 205, 0.34)", width: 8, height: 8, borderRadius: "50%" }} />
-            <span style={{ color: GRAPH_THEME.ui.timeline.playhead, fontSize: 12, fontWeight: 700 }}>Selection</span>
+            <span style={{ color: GRAPH_THEME.ui.timeline.playhead, fontSize: 12, fontWeight: 700 }}>{t('graph.inspector.selection')}</span>
           </div>
           <h3 style={{ margin: 0, color: GRAPH_THEME.ui.text.strong, fontSize: 20, fontWeight: 700, wordBreak: "break-word" }}>
             {nodeId}
@@ -347,11 +363,11 @@ export function GraphInspectorPanel({
           <div style={{ color: GRAPH_THEME.ui.text.muted, fontSize: 12, marginTop: 6, fontFamily: "monospace", wordBreak: "break-all" }}>{nodeId}</div>
         </div>
         <div style={groupedSelectionNoticeStyle}>
-          <div style={{ color: GRAPH_THEME.ui.text.strong, fontWeight: 600, marginBottom: 6 }}>Selected item is not directly inspectable in the current graph.</div>
+          <div style={{ color: GRAPH_THEME.ui.text.strong, fontWeight: 600, marginBottom: 6 }}>{t('graph.inspector.notInspectable')}</div>
           <div style={{ color: GRAPH_THEME.ui.text.body, fontSize: 13, lineHeight: 1.6 }}>
             {canActivateFocused
-              ? "Use Focus to resolve this grouped selection to its canonical node."
-              : focusedUnavailableReasonText(focusedUnavailableReason)}
+              ? t('graph.inspector.useFocusResolve')
+              : focusedReasonText(t, focusedUnavailableReason)}
           </div>
         </div>
       </aside>
@@ -387,7 +403,7 @@ export function GraphInspectorPanel({
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
           <span style={{ background: accentColor, boxShadow: `0 0 10px ${accentColor}`, width: 8, height: 8, borderRadius: "50%" }} />
           <span style={{ color: accentColor, fontSize: 12, fontWeight: 700 }}>
-            {groupedDisplaySelection ? "Grouped Selection" : (attributes?.nodeType || "Entity")}
+            {groupedDisplaySelection ? t('graph.inspector.groupedSelection') : (attributes?.nodeType || t('graph.inspector.entity'))}
           </span>
         </div>
         <h3 style={{ margin: 0, color: GRAPH_THEME.ui.text.strong, fontSize: 20, fontWeight: 700, wordBreak: "break-word" }}>
@@ -398,34 +414,34 @@ export function GraphInspectorPanel({
         </div>
         {groupedDisplaySelection ? (
           <div style={groupedSelectionNoticeStyle}>
-            <div style={{ color: GRAPH_THEME.ui.text.strong, fontWeight: 600, marginBottom: 6 }}>This grouped item stays display-level until you explicitly enter Focused mode.</div>
+            <div style={{ color: GRAPH_THEME.ui.text.strong, fontWeight: 600, marginBottom: 6 }}>{t('graph.inspector.groupedStays')}</div>
             <div style={{ color: GRAPH_THEME.ui.text.body, fontSize: 13, lineHeight: 1.6 }}>
               {canActivateFocused
-                ? `Canonical node available: ${effectiveNodeId}`
-                : focusedUnavailableReasonText(focusedUnavailableReason)}
+                ? t('graph.inspector.canonicalAvailable', { nodeId: effectiveNodeId })
+                : focusedReasonText(t, focusedUnavailableReason)}
             </div>
           </div>
         ) : null}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
           {attributes?.valid_from || attributes?.valid_until ? (
-            <span style={subtleChipStyle}>temporal</span>
+            <span style={subtleChipStyle}>{t('graph.inspector.temporal')}</span>
           ) : null}
-          {attribution.length ? <span style={subtleChipStyle}>{attribution.length} source fields</span> : null}
-          {predictions.length ? <span style={subtleChipStyle}>{predictions.length} candidate links</span> : null}
+          {attribution.length ? <span style={subtleChipStyle}>{t('graph.inspector.sourceFields', { count: attribution.length })}</span> : null}
+          {predictions.length ? <span style={subtleChipStyle}>{t('graph.inspector.candidateCount', { count: predictions.length })}</span> : null}
         </div>
       </div>
 
       {/* Temporal bounds */}
       {(attributes?.valid_from || attributes?.valid_until) ? (
         <div style={{ padding: "10px 12px", background: "rgba(233, 196, 122, 0.075)", border: "1px solid rgba(233, 196, 122, 0.22)", borderRadius: 8, fontSize: 12, color: GRAPH_THEME.palette.accent.selected, fontFamily: "monospace" }}>
-          {attributes?.valid_from ? <div>from: {attributes.valid_from}</div> : null}
-          {attributes?.valid_until ? <div>until: {attributes.valid_until}</div> : null}
+          {attributes?.valid_from ? <div>{t('graph.inspector.from')} {attributes.valid_from}</div> : null}
+          {attributes?.valid_until ? <div>{t('graph.inspector.until')} {attributes.valid_until}</div> : null}
         </div>
       ) : null}
 
       {/* Canonical nodes remain editable even when their current body is empty. */}
       <details className="node-panel-collapse" open>
-        <summary className="node-panel-summary">Content</summary>
+        <summary className="node-panel-summary">{t('graph.inspector.content')}</summary>
         <div className="node-panel-body" style={{ marginTop: 8 }}>
           <MarkdownContentViewer
             content={nodeContent}
@@ -438,7 +454,7 @@ export function GraphInspectorPanel({
 
       {/* Actions */}
       <section style={sectionStyle}>
-        <div style={sectionTitleStyle}>Actions</div>
+        <div style={sectionTitleStyle}>{t('graph.inspector.actions')}</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <button
             style={{ ...actionButtonStyle, width: "100%", justifyContent: "center", opacity: isRunningPredictions ? 0.7 : 1 }}
@@ -462,18 +478,18 @@ export function GraphInspectorPanel({
         <input
           value={predictionType}
           onChange={(event) => onPredictionTypeChange(event.target.value)}
-          placeholder="Optional candidate type filter, e.g. disease"
+          placeholder={t('graph.inspector.typeFilterPlaceholder')}
           style={inputStyle}
         />
       </section>
 
       {/* Trace Path */}
       <section style={sectionStyle}>
-        <div style={sectionTitleStyle}>Trace Path</div>
+        <div style={sectionTitleStyle}>{t('graph.inspector.tracePath')}</div>
         <input
           value={pathTargetId}
           onChange={(event) => onPathTargetChange(event.target.value)}
-          placeholder="Target node ID"
+          placeholder={t('graph.inspector.targetPlaceholder')}
           style={inputStyle}
         />
         <button style={actionButtonStyle} onClick={onTracePath} disabled={!actionNodeId}>{t('graph.inspector.traceCausalPath')}</button>
@@ -491,14 +507,14 @@ export function GraphInspectorPanel({
           </>
         ) : (
           <div style={emptyTextStyle}>
-            Choose a target or click a candidate prediction to prepare a path trace.
+            {t('graph.inspector.chooseTarget')}
           </div>
         )}
       </section>
 
       {/* Candidate Links */}
       <details className="node-panel-collapse" open={predictions.length > 0}>
-        <summary className="node-panel-summary">Candidate Links</summary>
+        <summary className="node-panel-summary">{t('graph.inspector.candidateLinks')}</summary>
         <div className="node-panel-body">
           {predictions.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -533,17 +549,17 @@ export function GraphInspectorPanel({
           ) : isRunningPredictions ? (
             <div style={{ display: "flex", alignItems: "center", gap: 8, padding: 8, color: "#8b949e", fontSize: 12 }}>
               <Loader2 size={13} className="animate-spin" />
-              <span>Computing candidate links…</span>
+              <span>{t('graph.inspector.computing')}</span>
             </div>
           ) : (
-            <div style={emptyTextStyle}>Run link prediction to surface likely next-hop relationships.</div>
+            <div style={emptyTextStyle}>{t('graph.inspector.runHint')}</div>
           )}
         </div>
       </details>
 
       {/* Source Attribution */}
       <details className="node-panel-collapse">
-        <summary className="node-panel-summary">Source Attribution</summary>
+        <summary className="node-panel-summary">{t('graph.inspector.sourceAttribution')}</summary>
         <div className="node-panel-body">
           {attribution.length ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -557,14 +573,14 @@ export function GraphInspectorPanel({
               ))}
             </div>
           ) : (
-            <div style={emptyTextStyle}>No explicit attribution metadata was found on this node.</div>
+            <div style={emptyTextStyle}>{t('graph.inspector.noAttribution')}</div>
           )}
         </div>
       </details>
 
       {/* Properties */}
       <details className="node-panel-collapse">
-        <summary className="node-panel-summary">Properties</summary>
+        <summary className="node-panel-summary">{t('graph.inspector.properties')}</summary>
         <div className="node-panel-body">
           {propertyEntries.length ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -578,7 +594,7 @@ export function GraphInspectorPanel({
               ))}
             </div>
           ) : (
-            <div style={emptyTextStyle}>No additional properties are attached to this node.</div>
+            <div style={emptyTextStyle}>{t('graph.inspector.noProperties')}</div>
           )}
         </div>
       </details>

@@ -1,3 +1,4 @@
+import i18next from "i18next";
 import type {
   AlignmentRelation,
   AlignmentSuggestion,
@@ -44,7 +45,7 @@ export type OntologyEntityOwner = {
 
 async function parseResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    let detail = `Request failed with status ${response.status}`;
+    let detail = i18next.t('ontologyTools.common.requestFailed', { status: response.status });
     try {
       const body = await response.json();
       detail = body.detail || detail;

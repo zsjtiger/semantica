@@ -3,6 +3,7 @@
  */
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import { Link2 } from "lucide-react";
 import { ReactFlow, Background, Controls } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -79,17 +80,17 @@ export function LineageDiagram() {
 
         if (!res.ok) {
           const text = await res.text();
-          throw new Error(`HTTP ${res.status}: API Route missing or failed. ${text.substring(0, 100)}`);
+          throw new Error(i18next.t('misc.lineage.httpError', { status: res.status, detail: text.substring(0, 100) }));
         }
 
         const contentType = res.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Backend returned non-JSON response (likely an HTML fallback).");
+          throw new Error(i18next.t('misc.lineage.nonJson'));
         }
 
         const data = await res.json();
         if (res.status === 207) {
-          setError(data.message || "Warning: Partial success loading lineage.");
+          setError(data.message || i18next.t('misc.lineage.partialWarning'));
         }
 
         const counters: Record<string, number> = { "group_agent": 0, "group_activity": 0, "group_entity": 0 };
@@ -121,7 +122,7 @@ export function LineageDiagram() {
           setEdges(mappedEdges);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load lineage.");
+        setError(err instanceof Error ? err.message : i18next.t('misc.lineage.loadFailed'));
       }
     };
     void fetchLineage();
@@ -134,11 +135,11 @@ export function LineageDiagram() {
 
       {/* Toolbar */}
       <div style={{ position: "absolute", top: 14, left: 14, right: 14, zIndex: 10, display: "flex", gap: 8, alignItems: "center", background: "rgba(4,10,18,0.88)", backdropFilter: "blur(14px)", padding: "8px 12px", borderRadius: 12, border: "1px solid rgba(74,163,255,0.16)", boxShadow: "0 4px 20px rgba(0,0,0,0.4)" }}>
-        <span className="ws-eyebrow" style={{ color: "var(--ws-accent, #4aa3ff)", marginRight: 4 }}>PROV-O Lineage</span>
+        <span className="ws-eyebrow" style={{ color: "var(--ws-accent, #4aa3ff)", marginRight: 4 }}>{t('misc.lineage.toolbarEyebrow')}</span>
         <input
           className="ws-input"
           type="text"
-          placeholder="Enter Node ID…"
+          placeholder={t('misc.lineage.nodeIdPlaceholder')}
           value={searchId}
           onChange={(e) => setSearchId(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") setActiveId(searchId); }}
@@ -170,8 +171,8 @@ export function LineageDiagram() {
       ) : (
         <div className="ws-empty" style={{ height: "100%", paddingTop: 72 }}>
           <div className="ws-empty-icon"><Link2 size={36} color="var(--ws-accent)" /></div>
-          <div className="ws-empty-title">PROV-O Lineage Viewer</div>
-          <div className="ws-empty-body">Enter a Node ID in the toolbar above and click Trace to view its W3C PROV-O lineage diagram.</div>
+          <div className="ws-empty-title">{t('misc.lineage.emptyTitle')}</div>
+          <div className="ws-empty-body">{t('misc.lineage.emptyBody')}</div>
         </div>
       )}
     </div>

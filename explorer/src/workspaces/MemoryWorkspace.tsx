@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import { Brain, RefreshCw } from "lucide-react";
 
 import { MarkdownContentViewer } from "./GraphWorkspace/MarkdownContentViewer";
@@ -41,7 +42,7 @@ async function fetchMemoryList(skip = 0): Promise<MemoryListResponse> {
   const response = await fetch(`/api/memories?skip=${skip}&limit=${MEMORY_PAGE_SIZE}`);
   if (!response.ok) {
     const payload = await response.json().catch(() => null);
-    throw new Error(responseMessage(payload, `Memory list failed (${response.status}).`));
+    throw new Error(responseMessage(payload, i18next.t('misc.memory.listFailed', { status: response.status })));
   }
   return response.json() as Promise<MemoryListResponse>;
 }
@@ -121,7 +122,7 @@ export function MemoryWorkspace({ onDirtyChange }: MemoryWorkspaceProps = {}) {
         setSelectedBody(document.body);
       } catch (failure) {
         if (isCurrent()) {
-          setError(failure instanceof Error ? failure.message : "Memories could not be loaded.");
+          setError(failure instanceof Error ? failure.message : i18next.t('misc.memory.loadFailed'));
         }
       } finally {
         if (isCurrent()) setLoading(false);
@@ -137,7 +138,7 @@ export function MemoryWorkspace({ onDirtyChange }: MemoryWorkspaceProps = {}) {
 
   const selectMemory = async (memoryId: string) => {
     if (memoryId === selectedId) return;
-    if (dirty && !window.confirm("Discard the unapplied Markdown draft and open another memory?")) return;
+    if (dirty && !window.confirm(t('misc.memory.discardConfirm'))) return;
     const selectionGeneration = ++selectionGenerationRef.current;
     // Do NOT call handleDirtyChange(false) here: the editor's own onDirtyChange
     // callback fires automatically when MarkdownContentViewer re-renders with
@@ -154,7 +155,7 @@ export function MemoryWorkspace({ onDirtyChange }: MemoryWorkspaceProps = {}) {
       setSelectedBody(document.body);
     } catch (failure) {
       if (selectionGeneration === selectionGenerationRef.current) {
-        setError(failure instanceof Error ? failure.message : "The memory could not be loaded.");
+        setError(failure instanceof Error ? failure.message : t('misc.memory.selectFailed'));
       }
     } finally {
       if (selectionGeneration === selectionGenerationRef.current) {
@@ -182,7 +183,7 @@ export function MemoryWorkspace({ onDirtyChange }: MemoryWorkspaceProps = {}) {
       setNextOffset(payload.skip + payload.items.length);
     } catch (failure) {
       if (listGeneration === listGenerationRef.current) {
-        setError(failure instanceof Error ? failure.message : "More memories could not be loaded.");
+        setError(failure instanceof Error ? failure.message : i18next.t('misc.memory.loadMoreFailed'));
       }
     } finally {
       if (listGeneration === listGenerationRef.current) {
@@ -201,7 +202,7 @@ export function MemoryWorkspace({ onDirtyChange }: MemoryWorkspaceProps = {}) {
       setNextOffset(payload.nextOffset);
     } catch {
       if (listGeneration === listGenerationRef.current) {
-        setError("Memory was applied, but its summary could not be refreshed.");
+        setError(i18next.t('misc.memory.refreshFailed'));
       }
     } finally {
       if (listGeneration === listGenerationRef.current) {
@@ -223,11 +224,11 @@ export function MemoryWorkspace({ onDirtyChange }: MemoryWorkspaceProps = {}) {
 
   return (
     <div style={workspaceStyle}>
-      <aside style={listPanelStyle} aria-label="Agent memories">
+      <aside style={listPanelStyle} aria-label={t('misc.memory.listAriaLabel')}>
         <div style={listHeaderStyle}>
           <div>
             <div style={listTitleStyle}>AgentMemory</div>
-            <div style={listCountStyle}>{items.length} of {total} loaded</div>
+            <div style={listCountStyle}>{t('misc.memory.loadedCount', { loaded: items.length, total })}</div>
           </div>
           <button
             type="button"
@@ -254,7 +255,7 @@ export function MemoryWorkspace({ onDirtyChange }: MemoryWorkspaceProps = {}) {
             >
               <span style={memoryTypeStyle}>{item.type}</span>
               <span style={memoryIdStyle}>{item.id}</span>
-              <span style={memoryExcerptStyle}>{item.excerpt || "Empty memory"}</span>
+              <span style={memoryExcerptStyle}>{item.excerpt || t('misc.memory.emptyExcerpt')}</span>
             </button>
           ))}
           {nextOffset < total ? (
@@ -271,7 +272,7 @@ export function MemoryWorkspace({ onDirtyChange }: MemoryWorkspaceProps = {}) {
           {!loading && items.length === 0 ? (
             <div style={emptyStyle}>
               <Brain size={22} aria-hidden="true" />
-              <span>No AgentMemory items are available.</span>
+              <span>{t('misc.memory.noItems')}</span>
               <button type="button" onClick={() => setReloadToken((value) => value + 1)} style={retryButtonStyle}>
                 {t('misc.memory.refreshShort')}
               </button>
@@ -283,11 +284,11 @@ export function MemoryWorkspace({ onDirtyChange }: MemoryWorkspaceProps = {}) {
       <main style={editorPanelStyle}>
         {error ? <div role="alert" style={alertStyle}>{error}</div> : null}
         {loading ? (
-          <div role="status" style={emptyStyle}>Loading memories…</div>
+          <div role="status" style={emptyStyle}>{t('misc.memory.loadingMemories')}</div>
         ) : selectedId ? (
           <>
             <div style={selectionHeaderStyle}>
-              <span style={selectionLabelStyle}>Selected memory</span>
+              <span style={selectionLabelStyle}>{t('misc.memory.selectedLabel')}</span>
               <strong style={selectionIdStyle}>{selectedId}</strong>
             </div>
             <MarkdownContentViewer

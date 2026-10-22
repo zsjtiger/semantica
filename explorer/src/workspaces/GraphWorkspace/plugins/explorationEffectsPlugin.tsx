@@ -17,31 +17,32 @@ type EffectRowConfig = {
   description: string;
 };
 
+// label and description hold i18n keys; they are translated at render time.
 const EFFECT_ROWS: EffectRowConfig[] = [
   {
     key: "pathPulseEnabled",
-    label: "Path Pulse",
-    description: "Animated pulse on the active selected path.",
+    label: "graph.plugins.effects.pathPulse",
+    description: "graph.plugins.effects.pathPulseDesc",
   },
   {
     key: "pathFlowEnabled",
-    label: "Path Flow",
-    description: "Directional flow accents along the active selected path.",
+    label: "graph.plugins.effects.pathFlow",
+    description: "graph.plugins.effects.pathFlowDesc",
   },
   {
     key: "lensEnabled",
-    label: "Neighborhood Lens",
-    description: "Local emphasis around the hovered or selected node.",
+    label: "graph.plugins.effects.lens",
+    description: "graph.plugins.effects.lensDesc",
   },
   {
     key: "edgeLabelsEnabled",
-    label: "Edge Labels",
-    description: "Draw the relationship type on graph edges. Off restores label-free edges on dense graphs.",
+    label: "graph.plugins.effects.edgeLabels",
+    description: "graph.plugins.effects.edgeLabelsDesc",
   },
   {
     key: "legendEnabled",
-    label: "Semantic Legend",
-    description: "Compact semantic group legend for graph orientation.",
+    label: "graph.plugins.effects.legend",
+    description: "graph.plugins.effects.legendDesc",
   },
 ];
 
@@ -59,12 +60,17 @@ const EFFECT_AVAILABILITY_KEYS: Partial<Record<GraphEffectToggle, keyof GraphDia
 function renderAvailabilityText(availability: GraphEffectAvailability) {
   if (availability.available) {
     if (typeof availability.visibleSegments === "number" && typeof availability.segmentCap === "number") {
-      return `${availability.reason} · ${availability.visibleSegments}/${availability.segmentCap} segments`;
+      return i18next.t("graph.plugins.effects.reasonSegments", {
+        reason: availability.reason,
+        value: `${availability.visibleSegments}/${availability.segmentCap}`,
+      });
     }
     return availability.reason;
   }
 
-  return availability.detail ? `${availability.reason} · ${availability.detail}` : availability.reason;
+  return availability.detail
+    ? i18next.t("graph.plugins.effects.reasonDetail", { reason: availability.reason, detail: availability.detail })
+    : availability.reason;
 }
 
 function collectLegendItems(context: Parameters<NonNullable<GraphPlugin["renderPanel"]>>[0]) {
@@ -148,15 +154,15 @@ export const explorationEffectsPlugin: GraphPlugin = {
       preferredHeight: 320,
       content: (
         <div style={panelBodyStyle}>
-          <div style={panelEyebrowStyle}>Exploration effects</div>
+          <div style={panelEyebrowStyle}>{i18next.t("graph.plugins.effects.eyebrow")}</div>
 
           <div style={sectionStyle}>
-            <div style={sectionTitleStyle}>Path and focus</div>
+            <div style={sectionTitleStyle}>{i18next.t("graph.plugins.effects.pathFocusSection")}</div>
             {EFFECT_ROWS.map((row) => (
               <EffectToggleRow
                 key={row.key}
-                label={row.label}
-                description={row.description}
+                label={i18next.t(row.label)}
+                description={i18next.t(row.description)}
                 checked={effectsState[row.key]}
                 availability={
                   (EFFECT_AVAILABILITY_KEYS[row.key] !== undefined
@@ -164,7 +170,7 @@ export const explorationEffectsPlugin: GraphPlugin = {
                     : undefined) ?? {
                     enabled: effectsState[row.key],
                     available: false,
-                    reason: "Waiting for graph runtime",
+                    reason: i18next.t("graph.plugins.effects.waiting"),
                   }
                 }
                 onToggle={() => context.dispatchAction({ type: "toggleEffect", effect: row.key })}
@@ -174,7 +180,7 @@ export const explorationEffectsPlugin: GraphPlugin = {
 
           {effectsState.legendEnabled ? (
             <div style={sectionStyle}>
-              <div style={sectionTitleStyle}>Semantic legend</div>
+              <div style={sectionTitleStyle}>{i18next.t("graph.plugins.effects.semanticLegendSection")}</div>
               {legendItems.length ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {legendItems.map((item) => (
@@ -188,36 +194,36 @@ export const explorationEffectsPlugin: GraphPlugin = {
                       />
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <div style={rowTitleStyle}>{item.group}</div>
-                        <div style={rowMetaStyle}>{item.count.toLocaleString()} nodes</div>
+                        <div style={rowMetaStyle}>{i18next.t("graph.plugins.legend.nodes", { value: item.count.toLocaleString() })}</div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div style={emptyTextStyle}>Legend data will populate when graph metadata is available.</div>
+                <div style={emptyTextStyle}>{i18next.t("graph.plugins.effects.legendEmpty")}</div>
               )}
             </div>
           ) : null}
 
           {import.meta.env.DEV ? (
             <div style={sectionStyle}>
-              <div style={sectionTitleStyle}>Diagnostics</div>
+              <div style={sectionTitleStyle}>{i18next.t("graph.plugins.effects.diagnosticsSection")}</div>
               <EffectToggleRow
-                label="Dev Diagnostics"
-                description="Inspect plugin, interaction, and effect gating state."
+                label={i18next.t("graph.plugins.effects.devDiagnostics")}
+                description={i18next.t("graph.plugins.effects.devDiagnosticsDesc")}
                 checked={effectsState.diagnosticsEnabled}
                 availability={
                   availability?.diagnostics ?? {
                     enabled: effectsState.diagnosticsEnabled,
                     available: false,
-                    reason: "Waiting for graph runtime",
+                    reason: i18next.t("graph.plugins.effects.waiting"),
                   }
                 }
                 onToggle={() => context.dispatchAction({ type: "toggleEffect", effect: "diagnosticsEnabled" })}
               />
               {effectsState.diagnosticsEnabled && diagnosticsSnapshot ? (
                 <details style={detailsStyle}>
-                  <summary style={summaryStyle}>Runtime snapshot</summary>
+                  <summary style={summaryStyle}>{i18next.t("graph.plugins.effects.runtimeSnapshot")}</summary>
                   <pre style={diagnosticsPreStyle}>
                     {JSON.stringify(diagnosticsSnapshot, null, 2)}
                   </pre>

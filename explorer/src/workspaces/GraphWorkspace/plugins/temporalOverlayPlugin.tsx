@@ -7,7 +7,7 @@ const TEMPORAL_PANEL_ID = "temporal-panel";
 
 function formatTemporalLabel(value: Date | null) {
   if (!value) {
-    return "No time selected";
+    return i18next.t('graph.plugins.temporal.noTime');
   }
   return `${value.getFullYear()}/${String(value.getMonth() + 1).padStart(2, "0")}`;
 }
@@ -59,10 +59,12 @@ export const temporalOverlayPlugin: GraphPlugin = {
             pointerEvents: "none",
           }}
         >
-          <span style={{ color: "#7fc6ff", fontWeight: 700 }}>Temporal</span>
+          <span style={{ color: "#7fc6ff", fontWeight: 700 }}>{i18next.t('graph.plugins.temporal.chip')}</span>
           <span>{label}</span>
           {typeof temporal.activeNodeCount === "number" ? (
-            <span style={{ color: "#8ea4be" }}>{temporal.activeNodeCount.toLocaleString()} active</span>
+            <span style={{ color: "#8ea4be" }}>
+              {i18next.t('graph.plugins.temporal.active', { value: temporal.activeNodeCount.toLocaleString() })}
+            </span>
           ) : null}
         </div>
       ),
@@ -84,21 +86,23 @@ export const temporalOverlayPlugin: GraphPlugin = {
       preferredHeight: 220,
       content: (
         <div style={panelBodyStyle}>
-          <div style={panelEyebrowStyle}>Current scrubber state</div>
+          <div style={panelEyebrowStyle}>{i18next.t('graph.plugins.temporal.eyebrow')}</div>
           <div style={detailRowStyle}>
-            <span style={detailLabelStyle}>Current</span>
+            <span style={detailLabelStyle}>{i18next.t('graph.plugins.temporal.current')}</span>
             <span style={detailValueStyle}>{formatTemporalLabel(temporal?.currentTime ?? null)}</span>
           </div>
           <div style={detailRowStyle}>
-            <span style={detailLabelStyle}>Bounds</span>
+            <span style={detailLabelStyle}>{i18next.t('graph.plugins.temporal.bounds')}</span>
             <span style={detailValueStyle}>
-              {(temporal?.minDate ?? "1970")} → {(temporal?.maxDate ?? "now")}
+              {(temporal?.minDate ?? "1970")} → {(temporal?.maxDate ?? i18next.t('graph.plugins.temporal.now'))}
             </span>
           </div>
           <div style={detailRowStyle}>
-            <span style={detailLabelStyle}>Active nodes</span>
+            <span style={detailLabelStyle}>{i18next.t('graph.plugins.temporal.activeNodes')}</span>
             <span style={detailValueStyle}>
-              {typeof temporal?.activeNodeCount === "number" ? temporal.activeNodeCount.toLocaleString() : "All"}
+              {typeof temporal?.activeNodeCount === "number"
+                ? temporal.activeNodeCount.toLocaleString()
+                : i18next.t('graph.plugins.temporal.all')}
             </span>
           </div>
         </div>

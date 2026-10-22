@@ -41,7 +41,7 @@ export const legendPlugin: GraphPlugin = {
       preferredHeight: 220,
       content: (
         <div style={panelBodyStyle}>
-          <div style={panelEyebrowStyle}>Semantic groups</div>
+          <div style={panelEyebrowStyle}>{i18next.t('graph.plugins.legend.eyebrow')}</div>
           {items.length ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {items.map((item) => (
@@ -55,13 +55,13 @@ export const legendPlugin: GraphPlugin = {
                   />
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={rowTitleStyle}>{item.group}</div>
-                    <div style={rowMetaStyle}>{item.count.toLocaleString()} nodes</div>
+                    <div style={rowMetaStyle}>{i18next.t('graph.plugins.legend.nodes', { value: item.count.toLocaleString() })}</div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div style={emptyTextStyle}>Legend will populate when the graph metadata is available.</div>
+            <div style={emptyTextStyle}>{i18next.t('graph.plugins.legend.empty')}</div>
           )}
         </div>
       ),

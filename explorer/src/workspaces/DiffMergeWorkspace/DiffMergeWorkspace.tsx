@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { GitMerge, ArrowRight, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import { logEvent } from "../../store/registryStore";
 
-interface FieldRow { label: string; primary: string; duplicate: string; differs: boolean }
+interface FieldRow { labelKey: string; primary: string; duplicate: string; differs: boolean }
 
 const MOCK_FIELDS: FieldRow[] = [
-  { label: "Name",     primary: "Sample Company Inc.", duplicate: "Sample Company",    differs: true  },
-  { label: "Founded",  primary: "2004-05-12",          duplicate: "2004-05-12",        differs: false },
-  { label: "Type",     primary: "Organization",        duplicate: "Organisation",      differs: true  },
-  { label: "Country",  primary: "US",                  duplicate: "US",                differs: false },
+  { labelKey: "dataTools.diffMerge.fields.name",    primary: "Sample Company Inc.", duplicate: "Sample Company",    differs: true  },
+  { labelKey: "dataTools.diffMerge.fields.founded", primary: "2004-05-12",          duplicate: "2004-05-12",        differs: false },
+  { labelKey: "dataTools.diffMerge.fields.type",    primary: "Organization",        duplicate: "Organisation",      differs: true  },
+  { labelKey: "dataTools.diffMerge.fields.country", primary: "US",                  duplicate: "US",                differs: false },
 ];
 
 export function DiffMergeWorkspace() {
@@ -31,16 +32,16 @@ export function DiffMergeWorkspace() {
       const data = await res.json();
       if (data.merged_into) {
         setStatus("success");
-        setMsg(`Merged → ${data.merged_into} · ${data.edges_updated ?? 0} edges redirected`);
-        logEvent("merge", `Merged ${duplicateId} → ${data.merged_into} · ${data.edges_updated ?? 0} edges redirected`, {
+        setMsg(t('dataTools.diffMerge.merged', { target: data.merged_into, count: data.edges_updated ?? 0 }));
+        logEvent("merge", i18next.t('dataTools.diffMerge.mergedLog', { duplicate: duplicateId, target: data.merged_into, count: data.edges_updated ?? 0 }), {
           primary: data.merged_into, duplicate: duplicateId, edgesUpdated: data.edges_updated,
         });
       } else {
-        throw new Error(data.detail || "Unexpected response");
+        throw new Error(data.detail || t('dataTools.diffMerge.unexpectedResponse'));
       }
     } catch (e: unknown) {
       setStatus("error");
-      setMsg(e instanceof Error ? e.message : "Merge failed");
+      setMsg(e instanceof Error ? e.message : t('dataTools.diffMerge.mergeFailed'));
     }
   }
 
@@ -53,22 +54,22 @@ export function DiffMergeWorkspace() {
             <GitMerge size={20} />
           </div>
           <div>
-            <h2 className="ws-title" style={{ fontSize: 18 }}>Entity Diff &amp; Merge</h2>
-            <div className="ws-body" style={{ marginTop: 2 }}>Compare suspected duplicates side-by-side and reconcile them into a single canonical entity.</div>
+            <h2 className="ws-title" style={{ fontSize: 18 }}>{t('dataTools.diffMerge.title')}</h2>
+            <div className="ws-body" style={{ marginTop: 2 }}>{t('dataTools.diffMerge.subtitle')}</div>
           </div>
         </div>
 
         {/* ID inputs */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 12, alignItems: "end" }}>
           <div>
-            <label className="ws-label">Primary Node ID (keep)</label>
+            <label className="ws-label">{t('dataTools.diffMerge.primaryLabel')}</label>
             <input className="ws-input" value={primaryId} onChange={(e) => { setPrimaryId(e.target.value); setStatus("idle"); }} placeholder="e.g. n-primary-1" />
           </div>
           <div style={{ paddingBottom: 2, color: "var(--ws-text-dim)" }}>
             <ArrowRight size={18} />
           </div>
           <div>
-            <label className="ws-label">Duplicate Node ID (remove)</label>
+            <label className="ws-label">{t('dataTools.diffMerge.duplicateLabel')}</label>
             <input className="ws-input" value={duplicateId} onChange={(e) => { setDuplicateId(e.target.value); setStatus("idle"); }} placeholder="e.g. n-dup-2" />
           </div>
         </div>
@@ -76,21 +77,21 @@ export function DiffMergeWorkspace() {
         {/* Diff table */}
         <div className="ws-card" style={{ padding: 0, overflow: "hidden" }}>
           <div style={{ padding: "6px 16px", background: "rgba(242,182,109,0.06)", borderBottom: "1px solid rgba(242,182,109,0.15)", display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: "var(--ws-amber)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Sample preview</span>
-            <span style={{ fontSize: 11, color: "var(--ws-text-dim)" }}>— field comparison will load from the graph once the backend is connected</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: "var(--ws-amber)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{t('dataTools.diffMerge.sampleBadge')}</span>
+            <span style={{ fontSize: 11, color: "var(--ws-text-dim)" }}>{t('dataTools.diffMerge.sampleNote')}</span>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "140px 1fr 1fr", background: "rgba(0,0,0,0.28)", borderBottom: "1px solid var(--ws-border)" }}>
-            <div style={{ padding: "10px 16px", fontSize: 11, fontWeight: 700, color: "var(--ws-text-dim)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Field</div>
-            <div style={{ padding: "10px 16px", fontSize: 11, fontWeight: 700, color: "var(--ws-accent)", letterSpacing: "0.08em", textTransform: "uppercase", borderLeft: "1px solid var(--ws-border)" }}>Primary (keep)</div>
-            <div style={{ padding: "10px 16px", fontSize: 11, fontWeight: 700, color: "#fca5a5", letterSpacing: "0.08em", textTransform: "uppercase", borderLeft: "1px solid var(--ws-border)" }}>Duplicate (remove)</div>
+            <div style={{ padding: "10px 16px", fontSize: 11, fontWeight: 700, color: "var(--ws-text-dim)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{t('dataTools.diffMerge.colField')}</div>
+            <div style={{ padding: "10px 16px", fontSize: 11, fontWeight: 700, color: "var(--ws-accent)", letterSpacing: "0.08em", textTransform: "uppercase", borderLeft: "1px solid var(--ws-border)" }}>{t('dataTools.diffMerge.colPrimary')}</div>
+            <div style={{ padding: "10px 16px", fontSize: 11, fontWeight: 700, color: "#fca5a5", letterSpacing: "0.08em", textTransform: "uppercase", borderLeft: "1px solid var(--ws-border)" }}>{t('dataTools.diffMerge.colDuplicate')}</div>
           </div>
           {MOCK_FIELDS.map((row) => (
-            <div key={row.label} style={{ display: "grid", gridTemplateColumns: "140px 1fr 1fr", borderBottom: "1px solid rgba(74,163,255,0.06)", background: row.differs ? "rgba(242,182,109,0.03)" : "transparent" }}>
-              <div style={{ padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--ws-text-dim)" }}>{row.label}</div>
+            <div key={row.labelKey} style={{ display: "grid", gridTemplateColumns: "140px 1fr 1fr", borderBottom: "1px solid rgba(74,163,255,0.06)", background: row.differs ? "rgba(242,182,109,0.03)" : "transparent" }}>
+              <div style={{ padding: "12px 16px", fontSize: 12, fontWeight: 600, color: "var(--ws-text-dim)" }}>{t(row.labelKey)}</div>
               <div style={{ padding: "12px 16px", fontSize: 13, color: "var(--ws-text)", borderLeft: "1px solid var(--ws-border)" }}>{row.primary}</div>
               <div style={{ padding: "12px 16px", fontSize: 13, color: row.differs ? "#fbbf24" : "var(--ws-text)", fontWeight: row.differs ? 700 : 400, borderLeft: "1px solid var(--ws-border)" }}>
                 {row.duplicate}
-                {row.differs && <span className="ws-pill ws-pill--amber" style={{ marginLeft: 8, fontSize: 9 }}>diff</span>}
+                {row.differs && <span className="ws-pill ws-pill--amber" style={{ marginLeft: 8, fontSize: 9 }}>{t('dataTools.diffMerge.diffBadge')}</span>}
               </div>
             </div>
           ))}

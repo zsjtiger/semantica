@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
+import i18next from "i18next";
 import {
   Layers,
   GitMerge,
@@ -59,12 +60,12 @@ export function VersionsTab() {
       if (response.ok) {
         const data = await response.json();
         setVersions(data);
-        if (response.status === 207) setError(data.message || "Warning: Partial success loading versions.");
+        if (response.status === 207) setError(data.message || i18next.t('ontologyTools.versions.partialVersions'));
       } else {
-        setError(`Failed to load versions (${response.status})`);
+        setError(i18next.t('ontologyTools.versions.loadVersionsFailed', { status: response.status }));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load versions.");
+      setError(err instanceof Error ? err.message : i18next.t('ontologyTools.versions.loadVersionsError'));
     }
   }, [ontologyUri]);
 
@@ -75,12 +76,12 @@ export function VersionsTab() {
       if (response.ok) {
         const data = await response.json();
         setProposals(data);
-        if (response.status === 207) setError(data.message || "Warning: Partial success loading proposals.");
+        if (response.status === 207) setError(data.message || i18next.t('ontologyTools.versions.partialProposals'));
       } else {
-        setError(`Failed to load proposals (${response.status})`);
+        setError(i18next.t('ontologyTools.versions.loadProposalsFailed', { status: response.status }));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load proposals.");
+      setError(err instanceof Error ? err.message : i18next.t('ontologyTools.versions.loadProposalsError'));
     }
   }, []);
 
@@ -94,13 +95,13 @@ export function VersionsTab() {
           const propData = await propRes.json();
           if (!ignore) {
             setProposals(propData);
-            if (propRes.status === 207) setError(propData.message || "Warning: Partial success loading proposals.");
+            if (propRes.status === 207) setError(propData.message || i18next.t('ontologyTools.versions.partialProposals'));
           }
         } else if (!ignore) {
-          setError(`Failed to load proposals (${propRes.status})`);
+          setError(i18next.t('ontologyTools.versions.loadProposalsFailed', { status: propRes.status }));
         }
       } catch (err) {
-        if (!ignore) setError(err instanceof Error ? err.message : "Failed to load proposals.");
+        if (!ignore) setError(err instanceof Error ? err.message : i18next.t('ontologyTools.versions.loadProposalsError'));
       }
 
       if (!ontologyUri) return;
@@ -110,13 +111,13 @@ export function VersionsTab() {
           const verData = await verRes.json();
           if (!ignore) {
             setVersions(verData);
-            if (verRes.status === 207) setError(verData.message || "Warning: Partial success loading versions.");
+            if (verRes.status === 207) setError(verData.message || i18next.t('ontologyTools.versions.partialVersions'));
           }
         } else if (!ignore) {
-          setError((prev) => prev || `Failed to load versions (${verRes.status})`);
+          setError((prev) => prev || i18next.t('ontologyTools.versions.loadVersionsFailed', { status: verRes.status }));
         }
       } catch (err) {
-        if (!ignore) setError((prev) => prev || (err instanceof Error ? err.message : "Failed to load versions."));
+        if (!ignore) setError((prev) => prev || (err instanceof Error ? err.message : i18next.t('ontologyTools.versions.loadVersionsError')));
       }
     }
     void fetchInitial();
@@ -132,16 +133,16 @@ export function VersionsTab() {
       if (response.ok) {
         if (response.status === 207) {
           const data = await response.json().catch(() => ({}));
-          setError(data.message || "Warning: Partial success approving proposal.");
+          setError(data.message || i18next.t('ontologyTools.versions.partialApprove'));
         } else {
-          alert("Proposal approved");
+          alert(i18next.t('ontologyTools.common.proposalApproved'));
         }
         loadProposals();
       } else {
-        setError(`Failed to approve proposal (${response.status})`);
+        setError(i18next.t('ontologyTools.versions.approveFailed', { status: response.status }));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to approve proposal.");
+      setError(err instanceof Error ? err.message : i18next.t('ontologyTools.versions.approveError'));
     }
   }, [loadProposals]);
 
@@ -154,16 +155,16 @@ export function VersionsTab() {
       if (response.ok) {
         if (response.status === 207) {
           const data = await response.json().catch(() => ({}));
-          setError(data.message || "Warning: Partial success rejecting proposal.");
+          setError(data.message || i18next.t('ontologyTools.versions.partialReject'));
         } else {
-          alert("Proposal rejected");
+          alert(i18next.t('ontologyTools.common.proposalRejected'));
         }
         loadProposals();
       } else {
-        setError(`Failed to reject proposal (${response.status})`);
+        setError(i18next.t('ontologyTools.versions.rejectFailed', { status: response.status }));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to reject proposal.");
+      setError(err instanceof Error ? err.message : i18next.t('ontologyTools.versions.rejectError'));
     }
   }, [loadProposals]);
 
@@ -176,17 +177,17 @@ export function VersionsTab() {
       if (response.ok) {
         if (response.status === 207) {
           const data = await response.json().catch(() => ({}));
-          setError(data.message || "Warning: Partial success publishing proposal.");
+          setError(data.message || i18next.t('ontologyTools.versions.partialPublish'));
         } else {
-          alert("Proposal published");
+          alert(i18next.t('ontologyTools.common.proposalPublished'));
         }
         loadProposals();
         loadVersions();
       } else {
-        setError(`Failed to publish proposal (${response.status})`);
+        setError(i18next.t('ontologyTools.versions.publishFailed', { status: response.status }));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to publish proposal.");
+      setError(err instanceof Error ? err.message : i18next.t('ontologyTools.versions.publishError'));
     }
   }, [loadProposals, loadVersions]);
 
@@ -205,13 +206,13 @@ export function VersionsTab() {
       });
       if (response.ok) {
         const data = await response.json();
-        if (response.status === 207) setError(data.message || "Warning: Partial success comparing versions.");
+        if (response.status === 207) setError(data.message || i18next.t('ontologyTools.versions.partialCompare'));
         setCompareResult(data);
       } else {
-        setError(`Failed to compare versions (${response.status})`);
+        setError(i18next.t('ontologyTools.versions.compareFailed', { status: response.status }));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to compare versions.");
+      setError(err instanceof Error ? err.message : i18next.t('ontologyTools.versions.compareError'));
     } finally {
       setIsLoading(false);
     }
@@ -339,10 +340,10 @@ export function VersionsTab() {
   return (
     <div style={containerStyle}>
       <div style={headerStyle}>
-        <h1 style={titleStyle}>Versions & Change Proposals</h1>
+        <h1 style={titleStyle}>{t('ontologyTools.versions.title')}</h1>
         <input
           type="text"
-          placeholder="Ontology URI"
+          placeholder={t('ontologyTools.versions.ontologyUriPlaceholder')}
           value={ontologyUri}
           onChange={(e) => setOntologyUri(e.target.value)}
           style={{ ...inputStyle, width: "300px", marginBottom: 0 }}
@@ -354,11 +355,11 @@ export function VersionsTab() {
       <div style={sectionStyle}>
         <h2 style={sectionTitleStyle}>
           <Layers size={16} />
-          Version History
+          {t('ontologyTools.versions.versionHistory')}
         </h2>
         <div style={listStyle}>
           {versions.length === 0 ? (
-            <div style={{ color: "#8fa8c6", fontSize: "13px" }}>No versions found</div>
+            <div style={{ color: "#8fa8c6", fontSize: "13px" }}>{t('ontologyTools.versions.noVersions')}</div>
           ) : (
             versions.map((version) => (
               <div key={version.version_id} style={itemStyle}>
@@ -390,11 +391,11 @@ export function VersionsTab() {
       <div style={sectionStyle}>
         <h2 style={sectionTitleStyle}>
           <GitMerge size={16} />
-          Change Proposals
+          {t('ontologyTools.versions.changeProposals')}
         </h2>
         <div style={listStyle}>
           {proposals.length === 0 ? (
-            <div style={{ color: "#8fa8c6", fontSize: "13px" }}>No proposals found</div>
+            <div style={{ color: "#8fa8c6", fontSize: "13px" }}>{t('ontologyTools.versions.noProposals')}</div>
           ) : (
             proposals.map((proposal) => (
               <div key={proposal.proposal_id} style={itemStyle}>
@@ -445,29 +446,29 @@ export function VersionsTab() {
         <div style={modalOverlayStyle} onClick={() => setShowProposalModal(false)}>
           <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
-              <h3 style={{ margin: 0, color: "#ebf3ff", fontSize: "16px" }}>Proposal Details</h3>
+              <h3 style={{ margin: 0, color: "#ebf3ff", fontSize: "16px" }}>{t('ontologyTools.versions.proposalDetails')}</h3>
               <button onClick={() => setShowProposalModal(false)} style={{ background: "none", border: "none", color: "#8fa8c6", cursor: "pointer" }}>
                 <X size={18} />
               </button>
             </div>
             <div style={{ marginBottom: "12px" }}>
               <label style={{ display: "block", color: "#8fa8c6", fontSize: "12px", marginBottom: "4px" }}>
-                Summary
+                {t('ontologyTools.common.summary')}
               </label>
               <div style={{ color: "#ebf3ff", fontSize: "13px" }}>{selectedProposal.summary}</div>
             </div>
             <div style={{ marginBottom: "12px" }}>
               <label style={{ display: "block", color: "#8fa8c6", fontSize: "12px", marginBottom: "4px" }}>
-                State
+                {t('ontologyTools.common.state')}
               </label>
               <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#ebf3ff", fontSize: "13px" }}>
                 {getStateIcon(selectedProposal.state)}
-                {selectedProposal.state}
+                {t(`ontologyTools.states.${selectedProposal.state}`)}
               </div>
             </div>
             <div style={{ marginBottom: "12px" }}>
               <label style={{ display: "block", color: "#8fa8c6", fontSize: "12px", marginBottom: "4px" }}>
-                Impact Analysis
+                {t('ontologyTools.common.impactAnalysis')}
               </label>
               <pre style={{ background: "rgba(3, 9, 18, 0.8)", padding: "12px", borderRadius: "6px", color: "#ebf3ff", fontSize: "12px", overflow: "auto" }}>
                 {JSON.stringify(selectedProposal.impact_analysis, null, 2)}
@@ -475,7 +476,7 @@ export function VersionsTab() {
             </div>
             <div style={{ marginBottom: "12px" }}>
               <label style={{ display: "block", color: "#8fa8c6", fontSize: "12px", marginBottom: "4px" }}>
-                SHACL Validation
+                {t('ontologyTools.common.shaclValidation')}
               </label>
               <pre style={{ background: "rgba(3, 9, 18, 0.8)", padding: "12px", borderRadius: "6px", color: "#ebf3ff", fontSize: "12px", overflow: "auto" }}>
                 {JSON.stringify(selectedProposal.shacl_validation, null, 2)}
@@ -483,7 +484,7 @@ export function VersionsTab() {
             </div>
             <div>
               <label style={{ display: "block", color: "#8fa8c6", fontSize: "12px", marginBottom: "4px" }}>
-                Comments ({selectedProposal.comments.length})
+                {t('ontologyTools.common.comments', { count: selectedProposal.comments.length })}
               </label>
               <div style={{ maxHeight: "120px", overflow: "auto" }}>
                 {selectedProposal.comments.map((comment) => (
@@ -502,7 +503,7 @@ export function VersionsTab() {
         <div style={modalOverlayStyle} onClick={() => setShowCompareModal(false)}>
           <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
-              <h3 style={{ margin: 0, color: "#ebf3ff", fontSize: "16px" }}>Compare Versions</h3>
+              <h3 style={{ margin: 0, color: "#ebf3ff", fontSize: "16px" }}>{t('ontologyTools.versions.compareVersions')}</h3>
               <button onClick={() => setShowCompareModal(false)} style={{ background: "none", border: "none", color: "#8fa8c6", cursor: "pointer" }}>
                 <X size={18} />
               </button>
@@ -510,7 +511,7 @@ export function VersionsTab() {
             <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
               <div style={{ flex: 1 }}>
                 <label style={{ display: "block", color: "#8fa8c6", fontSize: "12px", marginBottom: "4px" }}>
-                  Version 1
+                  {t('ontologyTools.versions.version1')}
                 </label>
                 <input
                   type="text"
@@ -521,7 +522,7 @@ export function VersionsTab() {
               </div>
               <div style={{ flex: 1 }}>
                 <label style={{ display: "block", color: "#8fa8c6", fontSize: "12px", marginBottom: "4px" }}>
-                  Version 2
+                  {t('ontologyTools.versions.version2')}
                 </label>
                 <input
                   type="text"

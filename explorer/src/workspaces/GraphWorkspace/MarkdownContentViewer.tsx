@@ -251,7 +251,7 @@ export function MarkdownContentViewer({
   return (
     <div className={className} style={viewerContainerStyle}>
       <div style={viewerHeaderStyle}>
-        <div style={{ display: "flex", gap: 4 }} role="tablist" aria-label="Content view mode">
+        <div style={{ display: "flex", gap: 4 }} role="tablist" aria-label={t('graph.markdown.viewMode')}>
           <button
             type="button"
             role="tab"
@@ -367,7 +367,7 @@ export function MarkdownContentViewer({
       >
         {activeMode === "source" && editing ? (
           <textarea
-            aria-label="Markdown source"
+            aria-label={t('graph.markdown.sourceLabel')}
             aria-describedby={error ? "markdown-editor-error" : undefined}
             aria-invalid={error?.kind === "validation" || undefined}
             value={session?.draft ?? ""}
@@ -377,7 +377,7 @@ export function MarkdownContentViewer({
             style={editorStyle}
           />
         ) : !hasContent ? (
-          <div style={emptyTextStyle}>No content available for this node.</div>
+          <div style={emptyTextStyle}>{t('graph.markdown.empty')}</div>
         ) : activeMode === "source" ? (
           <pre style={sourcePreStyle}>
             <code style={sourceCodeStyle}>{rawContent}</code>
@@ -387,6 +387,16 @@ export function MarkdownContentViewer({
         )}
       </div>
     </div>
+  );
+}
+
+function MarkdownImageBadge({ src, alt }: { src?: string; alt?: string }) {
+  const { t } = useTranslation();
+  return (
+    <span style={imageBadgeStyle} title={src || t('graph.markdown.imageTitle')}>
+      <ImageIcon size={12} style={{ marginRight: 5 }} />
+      <span>{t('graph.markdown.imageLabel', { name: alt || src || t('graph.markdown.unlabeled') })}</span>
+    </span>
   );
 }
 
@@ -441,12 +451,7 @@ const MARKDOWN_COMPONENTS: Components = {
       </a>
     );
   },
-  img: ({ src, alt }) => (
-    <span style={imageBadgeStyle} title={src || "Image"}>
-      <ImageIcon size={12} style={{ marginRight: 5 }} />
-      <span>Image: {alt || src || "unlabeled"}</span>
-    </span>
-  ),
+  img: ({ src, alt }) => <MarkdownImageBadge src={src} alt={alt} />,
   h1: ({ children }) => <h1 style={h1Style}>{children}</h1>,
   h2: ({ children }) => <h2 style={h2Style}>{children}</h2>,
   h3: ({ children }) => <h3 style={h3Style}>{children}</h3>,

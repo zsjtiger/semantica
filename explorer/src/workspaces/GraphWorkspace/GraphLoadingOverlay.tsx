@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 
 import { GRAPH_THEME, withAlpha } from "./graphTheme";
-import { GRAPH_LOAD_STAGE_SEQUENCE, createGraphLoadProgress, getGraphLoadStageLabel } from "./graphLoading";
+import { GRAPH_LOAD_STAGE_SEQUENCE, createGraphLoadProgress } from "./graphLoading";
 import type { GraphLoadProgress } from "./types";
 
 const LOADING_OVERLAY_CSS = `
@@ -177,31 +177,31 @@ const LOADING_OVERLAY_CSS = `
   }
 `;
 
-function formatLayoutSource(source: GraphLoadProgress["layoutSource"]) {
+function layoutSourceKey(source: GraphLoadProgress["layoutSource"]): string | null {
   switch (source) {
     case "provided":
-      return "Persisted layout";
+      return "graph.layoutSource.provided";
     case "carried":
-      return "Preserved layout";
+      return "graph.layoutSource.carried";
     case "runtime":
-      return "Runtime layout";
+      return "graph.layoutSource.runtime";
     default:
       return null;
   }
 }
 
-function formatLayoutState(state: GraphLoadProgress["layoutState"]) {
+function layoutStateKey(state: GraphLoadProgress["layoutState"]): string | null {
   switch (state) {
     case "bootstrapping":
-      return "Bootstrapping";
+      return "graph.layoutState.bootstrapping";
     case "running":
-      return "Settling";
+      return "graph.layoutState.running";
     case "interactive":
-      return "Interactive";
+      return "graph.layoutState.interactive";
     case "stabilized":
-      return "Stable";
+      return "graph.layoutState.stabilized";
     case "failed":
-      return "Fallback";
+      return "graph.layoutState.failed";
     default:
       return null;
   }
@@ -239,7 +239,7 @@ export function GraphLoadingOverlay({
   const [displayProgress, setDisplayProgress] = useState<GraphLoadProgress>(
     progress ?? createGraphLoadProgress({
       phase: "bootstrapping",
-      message: "Preparing graph session",
+      message: t('graph.loading.preparing'),
       progressKind: "indeterminate",
     }),
   );
@@ -300,10 +300,10 @@ export function GraphLoadingOverlay({
             </div>
             <div style={{ minWidth: 0 }}>
               <div style={{ color: "#ffffff", fontSize: 20, fontWeight: 700, letterSpacing: "-0.03em", marginBottom: 6 }}>
-                Could not load the graph
+                {t('graph.loading.errorTitle')}
               </div>
               <div style={{ color: "#8fa8c6", fontSize: 13, lineHeight: 1.5 }}>
-                The Explorer API did not return graph data. Check that the backend is running and reachable, then try again.
+                {t('graph.loading.errorBody')}
               </div>
             </div>
           </div>
@@ -331,8 +331,10 @@ export function GraphLoadingOverlay({
   const determinateRatio = activeProgress.progressKind === "determinate" && activeProgress.total
     ? Math.max(0.05, Math.min(activeProgress.loaded ?? 0, activeProgress.total) / Math.max(activeProgress.total, 1))
     : null;
-  const layoutSource = formatLayoutSource(activeProgress.layoutSource);
-  const layoutState = formatLayoutState(activeProgress.layoutState);
+  const layoutSourceKeyName = layoutSourceKey(activeProgress.layoutSource);
+  const layoutSource = layoutSourceKeyName ? t(layoutSourceKeyName) : null;
+  const layoutStateKeyName = layoutStateKey(activeProgress.layoutState);
+  const layoutState = layoutStateKeyName ? t(layoutStateKeyName) : null;
 
   return (
     <div
@@ -345,7 +347,7 @@ export function GraphLoadingOverlay({
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 14, marginBottom: 14 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ color: "#ffffff", fontSize: 20, fontWeight: 700, letterSpacing: "-0.03em", marginBottom: 6 }}>
-              {activeProgress.title}
+              {t(`graph.loadPhase.${activeProgress.phase}`)}
             </div>
             <div style={{ color: "#8fa8c6", fontSize: 13, lineHeight: 1.5 }}>
               {activeProgress.message}
@@ -354,7 +356,7 @@ export function GraphLoadingOverlay({
           <div style={{ display: "inline-flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
             <div className="graph-stage-loader-beacon" aria-hidden="true" />
             <div style={{ color: "#d7e9fb", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-              Stage {activeProgress.stageIndex ?? 1}/{activeProgress.stageCount ?? GRAPH_LOAD_STAGE_SEQUENCE.length}
+              {t('graph.loading.stage', { index: activeProgress.stageIndex ?? 1, total: activeProgress.stageCount ?? GRAPH_LOAD_STAGE_SEQUENCE.length })}
             </div>
           </div>
         </div>
@@ -365,7 +367,7 @@ export function GraphLoadingOverlay({
             const state = index + 1 < current ? "done" : index + 1 === current ? "active" : "upcoming";
             return (
               <div key={phase} className="graph-stage-loader-step" data-state={state}>
-                {getGraphLoadStageLabel(phase)}
+                {t(`graph.loadStage.${phase}`)}
               </div>
             );
           })}
@@ -374,13 +376,13 @@ export function GraphLoadingOverlay({
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", marginBottom: 8 }}>
           <div style={{ color: "#dce9f6", fontSize: 12, fontWeight: 600 }}>
             {activeProgress.progressKind === "determinate" && activeProgress.total
-              ? `${(activeProgress.loaded ?? 0).toLocaleString()} / ${activeProgress.total.toLocaleString()} in current stage`
-              : "Working through this stage"}
+              ? t('graph.loading.inStage', { loaded: (activeProgress.loaded ?? 0).toLocaleString(), total: activeProgress.total.toLocaleString() })
+              : t('graph.loading.working')}
           </div>
           <div style={{ color: "#90a8c5", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
             {activeProgress.progressKind === "determinate" && determinateRatio !== null
               ? `${Math.round(determinateRatio * 100)}%`
-              : "Live"}
+              : t('graph.loading.live')}
           </div>
         </div>
 
@@ -393,11 +395,11 @@ export function GraphLoadingOverlay({
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}>
           <span style={loadingMetricStyle}>
             {activeProgress.nodesLoaded.toLocaleString()}
-            {activeProgress.nodesTotal ? ` / ${activeProgress.nodesTotal.toLocaleString()}` : ""} nodes
+            {activeProgress.nodesTotal ? ` / ${activeProgress.nodesTotal.toLocaleString()}` : ""} {t('graph.loading.nodes')}
           </span>
           <span style={loadingMetricStyle}>
             {activeProgress.edgesLoaded.toLocaleString()}
-            {activeProgress.edgesTotal ? ` / ${activeProgress.edgesTotal.toLocaleString()}` : ""} relationships
+            {activeProgress.edgesTotal ? ` / ${activeProgress.edgesTotal.toLocaleString()}` : ""} {t('graph.loading.relationships')}
           </span>
           {layoutSource ? (
             <span style={{ ...loadingMetricStyle, color: "#a9ddff", borderColor: withAlpha(GRAPH_THEME.palette.accent.hovered, 0.22) }}>

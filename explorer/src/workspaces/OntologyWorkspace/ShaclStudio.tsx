@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import i18next from "i18next";
 import type { CSSProperties } from "react";
 import Editor, { type Monaco } from "@monaco-editor/react";
 import { FileCode2, Loader2, Play, Shield, Wand2 } from "lucide-react";
@@ -37,7 +38,7 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Failed to load ontology registry.");
+        setError(err instanceof Error ? err.message : i18next.t('ontologyTools.common.loadRegistryFailed'));
       });
     return () => {
       cancelled = true;
@@ -94,7 +95,7 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
       setShapes(shapeData.shapes);
       setValidation(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not generate SHACL.");
+      setError(err instanceof Error ? err.message : i18next.t('ontologyTools.shacl.generateFailed'));
     } finally {
       setLoading(false);
     }
@@ -129,7 +130,7 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
     try {
       setValidation(await validateShacl(selectedUri, shacl));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not validate SHACL.");
+      setError(err instanceof Error ? err.message : i18next.t('ontologyTools.shacl.validateFailed'));
     } finally {
       setLoading(false);
     }
@@ -138,7 +139,7 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
   const groupedShapes = useMemo(() => {
     const groups = new Map<string, ShaclShapeSummary[]>();
     for (const shape of shapes) {
-      const key = shape.target_class || "Untargeted shapes";
+      const key = shape.target_class || "";
       groups.set(key, [...(groups.get(key) || []), shape]);
     }
     return Array.from(groups.entries());
@@ -195,15 +196,14 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
     <div style={pageStyle}>
       <section style={heroStyle}>
         <div>
-          <div style={kickerStyle}><Shield size={14} /> SHACL Studio</div>
-          <h2 style={titleStyle}>Generate, edit, and validate shapes</h2>
+          <div style={kickerStyle}><Shield size={14} /> {t('ontologyTools.shacl.kicker')}</div>
+          <h2 style={titleStyle}>{t('ontologyTools.shacl.title')}</h2>
           <p style={textStyle}>
-            Create strict SHACL Turtle from ontology structure, inspect shape targets,
-            run validation, and jump from violations back into the graph.
+            {t('ontologyTools.shacl.text')}
           </p>
         </div>
         <div style={selectorShellStyle}>
-          <label style={labelStyle}>Ontology</label>
+          <label style={labelStyle}>{t('ontologyTools.shacl.ontology')}</label>
           <select style={inputStyle} value={selectedUri} onChange={(event) => setSelectedUri(event.target.value)}>
             {registry.map((entry) => <option key={entry.uri} value={entry.uri}>{entry.name}</option>)}
           </select>
@@ -215,9 +215,9 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
       <div style={gridStyle}>
         <section style={cardStyle}>
           <div style={panelHeaderStyle}>
-            <h3 style={sectionTitleStyle}>Shape library</h3>
+            <h3 style={sectionTitleStyle}>{t('ontologyTools.shacl.shapeLibrary')}</h3>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <span style={countBadgeStyle}>{shapes.length} shapes</span>
+              <span style={countBadgeStyle}>{t('ontologyTools.shacl.shapesCount', { count: shapes.length })}</span>
               {selectedShapeId ? (
                 <button style={smallButtonStyle} onClick={handleShowAllShapes}>{t('ontologyTools.shacl.viewAll')}</button>
               ) : null}
@@ -226,7 +226,7 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
           <div style={shapeListStyle}>
             {groupedShapes.map(([target, items]) => (
               <div key={target} style={shapeGroupStyle}>
-                <div style={shapeTargetStyle}>{target}</div>
+                <div style={shapeTargetStyle}>{target || t('ontologyTools.shacl.untargeted')}</div>
                 {items.map((shape) => {
                   const isSelected = selectedShapeId === shape.id;
                   return (
@@ -247,7 +247,7 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
                       <div>
                         <div style={{ color: "#ebf3ff", fontWeight: 800 }}>{shape.id}</div>
                         <div style={mutedStyle}>
-                          {shape.constraint_count} constraints
+                          {t('ontologyTools.shacl.constraintCount', { count: shape.constraint_count })}
                           {shape.constraints.length ? ` · ${shape.constraints.join(", ")}` : ""}
                         </div>
                       </div>
@@ -257,14 +257,14 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
                 })}
               </div>
             ))}
-            {!shapes.length ? <p style={mutedStyle}>No shapes generated yet.</p> : null}
+            {!shapes.length ? <p style={mutedStyle}>{t('ontologyTools.shacl.noShapes')}</p> : null}
           </div>
         </section>
 
         <section style={editorShellStyle}>
           <div style={panelHeaderStyle}>
             <h3 style={sectionTitleStyle}>
-              {selectedShapeId ? selectedShapeId : "Turtle shape editor"}
+              {selectedShapeId ? selectedShapeId : t('ontologyTools.shacl.turtleEditor')}
             </h3>
             <div style={{ display: "flex", gap: 8 }}>
               <button style={secondaryButtonStyle} disabled={loading} onClick={handleGenerate}><Wand2 size={14} /> {t('ontologyTools.shacl.generateStrict')}</button>
@@ -296,8 +296,8 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
 
       <section style={cardStyle}>
         <div style={panelHeaderStyle}>
-          <h3 style={sectionTitleStyle}>Validation report</h3>
-          {validation ? <span style={validationBadgeStyle(validation.status, validation.conforms)}>{validation.status}{validation.conforms ? " · conforms" : ""}</span> : null}
+          <h3 style={sectionTitleStyle}>{t('ontologyTools.shacl.validationReport')}</h3>
+          {validation ? <span style={validationBadgeStyle(validation.status, validation.conforms)}>{validation.status}{validation.conforms ? t('ontologyTools.shacl.conforms') : ""}</span> : null}
         </div>
         {validation ? (
           <>
@@ -320,11 +320,11 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
                   </div>
                 );
               })}
-              {!validation.violations.length ? <p style={mutedStyle}>No validation violations returned.</p> : null}
+              {!validation.violations.length ? <p style={mutedStyle}>{t('ontologyTools.shacl.noViolations')}</p> : null}
             </div>
           </>
         ) : (
-          <p style={mutedStyle}>Generate or edit SHACL Turtle, then run validation.</p>
+          <p style={mutedStyle}>{t('ontologyTools.shacl.editPrompt')}</p>
         )}
       </section>
     </div>

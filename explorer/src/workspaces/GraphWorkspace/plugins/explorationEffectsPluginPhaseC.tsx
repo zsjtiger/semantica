@@ -19,64 +19,65 @@ type EffectRowConfig = {
   description: string;
 };
 
+// label and description hold i18n keys; they are translated at render time.
 const SCENE_EFFECT_ROWS: EffectRowConfig[] = [
   {
     key: "pathPulseEnabled",
-    label: "Path Pulse",
-    description: "Animated pulse on the active selected path.",
+    label: "graph.plugins.effects.pathPulse",
+    description: "graph.plugins.effects.pathPulseDesc",
   },
   {
     key: "pathFlowEnabled",
-    label: "Path Flow",
-    description: "Directional flow accents along the active selected path.",
+    label: "graph.plugins.effects.pathFlow",
+    description: "graph.plugins.effects.pathFlowDesc",
   },
   {
     key: "lensEnabled",
-    label: "Neighborhood Lens",
-    description: "Local emphasis around the hovered or selected node.",
+    label: "graph.plugins.effects.lens",
+    description: "graph.plugins.effects.lensDesc",
   },
   {
     key: "temporalEmphasisEnabled",
-    label: "Temporal Emphasis",
-    description: "Subtle glow around temporally relevant nodes in the active time window.",
+    label: "graph.plugins.effects.temporalEmphasis",
+    description: "graph.plugins.effects.temporalEmphasisDesc",
   },
   {
     key: "semanticRegionsEnabled",
-    label: "Semantic Regions",
-    description: "Quiet semantic hulls around the strongest visible topic clusters.",
+    label: "graph.plugins.effects.semanticRegions",
+    description: "graph.plugins.effects.semanticRegionsDesc",
   },
   {
     key: "contoursEnabled",
-    label: "Contours",
-    description: "Low-contrast density halos around the strongest visible anchors.",
+    label: "graph.plugins.effects.contours",
+    description: "graph.plugins.effects.contoursDesc",
   },
   {
     key: "edgeLabelsEnabled",
-    label: "Edge Labels",
-    description: "Draw the relationship type on graph edges. Off restores label-free edges on dense graphs.",
+    label: "graph.plugins.effects.edgeLabels",
+    description: "graph.plugins.effects.edgeLabelsDesc",
   },
   {
     key: "legendEnabled",
-    label: "Regions Summary",
-    description: "Keep the regions and signals summary visible in the Effects panel.",
+    label: "graph.plugins.effects.regionsSummary",
+    description: "graph.plugins.effects.regionsSummaryDesc",
   },
 ];
 
 const INTELLIGENCE_EFFECT_ROWS: EffectRowConfig[] = [
   {
     key: "pathfindingEnabled",
-    label: "Directed Pathfinding",
-    description: "Compare the traced path against a strict local directed shortest path.",
+    label: "graph.plugins.effects.pathfinding",
+    description: "graph.plugins.effects.pathfindingDesc",
   },
   {
     key: "communitiesEnabled",
-    label: "Community Regions",
-    description: "Detect stable Louvain communities for orientation and scene grouping.",
+    label: "graph.plugins.effects.communities",
+    description: "graph.plugins.effects.communitiesDesc",
   },
   {
     key: "centralityEnabled",
-    label: "Centrality Ranking",
-    description: "Rank the strongest graph anchors for labels, regions, and navigation.",
+    label: "graph.plugins.effects.centrality",
+    description: "graph.plugins.effects.centralityDesc",
   },
 ];
 
@@ -98,12 +99,17 @@ const AVAILABILITY_KEYS: Record<GraphEffectToggle, keyof GraphDiagnosticsSnapsho
 function renderAvailabilityText(availability: GraphEffectAvailability) {
   if (availability.available) {
     if (typeof availability.visibleSegments === "number" && typeof availability.segmentCap === "number") {
-      return `${availability.reason} - ${availability.visibleSegments}/${availability.segmentCap} segments`;
+      return i18next.t("graph.plugins.effects.reasonSegmentsDash", {
+        reason: availability.reason,
+        value: `${availability.visibleSegments}/${availability.segmentCap}`,
+      });
     }
     return availability.reason;
   }
 
-  return availability.detail ? `${availability.reason} - ${availability.detail}` : availability.reason;
+  return availability.detail
+    ? i18next.t("graph.plugins.effects.reasonDetailDash", { reason: availability.reason, detail: availability.detail })
+    : availability.reason;
 }
 
 function collectFallbackLegendItems(context: Parameters<NonNullable<GraphPlugin["renderPanel"]>>[0]) {
@@ -120,7 +126,7 @@ function resolveAvailability(
   return availabilityMap?.[AVAILABILITY_KEYS[key]] ?? {
     enabled,
     available: false,
-    reason: "Waiting for graph runtime",
+    reason: i18next.t("graph.plugins.effects.waiting"),
   };
 }
 
@@ -163,14 +169,14 @@ function renderRegionsAndSignals(
   const directedPath = analytics?.directedPath ?? null;
 
   if (!semanticRegions.length && !communities.length && !centrality.length && !fallbackLegendItems.length && !directedPath) {
-    return <div style={emptyTextStyle}>Regions and intelligence summaries will populate when graph analytics are ready.</div>;
+    return <div style={emptyTextStyle}>{i18next.t("graph.plugins.effects.regionsEmpty")}</div>;
   }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {semanticRegions.length ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={subsectionTitleStyle}>Semantic regions</div>
+          <div style={subsectionTitleStyle}>{i18next.t("graph.plugins.effects.semanticRegionsTitle")}</div>
           {semanticRegions.map((region) => (
             <div key={region.semanticGroup} style={legendRowStyle}>
               <span
@@ -183,7 +189,10 @@ function renderRegionsAndSignals(
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={rowTitleStyle}>{region.semanticGroup}</div>
                 <div style={rowMetaStyle}>
-                  {region.visibleNodeCount.toLocaleString()} visible / {region.nodeCount.toLocaleString()} total
+                  {i18next.t("graph.plugins.effects.regionMeta", {
+                    visible: region.visibleNodeCount.toLocaleString(),
+                    total: region.nodeCount.toLocaleString(),
+                  })}
                 </div>
               </div>
               <div style={signalBadgeStyle}>{region.anchorLabel}</div>
@@ -194,13 +203,17 @@ function renderRegionsAndSignals(
 
       {communities.length ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={subsectionTitleStyle}>Community anchors</div>
+          <div style={subsectionTitleStyle}>{i18next.t("graph.plugins.effects.communityAnchors")}</div>
           {communities.slice(0, 3).map((community) => (
             <div key={community.communityId} style={signalRowStyle}>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={rowTitleStyle}>{community.anchorLabel}</div>
                 <div style={rowMetaStyle}>
-                  Community {community.communityId} - {community.visibleNodeCount} visible / {community.nodeCount} total
+                  {i18next.t("graph.plugins.effects.communityMeta", {
+                    id: community.communityId,
+                    visible: community.visibleNodeCount,
+                    total: community.nodeCount,
+                  })}
                 </div>
               </div>
               <div style={signalBadgeStyle}>{community.dominantSemanticGroup}</div>
@@ -211,16 +224,16 @@ function renderRegionsAndSignals(
 
       {centrality.length ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={subsectionTitleStyle}>Centrality leaders</div>
+          <div style={subsectionTitleStyle}>{i18next.t("graph.plugins.effects.centralityLeaders")}</div>
           {centrality.slice(0, 3).map((node) => (
             <div key={node.id} style={signalRowStyle}>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={rowTitleStyle}>{node.label}</div>
                 <div style={rowMetaStyle}>
-                  {node.semanticGroup} - score {node.score.toFixed(3)}
+                  {i18next.t("graph.plugins.effects.scoreMeta", { group: node.semanticGroup, score: node.score.toFixed(3) })}
                 </div>
               </div>
-              <div style={signalBadgeStyle}>deg {node.degree.toFixed(3)}</div>
+              <div style={signalBadgeStyle}>{i18next.t("graph.plugins.effects.degBadge", { value: node.degree.toFixed(3) })}</div>
             </div>
           ))}
         </div>
@@ -228,15 +241,21 @@ function renderRegionsAndSignals(
 
       {directedPath ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={subsectionTitleStyle}>Directed pathfinding</div>
+          <div style={subsectionTitleStyle}>{i18next.t("graph.plugins.effects.directedPathfinding")}</div>
           <div style={signalRowStyle}>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={rowTitleStyle}>{directedPath.ready ? "Local directed path ready" : "Waiting for path context"}</div>
+              <div style={rowTitleStyle}>
+                {directedPath.ready
+                  ? i18next.t("graph.plugins.effects.localPathReady")
+                  : i18next.t("graph.plugins.effects.waitingPath")}
+              </div>
               <div style={rowMetaStyle}>{directedPath.reason}</div>
             </div>
             {directedPath.ready ? (
               <div style={signalBadgeStyle}>
-                {directedPath.length} hops{directedPath.verifiedAgainstActivePath ? " - match" : ""}
+                {directedPath.verifiedAgainstActivePath
+                  ? i18next.t("graph.plugins.effects.hopsMatch", { value: directedPath.length })
+                  : i18next.t("graph.plugins.effects.hops", { value: directedPath.length })}
               </div>
             ) : null}
           </div>
@@ -245,7 +264,7 @@ function renderRegionsAndSignals(
 
       {!semanticRegions.length && !communities.length && !centrality.length && fallbackLegendItems.length ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={subsectionTitleStyle}>Fallback semantic legend</div>
+          <div style={subsectionTitleStyle}>{i18next.t("graph.plugins.effects.fallbackLegend")}</div>
           {fallbackLegendItems.map((item) => (
             <div key={item.id} style={legendRowStyle}>
               <span
@@ -257,7 +276,7 @@ function renderRegionsAndSignals(
               />
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={rowTitleStyle}>{item.group}</div>
-                <div style={rowMetaStyle}>{item.count.toLocaleString()} nodes</div>
+                <div style={rowMetaStyle}>{i18next.t("graph.plugins.legend.nodes", { value: item.count.toLocaleString() })}</div>
               </div>
             </div>
           ))}
@@ -308,15 +327,15 @@ export const explorationEffectsPluginPhaseC: GraphPlugin = {
       preferredHeight: 360,
       content: (
         <div style={panelBodyStyle}>
-          <div style={panelEyebrowStyle}>Exploration effects</div>
+          <div style={panelEyebrowStyle}>{i18next.t("graph.plugins.effects.eyebrow")}</div>
 
           <div style={sectionStyle}>
-            <div style={sectionTitleStyle}>Scene effects</div>
+            <div style={sectionTitleStyle}>{i18next.t("graph.plugins.effects.sceneSection")}</div>
             {SCENE_EFFECT_ROWS.map((row) => (
               <EffectToggleRow
                 key={row.key}
-                label={row.label}
-                description={row.description}
+                label={i18next.t(row.label)}
+                description={i18next.t(row.description)}
                 checked={effectsState[row.key]}
                 availability={resolveAvailability(availability, row.key, effectsState[row.key])}
                 onToggle={() => context.dispatchAction({ type: "toggleEffect", effect: row.key })}
@@ -325,12 +344,12 @@ export const explorationEffectsPluginPhaseC: GraphPlugin = {
           </div>
 
           <div style={sectionStyle}>
-            <div style={sectionTitleStyle}>Graph intelligence</div>
+            <div style={sectionTitleStyle}>{i18next.t("graph.plugins.effects.intelligenceSection")}</div>
             {INTELLIGENCE_EFFECT_ROWS.map((row) => (
               <EffectToggleRow
                 key={row.key}
-                label={row.label}
-                description={row.description}
+                label={i18next.t(row.label)}
+                description={i18next.t(row.description)}
                 checked={effectsState[row.key]}
                 availability={resolveAvailability(availability, row.key, effectsState[row.key])}
                 onToggle={() => context.dispatchAction({ type: "toggleEffect", effect: row.key })}
@@ -340,24 +359,24 @@ export const explorationEffectsPluginPhaseC: GraphPlugin = {
 
           {showSignalsSection ? (
             <div style={sectionStyle}>
-              <div style={sectionTitleStyle}>Regions and signals</div>
+              <div style={sectionTitleStyle}>{i18next.t("graph.plugins.effects.regionsSection")}</div>
               {renderRegionsAndSignals(context, analyticsSnapshot)}
             </div>
           ) : null}
 
           {import.meta.env.DEV ? (
             <div style={sectionStyle}>
-              <div style={sectionTitleStyle}>Diagnostics</div>
+              <div style={sectionTitleStyle}>{i18next.t("graph.plugins.effects.diagnosticsSection")}</div>
               <EffectToggleRow
-                label="Dev Diagnostics"
-                description="Inspect plugin, interaction, and effect gating state."
+                label={i18next.t("graph.plugins.effects.devDiagnostics")}
+                description={i18next.t("graph.plugins.effects.devDiagnosticsDesc")}
                 checked={effectsState.diagnosticsEnabled}
                 availability={resolveAvailability(availability, "diagnosticsEnabled", effectsState.diagnosticsEnabled)}
                 onToggle={() => context.dispatchAction({ type: "toggleEffect", effect: "diagnosticsEnabled" })}
               />
               {effectsState.diagnosticsEnabled && diagnosticsSnapshot ? (
                 <details style={detailsStyle}>
-                  <summary style={summaryStyle}>Runtime snapshot</summary>
+                  <summary style={summaryStyle}>{i18next.t("graph.plugins.effects.runtimeSnapshot")}</summary>
                   <pre style={diagnosticsPreStyle}>
                     {JSON.stringify({ diagnostics: diagnosticsSnapshot, analytics: analyticsSnapshot }, null, 2)}
                   </pre>
