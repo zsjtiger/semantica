@@ -7,16 +7,27 @@ helper did not change any output.
 
 import logging
 import unittest
+from unittest.mock import MagicMock, patch
 
 from semantica.ingest._documents import rows_to_documents
 from semantica.ingest.databricks_ingestor import DatabricksData, DatabricksIngestor
 from semantica.ingest.redshift_ingestor import RedshiftData, RedshiftIngestor
-from semantica.ingest.snowflake_ingestor import SnowflakeData, SnowflakeIngestor
 
 ROWS = [
     {"id": 7, "name": "Ada", "notes": "first", "score": 3.5, "active": True, "extra": None},
     {"name": "Grace", "notes": None, "score": 9},
 ]
+
+
+def _snowflake_classes():
+    """Import the Snowflake ingestor with the driver stubbed, as its own tests do.
+
+    The import is scoped so the module is dropped from sys.modules afterwards;
+    a cached copy would leak into the Snowflake tests that run later.
+    """
+    with patch.dict("sys.modules", {"snowflake": MagicMock(), "snowflake.connector": MagicMock()}):
+        from semantica.ingest.snowflake_ingestor import SnowflakeData, SnowflakeIngestor
+    return SnowflakeData, SnowflakeIngestor
 
 
 class _Stub:
@@ -59,6 +70,7 @@ class TestRowsToDocuments(unittest.TestCase):
 class TestSharedConversionPerIngestor(unittest.TestCase):
 
     def test_snowflake(self):
+        SnowflakeData, SnowflakeIngestor = _snowflake_classes()
         data = SnowflakeData(
             data=ROWS, row_count=2, columns=["id", "name"],
             table_name="CUSTOMERS", database="DB", schema="PUBLIC",

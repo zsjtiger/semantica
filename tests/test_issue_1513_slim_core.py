@@ -28,7 +28,7 @@ def _load_toml(file_path: Path) -> dict:
 
 
 def test_core_dependencies_count():
-    """pyproject.toml must contain exactly 22 unique core dependencies."""
+    """pyproject.toml must contain exactly 14 unique core dependencies."""
     repo_root = Path(__file__).resolve().parents[1]
     data = _load_toml(repo_root / "pyproject.toml")
     deps = data["project"]["dependencies"]
@@ -36,32 +36,24 @@ def test_core_dependencies_count():
         d.split(";")[0].split(">=")[0].split("<")[0].split("==")[0].strip()
         for d in deps
     }
-    expected_22 = {
+    expected_14 = {
+        "chardet",
+        "click",
+        "networkx",
         "numpy",
         "pandas",
-        "scipy",
-        "scikit-learn",
-        "rdflib",
-        "networkx",
-        "requests",
-        "chardet",
-        "protobuf",
-        "grpcio",
         "pillow",
         "pydantic",
-        "click",
-        "rich",
-        "tqdm",
         "pyyaml",
+        "rdflib",
+        "requests",
+        "rich",
+        "scikit-learn",
+        "scipy",
         "toml",
-        "python-dotenv",
-        "loguru",
-        "structlog",
-        "httpx",
-        "pyarrow",
     }
-    assert normalized_names == expected_22
-    assert len(normalized_names) == 22
+    assert normalized_names == expected_14
+    assert len(normalized_names) == 14
 
 
 def test_optional_extras_defined():
