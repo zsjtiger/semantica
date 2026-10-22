@@ -43,6 +43,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from ..utils.exceptions import ProcessingError, ValidationError
+from ._documents import rows_to_documents
 from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 from .db_ingestor import _validate_sql_fragment
@@ -853,41 +854,14 @@ class SnowflakeIngestor:
             >>> data = ingestor.ingest_table("CUSTOMERS")
             >>> documents = ingestor.export_as_documents(data, text_fields=["name", "description"])
         """
-        documents = []
-
-        for idx, row in enumerate(data.data):
-            doc = {
-                "id": str(row.get(id_field, idx)),
-                "metadata": {
-                    "source": "snowflake",
-                    "table": data.table_name,
-                    "database": data.database,
-                    "schema": data.schema,
-                },
-            }
-
-            # Combine text fields if specified
-            if text_fields:
-                text_parts = []
-                for field in text_fields:
-                    if field in row and row[field] is not None:
-                        text_parts.append(str(row[field]))
-                doc["text"] = " ".join(text_parts)
-            else:
-                # Use all string fields
-                text_parts = []
-                for key, value in row.items():
-                    if isinstance(value, str):
-                        text_parts.append(value)
-                doc["text"] = " ".join(text_parts)
-
-            # Add all row data to metadata
-            doc["metadata"]["row_data"] = row
-
-            documents.append(doc)
-
+        documents = rows_to_documents(
+            data.data,
+            source="snowflake",
+            context={"table": data.table_name, "database": data.database, "schema": data.schema},
+            id_field=id_field,
+            text_fields=text_fields,
+        )
         self.logger.debug(f"Exported {len(documents)} documents")
-
         return documents
 
     def close(self):

@@ -44,6 +44,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from ..utils.exceptions import ProcessingError, ValidationError
+from ._documents import rows_to_documents
 from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 from .db_ingestor import _validate_sql_fragment
@@ -1005,38 +1006,14 @@ class DatabricksIngestor:
             >>> data = ingestor.ingest_table("customers")
             >>> documents = ingestor.export_as_documents(data, text_fields=["name", "notes"])
         """
-        documents = []
-
-        for idx, row in enumerate(data.data):
-            doc = {
-                "id": str(row.get(id_field, idx)),
-                "metadata": {
-                    "source": "databricks",
-                    "table": data.table_name,
-                    "catalog": data.catalog,
-                    "schema": data.schema,
-                },
-            }
-
-            if text_fields:
-                text_parts = []
-                for field_name in text_fields:
-                    if field_name in row and row[field_name] is not None:
-                        text_parts.append(str(row[field_name]))
-                doc["text"] = " ".join(text_parts)
-            else:
-                text_parts = []
-                for key, value in row.items():
-                    if isinstance(value, str):
-                        text_parts.append(value)
-                doc["text"] = " ".join(text_parts)
-
-            doc["metadata"]["row_data"] = row
-
-            documents.append(doc)
-
+        documents = rows_to_documents(
+            data.data,
+            source="databricks",
+            context={"table": data.table_name, "catalog": data.catalog, "schema": data.schema},
+            id_field=id_field,
+            text_fields=text_fields,
+        )
         self.logger.debug(f"Exported {len(documents)} documents")
-
         return documents
 
     def close(self):

@@ -103,6 +103,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 from ..utils.exceptions import ProcessingError, ValidationError
+from ._documents import rows_to_documents
 from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 
@@ -1406,37 +1407,13 @@ class RedshiftIngestor:
                     ...
                 ]
         """
-        documents: List[Dict[str, Any]] = []
-
-        for idx, row in enumerate(data.data):
-            doc: Dict[str, Any] = {
-                "id": str(row.get(id_field, idx)),
-                "metadata": {
-                    "source": "redshift",
-                    "table": data.table_name,
-                    "database": data.database,
-                    "schema": data.schema,
-                },
-            }
-
-            if text_fields:
-                text_parts = [
-                    str(row[f])
-                    for f in text_fields
-                    if f in row and row[f] is not None
-                ]
-            else:
-                text_parts = [
-                    value
-                    for value in row.values()
-                    if isinstance(value, str)
-                ]
-
-            doc["text"] = " ".join(text_parts)
-            doc["metadata"]["row_data"] = row
-
-            documents.append(doc)
-
+        documents = rows_to_documents(
+            data.data,
+            source="redshift",
+            context={"table": data.table_name, "database": data.database, "schema": data.schema},
+            id_field=id_field,
+            text_fields=text_fields,
+        )
         self.logger.debug(
             "export_as_documents: exported %d document(s)", len(documents)
         )
