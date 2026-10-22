@@ -32,7 +32,7 @@ def test_mintlify_export_uses_utf8_lossy_capture(monkeypatch):
     # noise filter cannot see stdout (because it was None / lost), the
     # Mintlify check reports a failure and sys.exit(1) is raised here.
     runpy.run_path(
-        str(Path(__file__).parents[1] / "docs_check.py"),
+        str(Path(__file__).parents[1] / "scripts" / "docs_check.py"),
         run_name="__main__",
     )
 

@@ -1,4 +1,5 @@
 """Targeted regression tests for all 13 Qodo review fixes on the Distance Intelligence PR."""
+import pathlib
 import re
 import inspect
 
@@ -165,14 +166,11 @@ def test_qual002_no_bare_except_pass_in_find_path():
 
 # ── TypeScript fixes — checked via raw file reads ─────────────────────────────
 
-TS_BEHAVIOR = (
-    r"c:\Users\Mohd Kaif\semantica\explorer\src\workspaces"
-    r"\GraphWorkspace\behaviors\pathHighlightBehavior.ts"
+_WORKSPACE_DIR = (
+    pathlib.Path(__file__).resolve().parent.parent / "explorer" / "src" / "workspaces" / "GraphWorkspace"
 )
-TS_WORKSPACE = (
-    r"c:\Users\Mohd Kaif\semantica\explorer\src\workspaces"
-    r"\GraphWorkspace\GraphWorkspace.tsx"
-)
+TS_BEHAVIOR = _WORKSPACE_DIR / "behaviors" / "pathHighlightBehavior.ts"
+TS_WORKSPACE = _WORKSPACE_DIR / "GraphWorkspace.tsx"
 
 
 def test_bug008_sweep_generation_counter():
@@ -204,9 +202,13 @@ def test_bug002_semantic_neighborhood_response_type_complete():
 def test_qual001_ego_heatmap_merged_into_single_effect():
     with open(TS_WORKSPACE, encoding="utf-8") as fh:
         src = fh.read()
-    assert "egoModeEnabled, egoMaxHops, heatmapEnabled, selectedNodeId" in src, (
-        "Combined dep array must be present"
-    )
+    # One dependency array holds ego and heatmap deps together. Other deps may
+    # have been added since, so check membership rather than an exact list.
+    combined = [
+        deps for deps in re.findall(r"\[([^\[\]]*)\]\)", src)
+        if {"egoModeEnabled", "heatmapEnabled", "selectedNodeId"} <= {d.strip() for d in deps.split(",")}
+    ]
+    assert combined, "Combined dep array must be present"
     # The old separate dep arrays must not exist
     assert "], [egoModeEnabled, egoMaxHops, selectedNodeId]" not in src
     assert "], [heatmapEnabled, selectedNodeId]" not in src

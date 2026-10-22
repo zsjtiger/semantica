@@ -8,7 +8,7 @@ on:
     branches: [main]
     paths-ignore:
       - 'docs/**'
-      - 'docs_check.py'
+      - 'scripts/docs_check.py'
       - '**/*.md'
   pull_request:
     branches: [main]
@@ -46,7 +46,7 @@ jobs:
           CHANGED=$(git diff --name-only "$MERGE_BASE" "$HEAD")
           echo "Changed files:"
           echo "$CHANGED"
-          NON_DOCS=$(echo "$CHANGED" | grep -Ev '^(docs/|docs_check\.py|.*\.md$)' || true)
+          NON_DOCS=$(echo "$CHANGED" | grep -Ev '^(docs/|scripts/docs_check\.py|.*\.md$)' || true)
           if [ -n "$NON_DOCS" ]; then
             echo "src=true" >> "$GITHUB_OUTPUT"
           else

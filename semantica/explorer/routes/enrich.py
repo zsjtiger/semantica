@@ -33,7 +33,7 @@ _FACT_RE = re.compile(r"^(?P<predicate>[A-Za-z_][\w:-]*)\((?P<args>.*)\)$")
 # single request from exhausting server memory (CWE-770).  Without a cap the
 # endpoint calls session.get_nodes(limit=999_999) and scores every node in
 # O(N^2), consuming ~1.6 GB RAM at the maximum limit (measured via
-# tracemalloc at 1.7 KB/node with 128-dim embeddings; see poc_runner.py).
+# tracemalloc at 1.7 KB/node with 128-dim embeddings; see scripts/poc_runner.py).
 # Mirrors the SPARQL DoS fix from PR #898 (50k cap + semaphore).
 #
 # NOTE: session.get_nodes()/get_edges() (paginate_nodes/paginate_edges)
