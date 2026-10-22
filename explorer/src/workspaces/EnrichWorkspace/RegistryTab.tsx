@@ -6,6 +6,7 @@
  */
 import { useState } from "react";
 import { ClipboardList, Filter, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useRegistry, clearRegistry, type RegistryEntryOp } from "../../store/registryStore";
 
 const OP_META: Record<
@@ -27,6 +28,19 @@ const ALL_OPS: (RegistryEntryOp | "all")[] = [
   "all", "import", "export", "merge", "add-node", "update-node", "add-edge", "infer", "delete", "vocab-import",
 ];
 
+const OP_FILTER_KEYS: Record<RegistryEntryOp | "all", string> = {
+  all: "dataTools.registry.filterAll",
+  import: "dataTools.registry.opFilter.import",
+  export: "dataTools.registry.opFilter.export",
+  merge: "dataTools.registry.opFilter.merge",
+  "add-node": "dataTools.registry.opFilter.addNode",
+  "update-node": "dataTools.registry.opFilter.updateNode",
+  "add-edge": "dataTools.registry.opFilter.addEdge",
+  infer: "dataTools.registry.opFilter.infer",
+  delete: "dataTools.registry.opFilter.delete",
+  "vocab-import": "dataTools.registry.opFilter.vocabImport",
+};
+
 function formatTimestamp(date: Date): string {
   return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
@@ -36,6 +50,7 @@ function formatDate(date: Date): string {
 }
 
 function EntryRow({ entry }: { entry: ReturnType<typeof useRegistry>[number] }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const meta = OP_META[entry.op];
   const hasDetail = entry.detail && Object.keys(entry.detail).length > 0;
@@ -76,7 +91,7 @@ function EntryRow({ entry }: { entry: ReturnType<typeof useRegistry>[number] }) 
         {hasDetail ? (
           <button
             onClick={() => setExpanded((v) => !v)}
-            title={expanded ? "Collapse details" : "Expand details"}
+            title={expanded ? t('dataTools.registry.collapseDetails') : t('dataTools.registry.expandDetails')}
             style={expandBtnStyle}
           >
             {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -95,6 +110,7 @@ function EntryRow({ entry }: { entry: ReturnType<typeof useRegistry>[number] }) 
 }
 
 export function RegistryTab() {
+  const { t } = useTranslation();
   const entries = useRegistry();
   const [activeFilter, setActiveFilter] = useState<RegistryEntryOp | "all">("all");
 
@@ -122,11 +138,11 @@ export function RegistryTab() {
           {entries.length > 0 ? (
             <button
               onClick={clearRegistry}
-              title="Clear all events"
+              title={t('dataTools.registry.clearAllEvents')}
               style={clearBtnStyle}
             >
               <Trash2 size={13} />
-              <span>Clear</span>
+              <span>{t('dataTools.registry.clear')}</span>
             </button>
           ) : null}
         </div>
@@ -161,7 +177,7 @@ export function RegistryTab() {
                   transition: "all 140ms ease",
                 }}
               >
-                {op === "all" ? "All" : (meta?.label ?? op)}
+                {t(OP_FILTER_KEYS[op as RegistryEntryOp | "all"])}
               </button>
             );
           })}

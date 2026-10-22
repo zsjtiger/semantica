@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import {
   Layers,
@@ -38,6 +39,7 @@ interface Proposal {
 }
 
 export function VersionsTab() {
+  const { t } = useTranslation();
   const [ontologyUri, setOntologyUri] = useState<string>("");
   const [versions, setVersions] = useState<VersionEntry[]>([]);
   const [proposals, setProposals] = useState<Proposal[]>([]);
@@ -377,7 +379,7 @@ export function VersionsTab() {
                   }}
                 >
                   <ArrowRight size={12} />
-                  Compare
+                  {t('ontologyTools.compare')}
                 </button>
               </div>
             ))
@@ -409,18 +411,18 @@ export function VersionsTab() {
                   <div style={{ display: "flex", gap: "6px" }}>
                     <button style={buttonStyle} onClick={() => approveProposal(proposal.proposal_id)}>
                       <CheckCircle size={12} />
-                      Approve
+                      {t('ontologyTools.approve')}
                     </button>
                     <button style={buttonStyle} onClick={() => rejectProposal(proposal.proposal_id)}>
                       <XCircle size={12} />
-                      Reject
+                      {t('ontologyTools.reject')}
                     </button>
                   </div>
                 )}
                 {proposal.state === "approved" && (
                   <button style={buttonStyle} onClick={() => publishProposal(proposal.proposal_id)}>
                     <Send size={12} />
-                    Publish
+                    {t('ontologyTools.publish')}
                   </button>
                 )}
                 <button
@@ -431,7 +433,7 @@ export function VersionsTab() {
                   }}
                 >
                   <FileText size={12} />
-                  Details
+                  {t('ontologyTools.details')}
                 </button>
               </div>
             ))
@@ -531,7 +533,7 @@ export function VersionsTab() {
             </div>
             <button style={buttonStyle} onClick={runVersionComparison} disabled={isLoading}>
               <Scale size={12} />
-              {isLoading ? "Comparing..." : "Compare"}
+              {isLoading ? t('ontologyTools.comparing') : t('ontologyTools.compare')}
             </button>
             {compareResult && (
               <pre style={{ marginTop: "16px", background: "rgba(3, 9, 18, 0.8)", padding: "12px", borderRadius: "6px", color: "#ebf3ff", fontSize: "12px", overflow: "auto" }}>

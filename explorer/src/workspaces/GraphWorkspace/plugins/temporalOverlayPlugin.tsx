@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import i18next from "i18next";
 
 import type { GraphPlugin } from "./types";
 
@@ -19,8 +20,8 @@ export const temporalOverlayPlugin: GraphPlugin = {
   toolbarItems: (context) => [
     {
       id: "temporal-toggle",
-      label: "Temporal",
-      title: "Toggle temporal context panel",
+      label: i18next.t('graph.plugin.temporal'),
+      title: i18next.t('graph.plugin.temporalTitle'),
       active: context.isPanelOpen(TEMPORAL_PANEL_ID),
       order: 40,
       onClick: () => context.dispatchAction({ type: "togglePanel", panelId: TEMPORAL_PANEL_ID }),
@@ -75,7 +76,7 @@ export const temporalOverlayPlugin: GraphPlugin = {
     const temporal = context.getTemporalState();
     return {
       id: TEMPORAL_PANEL_ID,
-      title: "Temporal Context",
+      title: i18next.t('graph.plugin.temporalContext'),
       placement: "bottom",
       order: 30,
       defaultOpen: false,

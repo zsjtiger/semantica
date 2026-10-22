@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useRef, useState } from "react";
 import {
   AlertCircle,
@@ -173,6 +174,7 @@ function PreviewRow({
 // ---------------------------------------------------------------------------
 
 function URLImportPanel({ onLoaded }: { onLoaded: () => void }) {
+  const { t } = useTranslation();
   const [url, setUrl] = useState("");
   const [format, setFormat] = useState("");
   const [customName, setCustomName] = useState("");
@@ -260,7 +262,7 @@ function URLImportPanel({ onLoaded }: { onLoaded: () => void }) {
             {previewState === "loading" ? (
               <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} />
             ) : (
-              "Fetch Preview"
+              t('ontologyEditor.loader.fetchPreview')
             )}
           </button>
         </div>
@@ -283,7 +285,7 @@ function URLImportPanel({ onLoaded }: { onLoaded: () => void }) {
           size={13}
           style={{ transform: showAdvanced ? "rotate(180deg)" : undefined, transition: "200ms" }}
         />
-        Advanced options
+        {t('ontologyEditor.loader.advancedOptions')}
       </button>
 
       {showAdvanced && (
@@ -336,12 +338,12 @@ function URLImportPanel({ onLoaded }: { onLoaded: () => void }) {
           {loadState === "loading" ? (
             <>
               <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} />
-              Loading…
+              {t('ontologyEditor.loader.loading')}
             </>
           ) : (
             <>
               <Globe size={13} />
-              Load Ontology
+              {t('ontologyEditor.loader.loadOntology')}
             </>
           )}
         </button>
@@ -355,6 +357,7 @@ function URLImportPanel({ onLoaded }: { onLoaded: () => void }) {
 // ---------------------------------------------------------------------------
 
 function FileUploadPanel({ onLoaded }: { onLoaded: () => void }) {
+  const { t } = useTranslation();
   const fileRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState("");
   const [content, setContent] = useState("");
@@ -484,12 +487,12 @@ function FileUploadPanel({ onLoaded }: { onLoaded: () => void }) {
           {loadState === "loading" ? (
             <>
               <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} />
-              Loading…
+              {t('ontologyEditor.loader.loading')}
             </>
           ) : (
             <>
               <FileUp size={13} />
-              Load File
+              {t('ontologyEditor.loader.loadFile')}
             </>
           )}
         </button>
@@ -503,6 +506,7 @@ function FileUploadPanel({ onLoaded }: { onLoaded: () => void }) {
 // ---------------------------------------------------------------------------
 
 function CreateNewPanel({ onLoaded }: { onLoaded: () => void }) {
+  const { t } = useTranslation();
   const [createMode, setCreateMode] = useState<CreateMode>("scratch");
   const [namespace, setNamespace] = useState("https://example.org/ontology/");
   const [name, setName] = useState("");
@@ -557,7 +561,7 @@ function CreateNewPanel({ onLoaded }: { onLoaded: () => void }) {
               ...(createMode === m ? modeTabActive : modeTabIdle),
             }}
           >
-            {m === "scratch" ? "From Scratch" : m === "data" ? "From Data" : "From Text"}
+            {m === "scratch" ? t('ontologyEditor.loader.fromScratch') : m === "data" ? t('ontologyEditor.loader.fromData') : t('ontologyEditor.loader.fromText')}
           </button>
         ))}
       </div>
@@ -623,12 +627,12 @@ function CreateNewPanel({ onLoaded }: { onLoaded: () => void }) {
           {createState === "loading" ? (
             <>
               <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} />
-              Creating…
+              {t('ontologyEditor.loader.creating')}
             </>
           ) : (
             <>
               <Plus size={13} />
-              Create Ontology
+              {t('ontologyEditor.loader.createOntology')}
             </>
           )}
         </button>
@@ -642,6 +646,7 @@ function CreateNewPanel({ onLoaded }: { onLoaded: () => void }) {
 // ---------------------------------------------------------------------------
 
 export function OntologyLoader({ onLoaded, onClose }: LoaderProps) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<LoaderMode>("url");
 
   return (
@@ -670,11 +675,11 @@ export function OntologyLoader({ onLoaded, onClose }: LoaderProps) {
               }}
             >
               {m === "url" ? (
-                <><Globe size={12} /> URL Import</>
+                <><Globe size={12} /> {t('ontologyEditor.loader.urlImport')}</>
               ) : m === "file" ? (
-                <><FileUp size={12} /> File Upload</>
+                <><FileUp size={12} /> {t('ontologyEditor.loader.fileUpload')}</>
               ) : (
-                <><Plus size={12} /> Create New</>
+                <><Plus size={12} /> {t('ontologyEditor.loader.createNew')}</>
               )}
             </button>
           ))}

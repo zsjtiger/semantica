@@ -27,6 +27,7 @@ const { act, cleanup, fireEvent, render, waitFor } = await import(
 const { MarkdownContentViewer } = await import(
   "../src/workspaces/GraphWorkspace/MarkdownContentViewer.tsx"
 );
+await import("../src/i18n/index.ts");
 const { MemoryWorkspace } = await import(
   "../src/workspaces/MemoryWorkspace.tsx"
 );

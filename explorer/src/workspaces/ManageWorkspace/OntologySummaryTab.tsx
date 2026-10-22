@@ -5,6 +5,7 @@
  * top-level concepts. Clicking a concept deep-links to the Vocabulary Browser.
  */
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { BookOpen, ChevronRight, ChevronDown, ExternalLink } from "lucide-react";
 import { useVocabularies, useConceptHierarchy } from "../VocabularyWorkspace/queries";
 import type { ConceptNode, VocabularyScheme } from "../VocabularyWorkspace/types";
@@ -129,6 +130,7 @@ export function OntologySummaryTab({
 }: {
   onOpenVocabularyBrowser?: () => void;
 }) {
+  const { t } = useTranslation();
   const { data: schemes = [], isLoading } = useVocabularies();
   const [selectedConcept, setSelectedConcept] = useState<ConceptNode | null>(null);
 
@@ -150,7 +152,7 @@ export function OntologySummaryTab({
         {onOpenVocabularyBrowser ? (
           <button onClick={onOpenVocabularyBrowser} style={openBrowserBtnStyle}>
             <ExternalLink size={12} />
-            <span>Open Full Browser</span>
+            <span>{t('misc.ontology.openFullBrowser')}</span>
           </button>
         ) : null}
       </div>

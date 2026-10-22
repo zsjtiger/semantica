@@ -7,6 +7,7 @@ import { renderToString } from "react-dom/server";
 
 import { MarkdownContentViewer } from "../src/workspaces/GraphWorkspace/MarkdownContentViewer.tsx";
 import { isSafeUrl } from "../src/workspaces/GraphWorkspace/markdownUrlSafety.ts";
+await import("../src/i18n/index.ts");
 
 test("isSafeUrl permits safe http, https, and mailto URLs and relative paths", () => {
   assert.equal(isSafeUrl("https://example.com"), true);

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 import { Brain, RefreshCw } from "lucide-react";
 
 import { MarkdownContentViewer } from "./GraphWorkspace/MarkdownContentViewer";
@@ -67,6 +68,7 @@ async function fetchLoadedMemoryPages(endOffset: number): Promise<{
 }
 
 export function MemoryWorkspace({ onDirtyChange }: MemoryWorkspaceProps = {}) {
+  const { t } = useTranslation();
   const [items, setItems] = useState<MemorySummary[]>([]);
   const [total, setTotal] = useState(0);
   const [nextOffset, setNextOffset] = useState(0);
@@ -229,10 +231,10 @@ export function MemoryWorkspace({ onDirtyChange }: MemoryWorkspaceProps = {}) {
           </div>
           <button
             type="button"
-            aria-label="Refresh memories"
+            aria-label={t('misc.memory.refreshMemories')}
             onClick={() => setReloadToken((value) => value + 1)}
             disabled={loading || loadingMore || dirty}
-            title={dirty ? "Apply or cancel the current draft before refreshing" : "Refresh memories"}
+            title={dirty ? t('misc.memory.refreshBlockedByDraft') : t('misc.memory.refreshMemories')}
             style={{ ...iconButtonStyle, opacity: loading || loadingMore || dirty ? 0.55 : 1 }}
           >
             <RefreshCw size={14} aria-hidden="true" />
@@ -258,12 +260,12 @@ export function MemoryWorkspace({ onDirtyChange }: MemoryWorkspaceProps = {}) {
           {nextOffset < total ? (
             <button
               type="button"
-              aria-label="Load more memories"
+              aria-label={t('misc.memory.loadMoreLabel')}
               onClick={() => void loadMoreMemories()}
               disabled={loading || loadingMore}
               style={{ ...retryButtonStyle, opacity: loading || loadingMore ? 0.55 : 1 }}
             >
-              {loadingMore ? "Loading…" : "Load more"}
+              {loadingMore ? t('misc.memory.loading') : t('misc.memory.loadMore')}
             </button>
           ) : null}
           {!loading && items.length === 0 ? (
@@ -271,7 +273,7 @@ export function MemoryWorkspace({ onDirtyChange }: MemoryWorkspaceProps = {}) {
               <Brain size={22} aria-hidden="true" />
               <span>No AgentMemory items are available.</span>
               <button type="button" onClick={() => setReloadToken((value) => value + 1)} style={retryButtonStyle}>
-                Refresh
+                {t('misc.memory.refreshShort')}
               </button>
             </div>
           ) : null}

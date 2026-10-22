@@ -5,6 +5,7 @@
  * type distributions, and top connected nodes.
  */
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Network, RefreshCw, Loader2 } from "lucide-react";
 
 interface KGStats {
@@ -66,6 +67,7 @@ function buildTypeMap(nodes: NodeItem[], key: keyof NodeItem): Record<string, nu
 }
 
 export function KGOverviewTab() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<KGStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -216,7 +218,7 @@ export function KGOverviewTab() {
         </div>
         <button className="ws-btn ws-btn--ghost" onClick={() => void fetchOverview()} disabled={loading} style={{ padding: "6px 12px" }}>
           {loading ? <Loader2 size={13} className="ws-spin" /> : <RefreshCw size={13} />}
-          Refresh
+          {t('misc.kg.refresh')}
         </button>
       </div>
 

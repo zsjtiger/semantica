@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertCircle } from 'lucide-react';
+import i18next from 'i18next';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -89,7 +90,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               }}
               onClick={this.resetErrorBoundary}
             >
-              Try Again
+              {i18next.t('misc.errorBoundary.tryAgain')}
             </button>
           ) : (
             <button 
@@ -100,7 +101,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               }}
               onClick={() => window.location.reload()}
             >
-              Reload Application
+              {i18next.t('misc.errorBoundary.reloadApp')}
             </button>
           )}
         </div>

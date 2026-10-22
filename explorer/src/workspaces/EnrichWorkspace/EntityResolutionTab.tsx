@@ -6,6 +6,7 @@
  */
 import { useState, useCallback } from "react";
 import { ScanSearch, GitMerge, X, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { logEvent, useRegistry } from "../../store/registryStore";
 
 interface DedupPair {
@@ -80,6 +81,7 @@ function PairRow({
   onMerge: (primaryId: string, duplicateId: string) => Promise<void>;
   onDismiss: () => void;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [merging, setMerging] = useState(false);
 
@@ -122,9 +124,9 @@ function PairRow({
             }}
           >
             {merging ? <Loader2 size={12} className="animate-spin" /> : <GitMerge size={12} />}
-            <span>Merge</span>
+            <span>{t('dataTools.entityResolution.merge')}</span>
           </button>
-          <button onClick={onDismiss} style={iconBtnStyle} title="Dismiss">
+          <button onClick={onDismiss} style={iconBtnStyle} title={t('dataTools.entityResolution.dismiss')}>
             <X size={13} />
           </button>
         </div>
@@ -153,6 +155,7 @@ function PairRow({
 }
 
 export function EntityResolutionTab() {
+  const { t } = useTranslation();
   const [threshold, setThreshold] = useState(0.82);
   const [scanning, setScanning] = useState(false);
   const [pairs, setPairs] = useState<DedupPair[]>([]);
@@ -260,7 +263,7 @@ export function EntityResolutionTab() {
             style={scanBtnStyle}
           >
             {scanning ? <Loader2 size={14} className="animate-spin" /> : <ScanSearch size={14} />}
-            <span>{scanning ? "Scanning…" : "Run Dedup Scan"}</span>
+            <span>{scanning ? t('dataTools.entityResolution.scanning') : t('dataTools.entityResolution.runDedupScan')}</span>
           </button>
         </div>
         {scanError ? (
@@ -277,7 +280,7 @@ export function EntityResolutionTab() {
                 <div style={{ color: "#8b949e", fontSize: 12, fontWeight: 600 }}>
                   {pairs.length} flagged pair{pairs.length !== 1 ? "s" : ""}
                 </div>
-                <button onClick={() => setPairs([])} style={clearAllBtnStyle}>Clear all</button>
+                <button onClick={() => setPairs([])} style={clearAllBtnStyle}>{t('dataTools.entityResolution.clearAll')}</button>
               </div>
               {pairs.map((pair, index) => (
                 <PairRow

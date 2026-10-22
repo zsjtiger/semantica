@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { BrainCircuit, Play, RotateCcw, CheckCircle2, AlertCircle, Zap, GitBranch, Info } from "lucide-react";
 
@@ -10,23 +11,24 @@ const SAMPLE_RULE = `IF inhibits(Metformin, mTOR) AND causes(mTOR, Neurodegenera
 
 const TEMPLATES = [
   {
-    label: "Drug Candidate",
+    labelKey: "misc.reasoning.templates.drugCandidate",
     facts: `inhibits(Metformin, mTOR)\ncauses(mTOR, Neurodegeneration)\ntreats(Metformin, Diabetes)`,
     rule: `IF inhibits(Metformin, mTOR) AND causes(mTOR, Neurodegeneration) THEN candidate(Metformin, Alzheimer's)`,
   },
   {
-    label: "Gene → Disease",
+    labelKey: "misc.reasoning.templates.geneDisease",
     facts: `expressed_in(BRCA1, Breast)\nmutated_in(BRCA1, Cancer)\nassociated_with(Breast, Cancer)`,
     rule: `IF mutated_in(X, Cancer) AND expressed_in(X, Y) THEN risk_gene(X, Y)`,
   },
   {
-    label: "Pathway Activation",
+    labelKey: "misc.reasoning.templates.pathwayActivation",
     facts: `activates(EGF, EGFR)\ndownstream_of(MAPK, EGFR)\ndownstream_of(AKT, EGFR)`,
     rule: `IF activates(X, EGFR) AND downstream_of(Y, EGFR) THEN activates(X, Y)`,
   },
 ];
 
 export function ReasoningWorkspace() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [facts, setFacts] = useState(SAMPLE_FACTS);
   const [rules, setRules] = useState(SAMPLE_RULE);
@@ -102,9 +104,9 @@ export function ReasoningWorkspace() {
         <div style={{ padding: "12px 16px 10px", borderBottom: "1px solid var(--ws-border)", flexShrink: 0 }}>
           <div className="ws-eyebrow" style={{ marginBottom: 8 }}>Quick Templates</div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {TEMPLATES.map((t) => (
-              <button key={t.label} className="ws-btn ws-btn--ghost" style={{ padding: "5px 10px", fontSize: 11 }} onClick={() => loadTemplate(t)}>
-                {t.label}
+            {TEMPLATES.map((tpl) => (
+              <button key={tpl.labelKey} className="ws-btn ws-btn--ghost" style={{ padding: "5px 10px", fontSize: 11 }} onClick={() => loadTemplate(tpl)}>
+                {t(tpl.labelKey)}
               </button>
             ))}
           </div>
@@ -163,10 +165,10 @@ export function ReasoningWorkspace() {
               style={{ flex: 1, justifyContent: "center" }}
             >
               {isRunning
-                ? <><span className="ws-spin" style={{ display: "inline-block" }}><Zap size={15} /></span>Running…</>
-                : <><Play size={14} />Run Reasoning</>}
+                ? <><span className="ws-spin" style={{ display: "inline-block" }}><Zap size={15} /></span>{t('misc.reasoning.running')}</>
+                : <><Play size={14} />{t('misc.reasoning.run')}</>}
             </button>
-            <button className="ws-btn ws-btn--ghost" onClick={handleReset} title="Reset to defaults">
+            <button className="ws-btn ws-btn--ghost" onClick={handleReset} title={t('misc.reasoning.resetToDefaults')}>
               <RotateCcw size={14} />
             </button>
           </div>

@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import i18next from "i18next";
 
 import type { GraphPlugin } from "./types";
 
@@ -29,8 +30,8 @@ export const neighborhoodPanelPlugin: GraphPlugin = {
   toolbarItems: (context) => [
     {
       id: "neighborhood-toggle",
-      label: "Neighbors",
-      title: "Toggle neighborhood panel",
+      label: i18next.t('graph.plugin.neighbors'),
+      title: i18next.t('graph.plugin.neighborsTitle'),
       active: context.isPanelOpen(NEIGHBORHOOD_PANEL_ID),
       order: 30,
       onClick: () => context.dispatchAction({ type: "togglePanel", panelId: NEIGHBORHOOD_PANEL_ID }),
@@ -46,7 +47,7 @@ export const neighborhoodPanelPlugin: GraphPlugin = {
     if (!selected) {
       return {
         id: NEIGHBORHOOD_PANEL_ID,
-        title: "Neighborhood",
+        title: i18next.t('graph.plugin.neighborhood'),
         placement: "bottom",
         order: 20,
         defaultOpen: false,
@@ -91,7 +92,7 @@ export const neighborhoodPanelPlugin: GraphPlugin = {
 
     return {
       id: NEIGHBORHOOD_PANEL_ID,
-      title: "Neighborhood",
+      title: i18next.t('graph.plugin.neighborhood'),
       placement: "bottom",
       order: 20,
       defaultOpen: false,
@@ -110,7 +111,7 @@ export const neighborhoodPanelPlugin: GraphPlugin = {
               disabled={!selected.canCollapseNeighborhood || selected.isNeighborhoodCollapsed}
               style={controlButtonStyle}
             >
-              Collapse Neighborhood
+              {i18next.t('graph.neighborhood.collapse')}
             </button>
             <button
               type="button"
@@ -118,7 +119,7 @@ export const neighborhoodPanelPlugin: GraphPlugin = {
               disabled={!selected.isNeighborhoodCollapsed}
               style={controlButtonStyle}
             >
-              Expand Neighborhood
+              {i18next.t('graph.neighborhood.expand')}
             </button>
           </div>
           {hiddenNeighborCount > 0 ? (

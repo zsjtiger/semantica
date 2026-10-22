@@ -3,6 +3,11 @@ import { initReactI18next } from 'react-i18next';
 
 import { en } from './en';
 import { zhCN } from './zh-CN';
+import { ontologyEditorEn, ontologyEditorZh } from './areas/ontologyEditor';
+import { ontologyToolsEn, ontologyToolsZh } from './areas/ontologyTools';
+import { graphEn, graphZh } from './areas/graph';
+import { dataToolsEn, dataToolsZh } from './areas/dataTools';
+import { miscEn, miscZh } from './areas/misc';
 
 export const LANGUAGE_STORAGE_KEY = 'semantica.explorer.language';
 
@@ -35,8 +40,26 @@ export function setLanguage(language: SupportedLanguage) {
 
 void i18n.use(initReactI18next).init({
   resources: {
-    en: { translation: en },
-    'zh-CN': { translation: zhCN },
+    en: {
+      translation: {
+        ...en,
+        ...ontologyEditorEn,
+        ...ontologyToolsEn,
+        ...graphEn,
+        ...dataToolsEn,
+        ...miscEn,
+      },
+    },
+    'zh-CN': {
+      translation: {
+        ...zhCN,
+        ...ontologyEditorZh,
+        ...ontologyToolsZh,
+        ...graphZh,
+        ...dataToolsZh,
+        ...miscZh,
+      },
+    },
   },
   lng: detectLanguage(),
   fallbackLng: 'en',

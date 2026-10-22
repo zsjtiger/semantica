@@ -1,4 +1,5 @@
-﻿import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+﻿import { useTranslation } from "react-i18next";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { DataSet } from "vis-data";
 import { Timeline } from "vis-timeline";
 import type { TimelineOptions } from "vis-timeline";
@@ -58,6 +59,7 @@ function formatPlayheadLabel(value: Date): string {
 }
 
 export function TimelinePanel({ onTimeChange, minDate, maxDate }: TimelinePanelProps) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<Timeline | null>(null);
   const playheadRef = useRef<Date>(DEFAULT_MIN_DATE);
@@ -167,7 +169,7 @@ export function TimelinePanel({ onTimeChange, minDate, maxDate }: TimelinePanelP
         <button
           id="temporal-play-btn"
           onClick={togglePlay}
-          title={isPlaying ? "Pause Evolution" : "Play Evolution"}
+          title={isPlaying ? t('graph.timeline.pause') : t('graph.timeline.play')}
           style={{ width: 34, height: 34, borderRadius: "50%", border: `1.5px solid ${isPlaying ? GRAPH_THEME.ui.control.activeBorder : GRAPH_THEME.ui.control.defaultBorder}`, background: isPlaying ? GRAPH_THEME.ui.timeline.playheadSoft : GRAPH_THEME.ui.control.defaultBg, color: GRAPH_THEME.ui.timeline.playhead, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s", boxShadow: isPlaying ? "0 0 10px rgba(98, 226, 205, 0.32)" : "none" }}
         >
           {isPlaying ? (

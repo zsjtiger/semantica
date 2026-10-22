@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { GitMerge, ArrowRight, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { logEvent } from "../../store/registryStore";
 
 interface FieldRow { label: string; primary: string; duplicate: string; differs: boolean }
@@ -12,6 +13,7 @@ const MOCK_FIELDS: FieldRow[] = [
 ];
 
 export function DiffMergeWorkspace() {
+  const { t } = useTranslation();
   const [primaryId, setPrimaryId]   = useState("n-primary-1");
   const [duplicateId, setDuplicateId] = useState("n-dup-2");
   const [status, setStatus]   = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -112,7 +114,7 @@ export function DiffMergeWorkspace() {
             disabled={status === "loading" || !primaryId || !duplicateId}
             style={{ marginLeft: "auto" }}
           >
-            {status === "loading" ? <><Loader2 size={14} className="ws-spin" />Merging…</> : <><GitMerge size={14} />Confirm Merge</>}
+            {status === "loading" ? <><Loader2 size={14} className="ws-spin" />{t('dataTools.diffMerge.merging')}</> : <><GitMerge size={14} />{t('dataTools.diffMerge.confirmMerge')}</>}
           </button>
         </div>
       </div>

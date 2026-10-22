@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { GitMerge, Loader2, Sparkles, Trash2 } from "lucide-react";
@@ -31,6 +32,7 @@ const RELATION_COLORS: Record<AlignmentRelation, string> = {
 };
 
 export function AlignmentsTab() {
+  const { t } = useTranslation();
   const [registry, setRegistry] = useState<OntologyEntry[]>([]);
   const [alignments, setAlignments] = useState<OntologyAlignment[]>([]);
   const [suggestions, setSuggestions] = useState<AlignmentSuggestion[]>([]);
@@ -316,7 +318,7 @@ export function AlignmentsTab() {
           </div>
           <button style={primaryButtonStyle} disabled={busy} onClick={handleSave}>
             {busy ? <Loader2 size={14} className="ws-spin" /> : <GitMerge size={14} />}
-            Save alignment
+            {t('ontologyTools.alignments.save')}
           </button>
         </section>
 
@@ -350,7 +352,7 @@ export function AlignmentsTab() {
           />
           <button style={secondaryButtonStyle} disabled={busy} onClick={handleSuggest}>
             <Sparkles size={14} />
-            Suggest alignments
+            {t('ontologyTools.alignments.suggest')}
           </button>
           <div style={suggestionListStyle}>
             {suggestions.map((item) => (
@@ -383,7 +385,7 @@ export function AlignmentsTab() {
                 <div style={monoStyle}>{item.target_uri}</div>
               </div>
               <div style={confidenceStyle}>{Math.round(item.confidence * 100)}%</div>
-              <button style={iconButtonStyle} disabled={busy} onClick={() => handleRemove(item.id)} title="Remove alignment">
+              <button style={iconButtonStyle} disabled={busy} onClick={() => handleRemove(item.id)} title={t('ontologyTools.alignments.remove')}>
                 <Trash2 size={14} />
               </button>
             </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import {
   AlertCircle,
@@ -175,6 +176,7 @@ function DetailPanel({
   onClose: () => void;
 }) {
   const [detail, setDetail] = useState<EntityDetail | null>(null);
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -264,10 +266,10 @@ function DetailPanel({
             </DetailSection>
           )}
 
-          <CollapsibleList label="Superclasses / Broader" items={detail.superclasses} />
-          <CollapsibleList label="Subclasses / Narrower" items={detail.subclasses} />
-          <CollapsibleList label="Domain" items={detail.domain} />
-          <CollapsibleList label="Range" items={detail.range} />
+          <CollapsibleList label={t('ontologyEditor.search.superclasses')} items={detail.superclasses} />
+          <CollapsibleList label={t('ontologyEditor.search.subclasses')} items={detail.subclasses} />
+          <CollapsibleList label={t('ontologyEditor.search.domain')} items={detail.domain} />
+          <CollapsibleList label={t('ontologyEditor.search.range')} items={detail.range} />
 
           {detail.source_ontology && (
             <DetailSection label="Source Ontology">
@@ -308,6 +310,7 @@ function DetailSection({ label, children }: { label: string; children: React.Rea
 // ---------------------------------------------------------------------------
 
 export function OntologySearch() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [entityType, setEntityType] = useState<string>("all");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -362,16 +365,16 @@ export function OntologySearch() {
         </div>
 
         <div style={typeFilterStyle}>
-          {(["all", "class", "property", "individual", "concept", "scheme"] as const).map((t) => (
+          {(["all", "class", "property", "individual", "concept", "scheme"] as const).map((typeOption) => (
             <button
-              key={t}
-              onClick={() => setEntityType(t)}
+              key={typeOption}
+              onClick={() => setEntityType(typeOption)}
               style={{
                 ...typeFilterBtnBase,
-                ...(entityType === t ? typeFilterBtnActive : typeFilterBtnIdle),
+                ...(entityType === typeOption ? typeFilterBtnActive : typeFilterBtnIdle),
               }}
             >
-              {t === "all" ? "All" : ENTITY_TYPE_LABELS[t] || t}
+              {t(`ontologyEditor.search.typeFilter.${typeOption}`)}
             </button>
           ))}
         </div>

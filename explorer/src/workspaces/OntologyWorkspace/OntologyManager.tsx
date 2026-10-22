@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import {
   AlertCircle,
@@ -116,6 +117,7 @@ function RegistryRow({
   onRefresh: (uri: string) => void;
   onRemove: (uri: string) => void;
 }) {
+  const { t } = useTranslation();
   const [busyToggle, setBusyToggle] = useState(false);
   const [busyRefresh, setBusyRefresh] = useState(false);
   const [busyRemove, setBusyRemove] = useState(false);
@@ -188,7 +190,7 @@ function RegistryRow({
 
       <div style={rowActionsStyle}>
         <button
-          title={entry.enabled ? "Disable" : "Enable"}
+          title={entry.enabled ? t('ontologyEditor.registry.disable') : t('ontologyEditor.registry.enable')}
           onClick={handleToggle}
           disabled={busyToggle}
           style={actionBtnStyle}
@@ -204,7 +206,7 @@ function RegistryRow({
 
         {entry.source_url && (
           <button
-            title="Re-fetch from source URL"
+            title={t('ontologyEditor.registry.refetchSource')}
             onClick={handleRefresh}
             disabled={busyRefresh}
             style={actionBtnStyle}
@@ -218,7 +220,7 @@ function RegistryRow({
         )}
 
         <button
-          title="Remove from registry"
+          title={t('ontologyEditor.registry.removeFromRegistry')}
           onClick={handleRemove}
           disabled={busyRemove}
           style={{ ...actionBtnStyle, color: "#ff9daf" }}
@@ -239,6 +241,7 @@ function RegistryRow({
 // ---------------------------------------------------------------------------
 
 export function OntologyManager() {
+  const { t } = useTranslation();
   const [entries, setEntries] = useState<OntologyEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQ, setSearchQ] = useState("");
@@ -398,7 +401,7 @@ export function OntologyManager() {
                   ...(statusFilter === f ? filterPillActive : filterPillIdle),
                 }}
               >
-                {f === "all" ? "All" : f.toUpperCase()}
+                {t(`ontologyEditor.registry.filter.${f}`)}
               </button>
             ))}
           </div>
@@ -412,14 +415,14 @@ export function OntologyManager() {
               }}
             >
               <Search size={13} />
-              Entity Search
+              {t('ontologyEditor.registry.entitySearch')}
             </button>
             <button
               onClick={() => setShowLoader(true)}
               style={primaryToolBtnStyle}
             >
               <Plus size={13} />
-              Load Ontology
+              {t('ontologyEditor.registry.loadOntology')}
             </button>
           </div>
         </div>
@@ -471,7 +474,7 @@ export function OntologyManager() {
                 {!searchQ && (
                   <button onClick={() => setShowLoader(true)} style={{ ...primaryToolBtnStyle, marginTop: 18 }}>
                     <Plus size={13} />
-                    Load Ontology
+                    {t('ontologyEditor.registry.loadOntology')}
                   </button>
                 )}
               </div>
@@ -519,7 +522,7 @@ export function OntologyManager() {
                       style={browseBtnStyle}
                     >
                       <BookOpen size={12} />
-                      Browse SKOS
+                      {t('ontologyEditor.registry.browseSkos')}
                     </button>
                   )}
                   <button onClick={() => setSelectedEntry(null)} style={closePanelBtnStyle}>×</button>
@@ -587,7 +590,7 @@ export function OntologyManager() {
                 <div style={{ display: "flex", gap: 6 }}>
                   <button onClick={() => setRightPanel("none")} style={browseBtnStyle}>
                     <Layers size={12} />
-                    Registry Detail
+                    {t('ontologyEditor.registry.registryDetail')}
                   </button>
                   <button onClick={() => setRightPanel("none")} style={closePanelBtnStyle}>×</button>
                 </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import {
   AlertCircle,
@@ -338,6 +339,7 @@ function SchemePanel({
   onSelectConcept: (uri: string) => void;
   searchQuery: string;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
   const [hierarchy, setHierarchy] = useState<ConceptNode[]>([]);
   const [loading, setLoading] = useState(expanded);
@@ -410,7 +412,7 @@ function SchemePanel({
           <span style={{ color: "#e6edf3", fontSize: 14, fontWeight: 700 }}>{scheme.title}</span>
         </div>
         <span style={{ color: "#6a7f97", fontSize: 11 }}>
-          {loading ? "…" : `${totalConcepts} concept${totalConcepts !== 1 ? "s" : ""}`}
+          {loading ? "…" : t('ontologyTools.skos.conceptCount', { count: totalConcepts })}
         </span>
       </button>
 

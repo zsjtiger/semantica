@@ -1,15 +1,17 @@
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import { Play, Copy, Download, Table2, AlertCircle, FileCode2 } from "lucide-react";
 
-const TEMPLATES: { label: string; query: string }[] = [
-  { label: "All triples", query: "SELECT ?s ?p ?o\nWHERE {\n  ?s ?p ?o\n}\nLIMIT 20" },
-  { label: "Node types", query: "SELECT ?type (COUNT(?s) AS ?count)\nWHERE {\n  ?s a ?type\n}\nGROUP BY ?type\nORDER BY DESC(?count)" },
-  { label: "Outgoing edges", query: "SELECT ?predicate ?object\nWHERE {\n  <urn:node:example> ?predicate ?object\n}\nLIMIT 50" },
-  { label: "Path between", query: "SELECT ?mid ?p1 ?p2\nWHERE {\n  <urn:node:a> ?p1 ?mid .\n  ?mid ?p2 <urn:node:b>\n}\nLIMIT 20" },
+const TEMPLATES: { labelKey: string; query: string }[] = [
+  { labelKey: "misc.sparql.templates.allTriples", query: "SELECT ?s ?p ?o\nWHERE {\n  ?s ?p ?o\n}\nLIMIT 20" },
+  { labelKey: "misc.sparql.templates.nodeTypes", query: "SELECT ?type (COUNT(?s) AS ?count)\nWHERE {\n  ?s a ?type\n}\nGROUP BY ?type\nORDER BY DESC(?count)" },
+  { labelKey: "misc.sparql.templates.outgoingEdges", query: "SELECT ?predicate ?object\nWHERE {\n  <urn:node:example> ?predicate ?object\n}\nLIMIT 50" },
+  { labelKey: "misc.sparql.templates.pathBetween", query: "SELECT ?mid ?p1 ?p2\nWHERE {\n  <urn:node:a> ?p1 ?mid .\n  ?mid ?p2 <urn:node:b>\n}\nLIMIT 20" },
 ];
 
 export function SparqlWorkspace() {
+  const { t } = useTranslation();
   const monaco = useMonaco();
   const editorRef = useRef<unknown>(null);
   const [query, setQuery] = useState(TEMPLATES[0].query);
@@ -134,19 +136,19 @@ export function SparqlWorkspace() {
         <div style={{ padding: "10px 16px", borderBottom: "1px solid var(--ws-border)", display: "flex", alignItems: "center", gap: 8, flexShrink: 0, background: "rgba(0,0,0,0.18)" }}>
           <div style={{ display: "flex", gap: 6, flex: 1, flexWrap: "wrap" }}>
             <span className="ws-eyebrow" style={{ alignSelf: "center", marginRight: 4 }}>Templates:</span>
-            {TEMPLATES.map((t) => (
+            {TEMPLATES.map((tpl) => (
               <button
-                key={t.label}
+                key={tpl.labelKey}
                 className="ws-btn ws-btn--ghost"
                 style={{ padding: "4px 10px", fontSize: 11 }}
-                onClick={() => { setQuery(t.query); setResult(null); }}
+                onClick={() => { setQuery(tpl.query); setResult(null); }}
               >
-                {t.label}
+                {t(tpl.labelKey)}
               </button>
             ))}
           </div>
-          <button className="ws-btn ws-btn--ghost" style={{ padding: "6px 10px" }} onClick={handleCopyQuery} title="Copy query">
-            <Copy size={13} />{copyState ? "Copied!" : "Copy"}
+          <button className="ws-btn ws-btn--ghost" style={{ padding: "6px 10px" }} onClick={handleCopyQuery} title={t('misc.sparql.copyQuery')}>
+            <Copy size={13} />{copyState ? t('misc.sparql.copied') : t('misc.sparql.copy')}
           </button>
           <button
             className="ws-btn ws-btn--primary"
@@ -155,8 +157,8 @@ export function SparqlWorkspace() {
             style={{ minWidth: 110, justifyContent: "center" }}
           >
             {isLoading
-              ? <><span className="ws-spin" style={{ display: "inline-block" }}><Play size={13} /></span>Running…</>
-              : <><Play size={13} />Run Query</>}
+              ? <><span className="ws-spin" style={{ display: "inline-block" }}><Play size={13} /></span>{t('misc.sparql.running')}</>
+              : <><Play size={13} />{t('misc.sparql.run')}</>}
           </button>
         </div>
 
@@ -198,7 +200,7 @@ export function SparqlWorkspace() {
               </div>
               {result?.rows && result.rows.length > 0 && (
                 <button className="ws-btn ws-btn--ghost" style={{ marginLeft: "auto", padding: "4px 10px", fontSize: 11 }} onClick={handleExportCSV}>
-                  <Download size={12} />Export CSV
+                  <Download size={12} />{t('misc.sparql.exportCsv')}
                 </button>
               )}
             </div>

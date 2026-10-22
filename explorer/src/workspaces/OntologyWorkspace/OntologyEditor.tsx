@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
@@ -223,6 +224,7 @@ function buildEditorElements(apiNodes: OntologyGraphNode[], apiEdges: OntologyGr
 }
 
 export function OntologyEditor() {
+  const { t } = useTranslation();
   const [nodes, setNodes, onNodesChange] = useNodesState<OntologyNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<OntologyEdge>([]);
   const [selectedElement, setSelectedElement] = useState<OntologyNode | OntologyEdge | null>(null);
@@ -579,32 +581,32 @@ export function OntologyEditor() {
         </select>
         <button style={toolbarButtonStyle} onClick={addClass}>
           <Plus size={14} />
-          Add Class
+          {t('ontologyEditor.editor.addClass')}
         </button>
         <button style={toolbarButtonStyle} onClick={addProperty} disabled={nodes.length < 2}>
           <GitBranch size={14} />
-          Add Property
+          {t('ontologyEditor.editor.addProperty')}
         </button>
         <button style={toolbarButtonStyle} onClick={addIndividual}>
           <User size={14} />
-          Add Individual
+          {t('ontologyEditor.editor.addIndividual')}
         </button>
         <button style={toolbarButtonStyle} onClick={addRestriction}>
           <Shield size={14} />
-          Add Restriction
+          {t('ontologyEditor.editor.addRestriction')}
         </button>
         <button style={toolbarButtonStyle} onClick={addAxiom}>
           <FileText size={14} />
-          Add Axiom
+          {t('ontologyEditor.editor.addAxiom')}
         </button>
         <button style={toolbarButtonStyle} onClick={autoLayout}>
           <Layout size={14} />
-          Auto Layout
+          {t('ontologyEditor.editor.autoLayout')}
         </button>
         <div style={{ flex: 1 }} />
         <button style={toolbarButtonStyle} onClick={saveDraft} disabled={isSaving}>
           <Send size={14} />
-          {isSaving ? "Saving..." : "Propose"}
+          {isSaving ? t('ontologyEditor.editor.saving') : t('ontologyEditor.editor.propose')}
         </button>
       </div>
 

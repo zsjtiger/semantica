@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { Download, HeartPulse, Loader2, Wrench } from "lucide-react";
@@ -9,6 +10,7 @@ interface HealthTabProps {
 }
 
 export function HealthTab({ onFixInEditor }: HealthTabProps) {
+  const { t } = useTranslation();
   const [registry, setRegistry] = useState<OntologyEntry[]>([]);
   const [selectedUri, setSelectedUri] = useState("");
   const [health, setHealth] = useState<OntologyHealthResponse | null>(null);
@@ -100,7 +102,7 @@ export function HealthTab({ onFixInEditor }: HealthTabProps) {
             <div style={scoreCardStyle}>
               <span style={scoreValueStyle}>{Math.round(health.total_score)}</span>
               <span style={mutedStyle}>Total health score</span>
-              <button style={secondaryButtonStyle} onClick={exportReport}><Download size={14} /> Export report</button>
+              <button style={secondaryButtonStyle} onClick={exportReport}><Download size={14} /> {t('ontologyTools.health.exportReport')}</button>
             </div>
             {health.dimensions.map((dimension) => (
               <div key={dimension.key} style={dimensionCardStyle}>
@@ -137,6 +139,7 @@ export function HealthTab({ onFixInEditor }: HealthTabProps) {
 }
 
 function IssueRow({ issue, onFixInEditor }: { issue: HealthIssue; onFixInEditor?: (entityUri: string) => void }) {
+  const { t } = useTranslation();
   return (
     <div style={issueRowStyle}>
       <div style={severityDotStyle(issue.severity)} />
@@ -149,7 +152,7 @@ function IssueRow({ issue, onFixInEditor }: { issue: HealthIssue; onFixInEditor?
       {issue.entity_uri ? (
         <button style={smallButtonStyle} onClick={() => onFixInEditor?.(issue.entity_uri || "")}>
           <Wrench size={13} />
-          Fix in Editor
+          {t('ontologyTools.health.fixInEditor')}
         </button>
       ) : (
         <div />

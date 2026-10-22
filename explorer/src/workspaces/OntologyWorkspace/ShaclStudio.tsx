@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import Editor, { type Monaco } from "@monaco-editor/react";
@@ -15,6 +16,7 @@ interface ShaclStudioProps {
 }
 
 export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
+  const { t } = useTranslation();
   const [registry, setRegistry] = useState<OntologyEntry[]>([]);
   const [selectedUri, setSelectedUri] = useState("");
   const [shacl, setShacl] = useState("");
@@ -217,7 +219,7 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <span style={countBadgeStyle}>{shapes.length} shapes</span>
               {selectedShapeId ? (
-                <button style={smallButtonStyle} onClick={handleShowAllShapes}>View all</button>
+                <button style={smallButtonStyle} onClick={handleShowAllShapes}>{t('ontologyTools.shacl.viewAll')}</button>
               ) : null}
             </div>
           </div>
@@ -239,7 +241,7 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
                         width: "100%",
                       }}
                       onClick={() => handleSelectShape(shape.id)}
-                      title="Click to load this shape into the editor"
+                      title={t('ontologyTools.shacl.loadShapeTitle')}
                     >
                       <FileCode2 size={14} color={isSelected ? "#7ce7d3" : "#9ee8d7"} />
                       <div>
@@ -265,10 +267,10 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
               {selectedShapeId ? selectedShapeId : "Turtle shape editor"}
             </h3>
             <div style={{ display: "flex", gap: 8 }}>
-              <button style={secondaryButtonStyle} disabled={loading} onClick={handleGenerate}><Wand2 size={14} /> Generate strict</button>
+              <button style={secondaryButtonStyle} disabled={loading} onClick={handleGenerate}><Wand2 size={14} /> {t('ontologyTools.shacl.generateStrict')}</button>
               <button style={primaryButtonStyle} disabled={loading || !shacl.trim()} onClick={handleValidate}>
                 {loading ? <Loader2 size={14} className="ws-spin" /> : <Play size={14} />}
-                Validate
+                {t('ontologyTools.shacl.validate')}
               </button>
             </div>
           </div>
@@ -312,7 +314,7 @@ export function ShaclStudio({ onJumpToNode }: ShaclStudioProps) {
                     </div>
                     {nodeId ? (
                       <button style={smallButtonStyle} onClick={() => onJumpToNode?.(nodeId)}>
-                        Jump to Node
+                        {t('ontologyTools.shacl.jumpToNode')}
                       </button>
                     ) : null}
                   </div>

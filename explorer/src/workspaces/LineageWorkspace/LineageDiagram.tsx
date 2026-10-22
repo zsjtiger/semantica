@@ -2,6 +2,7 @@
  * src/workspaces/LineageWorkspace/LineageDiagram.tsx
  */
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link2 } from "lucide-react";
 import { ReactFlow, Background, Controls } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -29,6 +30,7 @@ const THEME_CSS = `
 `;
 
 export function LineageDiagram() {
+  const { t } = useTranslation();
   const [nodes, setNodes] = useState<any[]>([]);
   const [edges, setEdges] = useState<any[]>([]);
   const [searchId, setSearchId] = useState("");
@@ -143,14 +145,14 @@ export function LineageDiagram() {
           style={{ width: 200, padding: "6px 10px", fontSize: 12 }}
         />
         <button className="ws-btn ws-btn--primary" style={{ padding: "6px 12px" }} onClick={() => setActiveId(searchId)}>
-          Trace
+          {t('misc.lineage.trace')}
         </button>
         <div style={{ flex: 1 }} />
         <button className="ws-btn ws-btn--ghost" style={{ padding: "6px 12px", fontSize: 11 }} disabled={!activeId} onClick={() => void downloadReport("json")}>
-          Export JSON
+          {t('misc.lineage.exportJson')}
         </button>
         <button className="ws-btn ws-btn--ghost" style={{ padding: "6px 12px", fontSize: 11 }} disabled={!activeId} onClick={() => void downloadReport("markdown")}>
-          Export MD
+          {t('misc.lineage.exportMd')}
         </button>
       </div>
 

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import {
   GitMerge,
@@ -35,6 +36,7 @@ interface DiffChange {
 }
 
 export function ProposalReview({ proposalId }: { proposalId: string }) {
+  const { t } = useTranslation();
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [diff, setDiff] = useState<DiffChange[]>([]);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
@@ -308,18 +310,18 @@ export function ProposalReview({ proposalId }: { proposalId: string }) {
             <>
               <button style={buttonStyle} onClick={approveProposal}>
                 <CheckCircle size={12} />
-                Approve
+                {t('ontologyTools.approve')}
               </button>
               <button style={buttonStyle} onClick={rejectProposal}>
                 <XCircle size={12} />
-                Reject
+                {t('ontologyTools.reject')}
               </button>
             </>
           )}
           {proposal.state === "approved" && (
             <button style={buttonStyle} onClick={publishProposal}>
               <Send size={12} />
-              Publish
+              {t('ontologyTools.publish')}
             </button>
           )}
         </div>
@@ -418,7 +420,7 @@ export function ProposalReview({ proposalId }: { proposalId: string }) {
               />
               <button style={buttonStyle} onClick={addComment} disabled={!commentText}>
                 <Send size={12} />
-                Add Comment
+                {t('ontologyTools.addComment')}
               </button>
             </div>
           )}

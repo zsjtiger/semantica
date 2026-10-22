@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 
@@ -232,6 +233,7 @@ export function GraphLoadingOverlay({
   error?: string | null;
   onRetry?: () => void;
 }) {
+  const { t } = useTranslation();
   const [renderVisible, setRenderVisible] = useState(visible);
   const [exiting, setExiting] = useState(false);
   const [displayProgress, setDisplayProgress] = useState<GraphLoadProgress>(
@@ -312,7 +314,7 @@ export function GraphLoadingOverlay({
             <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
               <button type="button" className="graph-stage-loader-retry" onClick={onRetry}>
                 <RefreshCw size={14} strokeWidth={2.2} aria-hidden />
-                Retry
+                {t('graph.loading.retry')}
               </button>
             </div>
           ) : null}

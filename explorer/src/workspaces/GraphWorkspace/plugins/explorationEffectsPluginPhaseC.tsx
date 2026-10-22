@@ -1,4 +1,6 @@
 import type { CSSProperties } from "react";
+import i18next from "i18next";
+import { useTranslation } from "react-i18next";
 
 import { buildGraphColorLegend } from "../graphColorLegend";
 import type {
@@ -135,6 +137,7 @@ function EffectToggleRow({
   availability: GraphEffectAvailability;
   onToggle: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div style={toggleRowStyle}>
       <div style={{ minWidth: 0, flex: 1 }}>
@@ -143,7 +146,7 @@ function EffectToggleRow({
         <div style={rowMetaStyle}>{renderAvailabilityText(availability)}</div>
       </div>
       <button type="button" onClick={onToggle} style={checked ? toggleButtonActiveStyle : toggleButtonStyle}>
-        {checked ? "On" : "Off"}
+        {checked ? t('graph.effects.on') : t('graph.effects.off')}
       </button>
     </div>
   );
@@ -272,8 +275,8 @@ export const explorationEffectsPluginPhaseC: GraphPlugin = {
   toolbarItems: (context) => [
     {
       id: "effects-toggle",
-      label: "Effects",
-      title: "Open exploration effects controls",
+      label: i18next.t('graph.plugin.effects'),
+      title: i18next.t('graph.plugin.effectsTitle'),
       active: context.isPanelOpen(EFFECTS_PANEL_ID),
       order: 18,
       onClick: () => context.dispatchAction({ type: "togglePanel", panelId: EFFECTS_PANEL_ID }),
@@ -297,7 +300,7 @@ export const explorationEffectsPluginPhaseC: GraphPlugin = {
 
     return {
       id: EFFECTS_PANEL_ID,
-      title: "Effects",
+      title: i18next.t('graph.plugin.effects'),
       placement: "bottom",
       order: 8,
       defaultOpen: false,

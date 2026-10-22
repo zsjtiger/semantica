@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { CSSProperties } from "react";
 import { Loader2 } from "lucide-react";
 import { graph } from "../../store/graphStore";
@@ -227,6 +228,7 @@ function PathFlowViz({
   bottleneckNodeId?: string | null;
   onFocusNode?: (nodeId: string) => void;
 }) {
+  const { t } = useTranslation();
   if (path.length === 0) {
     return <div style={emptyTextStyle}>No path found between the selected nodes.</div>;
   }
@@ -247,7 +249,7 @@ function PathFlowViz({
               {/* Node chip */}
               <button
                 onClick={() => onFocusNode?.(nodeId)}
-                title={nodeId === bottleneckNodeId ? `Bottleneck: ${nodeId}` : `Focus: ${nodeId}`}
+                title={nodeId === bottleneckNodeId ? t('graph.inspector.bottleneckNode', { nodeId }) : t('graph.inspector.focusNode', { nodeId })}
                 style={{
                   ...pathNodeChipStyle,
                   cursor: onFocusNode ? "pointer" : "default",
@@ -311,6 +313,7 @@ export function GraphInspectorPanel({
   onMarkdownApplied,
   onMarkdownDirtyChange,
 }: GraphInspectorPanelProps) {
+  const { t } = useTranslation();
   if (!nodeId) {
     return (
       <div style={{ padding: 32, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, marginTop: 32 }}>
@@ -445,14 +448,14 @@ export function GraphInspectorPanel({
             {isRunningPredictions ? (
               <Loader2 size={14} className="animate-spin" style={{ marginRight: 6 }} />
             ) : null}
-            {isRunningPredictions ? "Running…" : "Run Link Prediction"}
+            {isRunningPredictions ? t('graph.inspector.running') : t('graph.inspector.runPredictions')}
           </button>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button style={secondaryActionButtonStyle} onClick={() => onDownloadProvenance("json")} disabled={!actionNodeId}>
-              Provenance JSON
+              {t('graph.inspector.provenanceJson')}
             </button>
             <button style={secondaryActionButtonStyle} onClick={() => onDownloadProvenance("markdown")} disabled={!actionNodeId}>
-              Provenance MD
+              {t('graph.inspector.provenanceMd')}
             </button>
           </div>
         </div>
@@ -473,7 +476,7 @@ export function GraphInspectorPanel({
           placeholder="Target node ID"
           style={inputStyle}
         />
-        <button style={actionButtonStyle} onClick={onTracePath} disabled={!actionNodeId}>Trace Causal Path</button>
+        <button style={actionButtonStyle} onClick={onTracePath} disabled={!actionNodeId}>{t('graph.inspector.traceCausalPath')}</button>
 
         {pathResult?.path?.length ? (
           <>

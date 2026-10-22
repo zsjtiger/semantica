@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import { useTranslation } from "react-i18next";
 import { UploadCloud, Download, FileJson, FileText, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { logEvent } from "../../store/registryStore";
 
 interface Toast { id: number; type: "success" | "error"; text: string }
 
 export function ImportExportWorkspace() {
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [exportFormat, setExportFormat] = useState<"json" | "csv">("json");
@@ -133,7 +135,7 @@ export function ImportExportWorkspace() {
               disabled={!file || isUploading}
               style={{ width: "100%", justifyContent: "center" }}
             >
-              {isUploading ? <><Loader2 size={15} className="ws-spin" />Uploading…</> : <><UploadCloud size={15} />Upload to Graph</>}
+              {isUploading ? <><Loader2 size={15} className="ws-spin" />{t('dataTools.importExport.uploading')}</> : <><UploadCloud size={15} />{t('dataTools.importExport.uploadToGraph')}</>}
             </button>
           </div>
 
@@ -176,7 +178,7 @@ export function ImportExportWorkspace() {
               disabled={isExporting}
               style={{ width: "100%", justifyContent: "center", background: "var(--ws-purple-soft)", borderColor: "rgba(192,132,252,0.3)", color: "#d8b4fe" }}
             >
-              {isExporting ? <><Loader2 size={15} className="ws-spin" />Preparing…</> : <><Download size={15} />Download Export</>}
+              {isExporting ? <><Loader2 size={15} className="ws-spin" />{t('dataTools.importExport.preparing')}</> : <><Download size={15} />{t('dataTools.importExport.downloadExport')}</>}
             </button>
           </div>
         </div>
