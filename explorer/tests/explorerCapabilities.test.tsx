@@ -22,6 +22,7 @@ Object.defineProperty(globalThis, "navigator", {
 });
 
 const { cleanup, render } = await import("@testing-library/react");
+await import("../src/i18n/index.ts");
 const { ExploreWorkspaceTabs } = await import("../src/ExploreWorkspaceTabs.tsx");
 
 test.afterEach(cleanup);
