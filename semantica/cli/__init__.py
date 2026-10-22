@@ -47,6 +47,18 @@ _SUBMODULES = (
 )
 
 
+_LAST_OWNER = {}
+
+
+def _owner_of(name):
+    for module in _SUBMODULES:
+        if name in vars(module):
+            return module
+    # A name removed by delattr (e.g. at the end of mock.patch) is restored to
+    # the module that held it, not onto this package object.
+    return _LAST_OWNER.get(name)
+
+
 class _CLIModule(types.ModuleType):
     def __getattr__(self, name):
         for module in _SUBMODULES:
@@ -55,11 +67,19 @@ class _CLIModule(types.ModuleType):
         raise AttributeError(f"module {self.__name__!r} has no attribute {name!r}")
 
     def __setattr__(self, name, value):
+        owner = _owner_of(name)
+        if owner is None:
+            super().__setattr__(name, value)
+        else:
+            setattr(owner, name, value)
+
+    def __delattr__(self, name):
         for module in _SUBMODULES:
             if name in vars(module):
-                setattr(module, name, value)
+                _LAST_OWNER[name] = module
+                delattr(module, name)
                 return
-        super().__setattr__(name, value)
+        super().__delattr__(name)
 
 
 sys.modules[__name__].__class__ = _CLIModule
