@@ -44,6 +44,10 @@ from ..utils.progress_tracker import get_progress_tracker
 from .html_parser import HTMLParser
 from .xml_parser import XMLParser
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class WebParser:
     """
@@ -456,5 +460,5 @@ class JavaScriptRenderer:
         if hasattr(self, "driver") and self.driver:
             try:
                 self.driver.quit()
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("__del__() ignored an exception: %s", ignored_exc)

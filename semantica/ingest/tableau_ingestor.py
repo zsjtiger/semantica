@@ -53,6 +53,10 @@ from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 from .ssrf import validate_url_for_request
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 # ---------------------------------------------------------------------------
 # Optional-dependency guard — mirrors the pattern in salesforce_ingestor.
 # The module always imports cleanly; the guard fires at instantiation time
@@ -268,8 +272,8 @@ class TableauConnector:
         if self._server is not None:
             try:
                 self._server.auth.sign_out()
-            except Exception:  # noqa: BLE001
-                pass
+            except Exception as ignored_exc:  # noqa: BLE001
+                _logger.debug("disconnect() ignored an exception: %s", ignored_exc)
             self._server = None
             self.logger.debug("Tableau connection closed.")
 

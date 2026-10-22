@@ -23,6 +23,10 @@ from ..kg.community_summarizer import CommunityReport, estimate_tokens
 from ..utils.logging import get_logger
 from .context_retriever import RetrievedContext
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 logger = get_logger("drift_search")
 
 
@@ -1039,8 +1043,8 @@ class DriftSearchEngine:
             val = json.loads(cleaned)
             if isinstance(val, (dict, list)):
                 return val
-        except Exception:
-            pass
+        except Exception as ignored_exc:
+            _logger.debug("_extract_json() ignored an exception: %s", ignored_exc)
 
         match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", cleaned, re.DOTALL)
         if match:
@@ -1049,8 +1053,8 @@ class DriftSearchEngine:
                 val = json.loads(block)
                 if isinstance(val, (dict, list)):
                     return val
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                _logger.debug("_extract_json() ignored an exception: %s", ignored_exc)
 
         decoder = json.JSONDecoder()
         for i in range(len(cleaned)):
@@ -1059,8 +1063,8 @@ class DriftSearchEngine:
                     obj, _ = decoder.raw_decode(cleaned[i:])
                     if isinstance(obj, (dict, list)):
                         return obj
-                except Exception:
-                    pass
+                except Exception as ignored_exc:
+                    _logger.debug("_extract_json() ignored an exception: %s", ignored_exc)
 
         raise ValueError(f"No valid JSON in response: {cleaned[:100]}...")
 
@@ -1084,8 +1088,8 @@ class DriftSearchEngine:
         if hasattr(res, "__dict__"):
             try:
                 return DriftFacetsResponseSchema.model_validate(vars(res))
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                _logger.debug("_coerce_facets_response() ignored an exception: %s", ignored_exc)
         if isinstance(res, str):
             try:
                 parsed = self._extract_json(res)
@@ -1103,8 +1107,8 @@ class DriftSearchEngine:
                     ):
                         return DriftFacetsResponseSchema(facets=[parsed])
                     return DriftFacetsResponseSchema.model_validate(parsed)
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                _logger.debug("_coerce_facets_response() ignored an exception: %s", ignored_exc)
         return None
 
     def _generate_facets(

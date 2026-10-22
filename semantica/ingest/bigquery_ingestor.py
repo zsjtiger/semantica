@@ -86,6 +86,10 @@ from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 from .db_ingestor import _validate_sql_fragment
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # ---------------------------------------------------------------------------
 # Optional-dependency guard
 # ---------------------------------------------------------------------------
@@ -520,8 +524,8 @@ class BigQueryConnector:
         if self._client is not None:
             try:
                 self._client.close()
-            except Exception:  # noqa: BLE001
-                pass
+            except Exception as ignored_exc:  # noqa: BLE001
+                logger.debug("disconnect() ignored an exception: %s", ignored_exc)
             finally:
                 self._client = None
             self.logger.info("Disconnected from BigQuery.")

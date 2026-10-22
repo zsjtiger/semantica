@@ -55,6 +55,10 @@ from ..utils.exceptions import ProcessingError, ValidationError
 from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # ---------------------------------------------------------------------------
 # Optional-dependency guard — mirrors the pattern in snowflake_ingestor and
 # databricks_ingestor exactly.  The module always imports cleanly; the guard
@@ -677,8 +681,8 @@ class SalesforceConnector:
             if session is not None:
                 try:
                     session.close()
-                except Exception:  # noqa: BLE001
-                    pass
+                except Exception as ignored_exc:  # noqa: BLE001
+                    logger.debug("disconnect() ignored an exception: %s", ignored_exc)
             self._client = None
             self.logger.info("Disconnected from Salesforce.")
 

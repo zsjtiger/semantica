@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import sys
 from typing import Any
 
@@ -175,6 +176,10 @@ class SemanticaMCPServer:
 
     def __init__(self, *, debug: bool = False) -> None:
         level = logging.DEBUG if debug else logging.WARNING
+        # SEMANTICA_LOG_LEVEL (DEBUG, INFO, WARNING) overrides the default.
+        env_level = os.environ.get("SEMANTICA_LOG_LEVEL", "").strip().upper()
+        if not debug and env_level:
+            level = getattr(logging, env_level, level)
         logging.basicConfig(stream=sys.stderr, level=level,
                             format="%(name)s %(levelname)s %(message)s")
 

@@ -31,6 +31,10 @@ from contextlib import contextmanager
 from .schemas import ProvenanceEntry
 from ..utils.logging import get_logger
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class ProvenanceStorage(ABC):
     """
@@ -451,8 +455,8 @@ class SQLiteStorage(ProvenanceStorage):
             )
             try:
                 conn.execute("PRAGMA journal_mode=DELETE")
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("_configure_connection() ignored an exception: %s", ignored_exc)
 
         try:
             conn.execute("PRAGMA busy_timeout=5000")
@@ -483,8 +487,8 @@ class SQLiteStorage(ProvenanceStorage):
         except Exception:
             try:
                 conn.rollback()
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("transaction() ignored an exception: %s", ignored_exc)
             raise
         finally:
             conn.close()
@@ -511,8 +515,8 @@ class SQLiteStorage(ProvenanceStorage):
             try:
                 conn.execute(f"ROLLBACK TO {sp_name}")
                 conn.execute(f"RELEASE {sp_name}")
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("savepoint() ignored an exception: %s", ignored_exc)
             raise
 
     @contextmanager

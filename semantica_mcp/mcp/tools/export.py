@@ -4,6 +4,7 @@ Export tools — graph export (JSON/RDF/CSV/GraphML/Parquet) and provenance.
 
 from __future__ import annotations
 
+import json
 import logging
 
 from ..schemas import EXPORT_GRAPH, GET_PROVENANCE
@@ -23,27 +24,13 @@ _FORMAT_ALIASES: dict[str, str] = {
 
 def handle_export_graph(args: dict) -> dict:
     """Export the knowledge graph to a structured format."""
-    fmt = str(args.get("format", "json")).lower().strip()
-    include_metadata = bool(args.get("include_metadata", True))
+    fmt = str(args.get("format", "json-ld")).lower().strip()
     try:
         graph = get_graph()
 
         if fmt == "json":
-            nodes = list(graph.find_nodes())
-            edges: list = []
-            if hasattr(graph, "find_edges"):
-                try:
-                    edges = list(graph.find_edges())
-                except Exception as exc:
-                    log.debug("Failed to collect edges during JSON export; continuing with empty edges: %s", exc)
-            payload: dict = {"nodes": nodes, "edges": edges}
-            if include_metadata:
-                payload["meta"] = {
-                    "node_count": len(nodes),
-                    "edge_count": len(edges),
-                    "format": "json",
-                }
-            return {"format": "json", "data": payload}
+            # Same canonical kg dict the RDF exporters consume, as a JSON string.
+            return {"format": "json", "data": json.dumps(graph.to_kg_dict(), indent=2, ensure_ascii=False)}
 
         if fmt in ("csv",):
             nodes = list(graph.find_nodes())

@@ -111,6 +111,10 @@ from ..utils.progress_tracker import get_progress_tracker
 # has no optional dependency) and keeps validation logic in one place.
 from .db_ingestor import _validate_sql_fragment, _validate_sql_identifier
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # ---------------------------------------------------------------------------
 # Optional-dependency guard
 # ---------------------------------------------------------------------------
@@ -527,8 +531,8 @@ class RedshiftConnector:
         if self._connection is not None:
             try:
                 self._connection.close()
-            except Exception:  # noqa: BLE001
-                pass
+            except Exception as ignored_exc:  # noqa: BLE001
+                logger.debug("disconnect() ignored an exception: %s", ignored_exc)
             finally:
                 self._connection = None
             self.logger.info("Disconnected from Redshift.")

@@ -98,44 +98,57 @@ from .query_engine import QueryEngine, QueryPlan, QueryResult
 from .registry import method_registry
 from .triplet_store import TripletStore
 
-# Global store registry
-_global_stores: Dict[str, TripletStore] = {}
-_default_store_id: Optional[str] = None
-_global_bulk_loader: Optional[BulkLoader] = None
+
+class _StoreRegistry:
+    """Process-wide triplet stores and bulk loader behind the module functions.
+
+    Kept in one object so the state has a single owner and tests can reset it
+    with :meth:`reset` instead of reaching into module globals.
+    """
+
+    def __init__(self) -> None:
+        self.stores: Dict[str, TripletStore] = {}
+        self.default_id: Optional[str] = None
+        self.bulk_loader: Optional[BulkLoader] = None
+
+    def reset(self) -> None:
+        self.stores.clear()
+        self.default_id = None
+        self.bulk_loader = None
+
+
+_registry = _StoreRegistry()
 
 
 def _get_store(store_id: Optional[str] = None) -> TripletStore:
     """Get triplet store instance."""
-    global _default_store_id
-    
-    target_id = store_id or _default_store_id
-    
+    target_id = store_id or _registry.default_id
+
     if not target_id:
         # Try to create a default store from config if none registered
-        if not _global_stores:
+        if not _registry.stores:
             config = triplet_store_config.get_all()
             default_backend = config.get("default_backend", "blazegraph")
             default_endpoint = config.get(f"{default_backend}_endpoint", "http://localhost:9999/blazegraph")
-            
+
             store = TripletStore(backend=default_backend, endpoint=default_endpoint)
-            _global_stores["default"] = store
-            _default_store_id = "default"
+            _registry.stores["default"] = store
+            _registry.default_id = "default"
             return store
-            
+
         raise ValueError("No store identifier provided and no default store set")
-        
-    if target_id not in _global_stores:
+
+    if target_id not in _registry.stores:
         raise ValueError(f"Store not found: {target_id}")
-        
-    return _global_stores[target_id]
+
+    return _registry.stores[target_id]
 
 
 def _get_bulk_loader() -> BulkLoader:
-    """Get or create global BulkLoader instance."""
-    global _global_bulk_loader
-    if _global_bulk_loader is None:
-        _global_bulk_loader = BulkLoader()
-    return _global_bulk_loader
+    """Get or create the shared BulkLoader instance."""
+    if _registry.bulk_loader is None:
+        _registry.bulk_loader = BulkLoader()
+    return _registry.bulk_loader
 
 
 def register_store(
@@ -162,12 +175,11 @@ def register_store(
     # Default implementation
     store = TripletStore(backend=store_type, endpoint=endpoint, **options)
     
-    global _default_store_id
-    _global_stores[store_id] = store
-    
-    if _default_store_id is None:
-        _default_store_id = store_id
-        
+    _registry.stores[store_id] = store
+
+    if _registry.default_id is None:
+        _registry.default_id = store_id
+
     return store
 
 

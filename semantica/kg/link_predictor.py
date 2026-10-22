@@ -53,6 +53,10 @@ import numpy as np
 from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class LinkPredictor:
     """
@@ -498,8 +502,8 @@ class LinkPredictor:
                             edge_data = graph_store.get_edge_data(node_id, nb)
                             if isinstance(edge_data, dict) and edge_data.get('type') in relationship_types:
                                 filtered.append(nb)
-                        except Exception:
-                            pass
+                        except Exception as ignored_exc:
+                            logger.debug("_get_node_neighbors() ignored an exception: %s", ignored_exc)
                     return filtered
                 return neighbors
         if hasattr(graph_store, 'neighbors') and callable(graph_store.neighbors):
@@ -514,8 +518,8 @@ class LinkPredictor:
                             edge_data = graph_store.get_edge_data(node_id, nb)
                             if isinstance(edge_data, dict) and edge_data.get('type') in relationship_types:
                                 filtered.append(nb)
-                        except Exception:
-                            pass
+                        except Exception as ignored_exc:
+                            logger.debug("_get_node_neighbors() ignored an exception: %s", ignored_exc)
                     return filtered
                 return raw
             except TypeError:

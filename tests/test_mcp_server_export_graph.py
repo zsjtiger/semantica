@@ -18,7 +18,9 @@ import json
 import os
 import unittest
 
-from semantica import mcp_server
+from semantica_mcp.mcp import server as mcp_server
+from semantica_mcp.mcp import session
+from semantica_mcp.mcp.tools.export import handle_export_graph as _tool_export_graph
 from semantica.context import ContextGraph
 
 
@@ -33,14 +35,14 @@ def _graph_with_content() -> ContextGraph:
 class TestExportGraphTool(unittest.TestCase):
 
     def setUp(self):
-        self._old_graph = mcp_server._graph
-        mcp_server._graph = _graph_with_content()
+        self._old_graph = session._graph
+        session._graph = _graph_with_content()
 
     def tearDown(self):
-        mcp_server._graph = self._old_graph
+        session._graph = self._old_graph
 
     def test_json_branch_returns_string_data_not_error(self):
-        result = mcp_server._tool_export_graph({"format": "json"})
+        result = _tool_export_graph({"format": "json"})
         self.assertNotIn("error", result)
         self.assertEqual(result["format"], "json")
         payload = json.loads(result["data"])
@@ -48,14 +50,14 @@ class TestExportGraphTool(unittest.TestCase):
         self.assertEqual(len(payload["relationships"]), 1)
 
     def test_jsonld_branch_returns_string_data_not_error(self):
-        result = mcp_server._tool_export_graph({"format": "json-ld"})
+        result = _tool_export_graph({"format": "json-ld"})
         self.assertNotIn("error", result)
         self.assertEqual(result["format"], "json-ld")
         self.assertIsInstance(result["data"], str)
         self.assertGreater(len(result["data"]), 0)
 
     def test_turtle_branch_returns_string_data_not_error(self):
-        result = mcp_server._tool_export_graph({"format": "turtle"})
+        result = _tool_export_graph({"format": "turtle"})
         self.assertNotIn("error", result)
         self.assertIsInstance(result["data"], str)
         self.assertIn("@prefix", result["data"])
@@ -63,7 +65,7 @@ class TestExportGraphTool(unittest.TestCase):
     def test_all_rdf_formats_succeed(self):
         for fmt in ("turtle", "ttl", "nt", "xml", "json-ld"):
             with self.subTest(fmt=fmt):
-                result = mcp_server._tool_export_graph({"format": fmt})
+                result = _tool_export_graph({"format": fmt})
                 self.assertNotIn("error", result, fmt)
                 self.assertIsInstance(result["data"], str)
 
@@ -74,16 +76,17 @@ class TestExportGraphTool(unittest.TestCase):
         """A format outside the declared enum (typo, unsupported value, or a
         client that skips schema validation) must error, not silently return
         JSON data mislabeled with the requested format string."""
-        result = mcp_server._tool_export_graph({"format": "yaml"})
+        result = _tool_export_graph({"format": "yaml"})
         self.assertIn("error", result)
         self.assertIn("yaml", result["error"])
 
-    def test_export_graph_schema_enum_matches_handled_formats(self):
-        """The tool's declared inputSchema enum must not drift from the set
-        of formats the handler actually accepts."""
-        tool = next(t for t in mcp_server.TOOLS if t["name"] == "export_graph")
-        schema_enum = set(tool["inputSchema"]["properties"]["format"]["enum"])
-        self.assertEqual(schema_enum, set(mcp_server._EXPORT_GRAPH_FORMATS))
+    def test_every_advertised_format_is_handled(self):
+        """Each format in the declared inputSchema enum must be accepted by the handler."""
+        tool = next(t for t in mcp_server.TOOL_DEFINITIONS if t["name"] == "export_graph")
+        for fmt in tool["inputSchema"]["properties"]["format"]["enum"]:
+            with self.subTest(format=fmt):
+                result = _tool_export_graph({"format": fmt})
+                self.assertNotIn("Unsupported format", result.get("error", ""))
 
 
 if __name__ == "__main__":

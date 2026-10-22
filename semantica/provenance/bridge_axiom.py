@@ -65,6 +65,10 @@ import uuid
 
 from ..utils.helpers import utc_now_iso
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class BridgeAxiom:
@@ -193,8 +197,8 @@ class BridgeAxiom:
                         **kwargs
                     }
                 )
-            except Exception:
-                pass  # Graceful failure
+            except Exception as ignored_exc:
+                logger.debug("apply() ignored an exception: %s", ignored_exc)
         
         return {
             "axiom_id": self.axiom_id,
@@ -428,8 +432,8 @@ def trace_translation_chain(
             try:
                 lineage = prov_manager.get_lineage(entity_id)
                 layer_trace["provenance"] = lineage
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("trace_translation_chain() ignored an exception: %s", ignored_exc)
         
         trace["layers"].append(layer_trace)
     

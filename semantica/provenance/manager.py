@@ -39,6 +39,10 @@ from .integrity import compute_checksum, verify_checksum
 from ..utils.helpers import to_utc_datetime, utc_now_iso
 from ..utils.logging import get_logger
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 #: Sort key for an entry whose timestamp cannot be read as one, so an
 #: unreadable value orders first instead of raising during a sort.
 _EPOCH = datetime(1, 1, 1, tzinfo=timezone.utc)
@@ -321,8 +325,8 @@ class ProvenanceManager:
                         source_entity = self.storage._retrieve_with_conn(conn, source)
                         if source_entity:
                             parent_id = source
-                    except Exception:
-                        pass
+                    except Exception as ignored_exc:
+                        logger.debug("track_entity() ignored an exception: %s", ignored_exc)
 
                 explicit_parent_supplied = parent_id is not None
 
@@ -675,8 +679,8 @@ class ProvenanceManager:
                                     entity_id, source, entity_metadata, _conn=conn, **batch_kwargs
                                 )
                             batch_count += 1
-                        except Exception:
-                            pass  # Continue with other entities in this batch
+                        except Exception as ignored_exc:
+                            logger.debug("track_entities_batch() ignored an exception: %s", ignored_exc)
                 # Add batch_count to tracked_count only after the transaction context
                 # exits successfully and commits (#807).
                 tracked_count += batch_count
@@ -734,8 +738,8 @@ class ProvenanceManager:
                                     **{**metadata, **chunk.get("metadata", {})}
                                 )
                             batch_count += 1
-                        except Exception:
-                            pass
+                        except Exception as ignored_exc:
+                            logger.debug("track_chunks_batch() ignored an exception: %s", ignored_exc)
                 # Add batch_count to tracked_count only after the transaction context
                 # exits successfully and commits (#807).
                 tracked_count += batch_count

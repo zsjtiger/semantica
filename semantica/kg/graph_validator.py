@@ -34,6 +34,10 @@ import networkx as nx
 from ..utils.entity_ids import get_entity_id
 from ..utils.logging import get_logger
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class ValidationSeverity(Enum):
     """Severity levels for validation issues."""
     INFO = "info"
@@ -291,8 +295,8 @@ class GraphValidator:
                         severity=ValidationSeverity.INFO, # Cycles aren't always bad
                         details={"count": len(cycles)}
                     ))
-            except Exception:
-                pass # Skip if too complex
+            except Exception as ignored_exc:
+                logger.debug("validate() ignored an exception: %s", ignored_exc)
 
             # Check for Orphans (Isolated nodes)
             isolates = list(nx.isolates(nx_graph))

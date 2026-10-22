@@ -43,10 +43,10 @@ class TestSchemaInfoToolList(unittest.TestCase):
         more — it must not be a stale hard-coded subset."""
         self.assertEqual(self._schema_info_tools(), self._defined_tool_names())
 
-    def test_schema_info_tool_count_is_22(self):
-        """TOOL_DEFINITIONS currently registers 22 tools; the resource must
+    def test_schema_info_tool_count_is_25(self):
+        """TOOL_DEFINITIONS currently registers 25 tools; the resource must
         reflect that exact count."""
-        self.assertEqual(len(self._schema_info_tools()), 22)
+        self.assertEqual(len(self._schema_info_tools()), 25)
 
     def test_schema_info_includes_link_decisions(self):
         """link_decisions was missing from the old hard-coded list."""

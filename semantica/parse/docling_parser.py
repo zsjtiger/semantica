@@ -42,6 +42,10 @@ from ..utils.helpers import safe_import
 from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Try to import docling, handle gracefully if not available
 DOCLING_AVAILABLE = False
 DOCLING_IMPORT_ERROR = None
@@ -491,8 +495,8 @@ class DoclingParser:
                                 elif hasattr(item, 'export_to_markdown'):
                                     try:
                                         page_text_parts.append(item.export_to_markdown(doc=doc))
-                                    except Exception:
-                                        pass  # export failure degrades to skipping this text item
+                                    except Exception as ignored_exc:
+                                        logger.debug("_extract_pages() ignored an exception: %s", ignored_exc)
                                 
                                 # Extract tables on this page
                                 from docling_core.types.doc import TableItem

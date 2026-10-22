@@ -43,6 +43,10 @@ import numpy as np
 
 from ...utils.logging import get_logger
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class LayoutAlgorithm(ABC):
     """Abstract base class for graph layout algorithms."""
@@ -217,8 +221,8 @@ class HierarchicalLayout(LayoutAlgorithm):
                             node: (float(pos[node][0]), float(pos[node][1]))
                             for node in nodes
                         }
-                except Exception:
-                    pass  # Fall through to simple hierarchical layout
+                except Exception as ignored_exc:
+                    logger.debug("compute_layout() ignored an exception: %s", ignored_exc)
             except Exception as e:
                 self.logger.warning(
                     f"NetworkX hierarchical layout failed: {e}, using basic implementation"

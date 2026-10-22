@@ -7,7 +7,7 @@ Covers:
 - Skipped link (unknown IDs) surfacing False from add_causal_relationship
 - Invalid relationship type returning an error dict (ValueError path)
 - Unexpected exception returning an error dict
-- Tool exposed in the embedded server (semantica.mcp_server)
+- Tool exposed in the embedded server (semantica_mcp.mcp)
 - Tool exposed in the modular server (semantica_mcp.mcp)
 - End-to-end: record two decisions → link → get_causal_chain observes the edge
 """
@@ -187,7 +187,7 @@ class TestEmbeddedServerLinkDecisionsRegistration(unittest.TestCase):
     """Verify link_decisions is discoverable through the embedded MCP server."""
 
     def test_link_decisions_in_tools_list(self):
-        from semantica.mcp_server import TOOLS
+        from semantica_mcp.mcp.tools import TOOL_DEFINITIONS as TOOLS
 
         names = [t["name"] for t in TOOLS]
         self.assertIn(
@@ -197,7 +197,7 @@ class TestEmbeddedServerLinkDecisionsRegistration(unittest.TestCase):
         )
 
     def test_link_decisions_schema_required(self):
-        from semantica.mcp_server import TOOLS
+        from semantica_mcp.mcp.tools import TOOL_DEFINITIONS as TOOLS
 
         tool = next(t for t in TOOLS if t["name"] == "link_decisions")
         schema = tool["inputSchema"]
@@ -205,16 +205,16 @@ class TestEmbeddedServerLinkDecisionsRegistration(unittest.TestCase):
 
     def test_link_decisions_handler_missing_args(self):
         """Embedded handler must return error dict on missing args, not raise."""
-        from semantica.mcp_server import TOOLS
+        from semantica_mcp.mcp.tools import TOOL_DEFINITIONS as TOOLS
 
         handler = next(t["_handler"] for t in TOOLS if t["name"] == "link_decisions")
         result = handler({})
         self.assertIn("error", result)
 
-    @patch("semantica.mcp_server._get_graph")
+    @patch("semantica_mcp.mcp.tools.decisions.get_graph")
     def test_embedded_handler_calls_add_causal_relationship(self, mock_get_graph):
         """Embedded handler must forward source/target/relationship to add_causal_relationship."""
-        from semantica.mcp_server import TOOLS
+        from semantica_mcp.mcp.tools import TOOL_DEFINITIONS as TOOLS
 
         mock_graph = MagicMock()
         mock_graph.add_causal_relationship.return_value = True
@@ -229,10 +229,10 @@ class TestEmbeddedServerLinkDecisionsRegistration(unittest.TestCase):
         self.assertEqual(result["target"], "t1")
         self.assertEqual(result["relationship"], "CAUSED")
 
-    @patch("semantica.mcp_server._get_graph")
+    @patch("semantica_mcp.mcp.tools.decisions.get_graph")
     def test_embedded_handler_surfaces_false_for_skip(self, mock_get_graph):
         """Embedded handler must surface linked=False when add_causal_relationship returns False."""
-        from semantica.mcp_server import TOOLS
+        from semantica_mcp.mcp.tools import TOOL_DEFINITIONS as TOOLS
 
         mock_graph = MagicMock()
         mock_graph.add_causal_relationship.return_value = False
@@ -244,10 +244,10 @@ class TestEmbeddedServerLinkDecisionsRegistration(unittest.TestCase):
         self.assertNotIn("error", result)
         self.assertFalse(result["linked"])
 
-    @patch("semantica.mcp_server._get_graph")
+    @patch("semantica_mcp.mcp.tools.decisions.get_graph")
     def test_embedded_handler_invalid_relationship_type_returns_error(self, mock_get_graph):
         """Embedded handler must convert ValueError to error dict."""
-        from semantica.mcp_server import TOOLS
+        from semantica_mcp.mcp.tools import TOOL_DEFINITIONS as TOOLS
 
         mock_graph = MagicMock()
         mock_graph.add_causal_relationship.side_effect = ValueError("bad type")
@@ -356,7 +356,7 @@ class TestEmbeddedLinkDecisionsNoneArguments(unittest.TestCase):
     """
 
     def _handler(self):
-        from semantica.mcp_server import TOOLS
+        from semantica_mcp.mcp.tools import TOOL_DEFINITIONS as TOOLS
         return next(t["_handler"] for t in TOOLS if t["name"] == "link_decisions")
 
     def test_none_source_returns_error_not_exception(self):

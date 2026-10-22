@@ -91,6 +91,10 @@ from ..kg.similarity_calculator import SimilarityCalculator
 from ..utils.exceptions import ValidationError
 from .truth_maintenance_filter import TruthMaintenanceContextFilter
 from .tiers import TierCalculator, TrustTier
+
+import logging
+
+logger = logging.getLogger(__name__)
 try:
     from ..kg.temporal_query import TemporalGraphQuery as _TemporalGraphQuery
     from ..kg.temporal_model import parse_temporal_value as _parse_temporal_value
@@ -2638,8 +2642,8 @@ Answer:"""
                         frontier = next_frontier
                         if not frontier:
                             break
-                except Exception:
-                    pass  # Neighbor expansion is best-effort
+                except Exception as ignored_exc:
+                    logger.debug("_expand_decision_context() ignored an exception: %s", ignored_exc)
                 
                 # Use path finder for multi-hop relationships
                 if self.path_finder and max_hops > 1:
@@ -3165,8 +3169,8 @@ Answer:"""
                                     "content": str(neighbor),
                                     "hop": hop + 1
                                 })
-                    except Exception:
-                        pass
+                    except Exception as ignored_exc:
+                        logger.debug("expand_context() ignored an exception: %s", ignored_exc)
                 current_level = next_level
                 if not current_level:
                     break

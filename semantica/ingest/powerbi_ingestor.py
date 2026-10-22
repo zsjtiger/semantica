@@ -69,6 +69,10 @@ from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 from .ssrf import parse_bool, request_with_ssrf_guard
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 __all__ = [
     "PowerBIData",
     "PowerBIConnector",
@@ -493,8 +497,8 @@ class PowerBIConnector:
         if self._session is not None:
             try:
                 self._session.close()
-            except Exception:  # noqa: BLE001
-                pass
+            except Exception as ignored_exc:  # noqa: BLE001
+                logger.debug("close() ignored an exception: %s", ignored_exc)
             self._session = None
 
 

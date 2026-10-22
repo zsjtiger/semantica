@@ -39,6 +39,10 @@ from ..utils.exceptions import ProcessingError, ValidationError
 from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 _IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 # Fragments that turn a filter/order clause into a second statement, a
@@ -561,15 +565,15 @@ class DataExporter:
                     pk = inspector.get_pk_constraint(table_name, schema=schema)
                     if pk:
                         table_info["primary_keys"] = pk.get("constrained_columns", [])
-                except Exception:
-                    pass
+                except Exception as ignored_exc:
+                    logger.debug("export_schema() ignored an exception: %s", ignored_exc)
 
                 # Get indexes
                 try:
                     indexes = inspector.get_indexes(table_name, schema=schema)
                     table_info["indexes"] = [idx["name"] for idx in indexes]
-                except Exception:
-                    pass
+                except Exception as ignored_exc:
+                    logger.debug("export_schema() ignored an exception: %s", ignored_exc)
 
                 schema_info["tables"].append(table_info)
 
@@ -578,17 +582,17 @@ class DataExporter:
                 views = inspector.get_view_names(schema=schema)
                 schema_info["views"] = views
                 self.logger.debug(f"Found {len(views)} view(s) in schema")
-            except Exception:
+            except Exception as ignored_exc:
                 # Views may not be supported by all databases
-                pass
+                logger.debug("export_schema() ignored an exception: %s", ignored_exc)
 
             # Get foreign key constraints
             for table_name in tables:
                 try:
                     foreign_keys = inspector.get_foreign_keys(table_name, schema=schema)
                     schema_info["foreign_keys"].extend(foreign_keys)
-                except Exception:
-                    pass
+                except Exception as ignored_exc:
+                    logger.debug("export_schema() ignored an exception: %s", ignored_exc)
 
             self.logger.debug(
                 f"Exported schema: {len(schema_info['tables'])} table(s), "

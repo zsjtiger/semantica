@@ -36,6 +36,7 @@ Parquet:
 from __future__ import annotations
 
 import base64
+import json
 import os
 import unittest
 
@@ -597,7 +598,10 @@ class TestMCPExportPreservesExistingFormats(unittest.TestCase):
         result = handle_export_graph({"format": "json"})
         self.assertNotIn("error", result, result)
         self.assertEqual(result.get("format"), "json")
-        self.assertIsInstance(result.get("data"), dict)
+        self.assertIsInstance(result.get("data"), str)
+        payload = json.loads(result["data"])
+        self.assertIn("entities", payload)
+        self.assertIn("relationships", payload)
 
     def test_csv_still_works(self):
         from semantica_mcp.mcp.tools.export import handle_export_graph

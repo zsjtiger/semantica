@@ -15,7 +15,8 @@ import json
 import unittest
 from datetime import datetime
 
-from semantica import mcp_server
+from semantica_mcp.mcp import server as mcp_server
+from semantica_mcp.mcp import session
 from semantica.context import ContextGraph
 
 SCENARIOS = ("Adopt HIPAA program", "Require BAA from vendors", "Host on AWS")
@@ -42,15 +43,15 @@ def _linked_graph():
 class TestGetCausalChainTool(unittest.TestCase):
 
     def setUp(self):
-        self._old_graph = mcp_server._graph
+        self._old_graph = session._graph
         self.graph, self.ids = _linked_graph()
-        mcp_server._graph = self.graph
+        session._graph = self.graph
 
     def tearDown(self):
-        mcp_server._graph = self._old_graph
+        session._graph = self._old_graph
 
     def _call(self, **arguments):
-        response = mcp_server._handle({
+        response = mcp_server.SemanticaMCPServer().dispatch({
             "jsonrpc": "2.0",
             "id": 1,
             "method": "tools/call",

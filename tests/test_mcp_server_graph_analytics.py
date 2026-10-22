@@ -20,7 +20,9 @@ import json
 import unittest
 from unittest import mock
 
-from semantica import mcp_server
+from semantica_mcp.mcp import server as mcp_server
+from semantica_mcp.mcp import session
+from semantica_mcp.mcp.tools.graph import handle_get_graph_analytics as _tool_get_graph_analytics
 from semantica.context import ContextGraph
 from semantica.kg import CentralityCalculator
 
@@ -44,8 +46,8 @@ def _graph() -> ContextGraph:
 class TestGraphAnalyticsRankings(unittest.TestCase):
 
     def setUp(self):
-        self._old_graph = mcp_server._graph
-        mcp_server._graph = _graph()
+        self._old_graph = session._graph
+        session._graph = _graph()
         patcher = mock.patch.object(
             CentralityCalculator, "calculate_pagerank", return_value=PAGERANK_RESULT
         )
@@ -53,10 +55,10 @@ class TestGraphAnalyticsRankings(unittest.TestCase):
         self.addCleanup(patcher.stop)
 
     def tearDown(self):
-        mcp_server._graph = self._old_graph
+        session._graph = self._old_graph
 
     def test_returns_nodes_ranked_by_pagerank_score(self):
-        result = mcp_server._tool_get_graph_analytics({})
+        result = _tool_get_graph_analytics({})
         self.assertNotIn("error", result, result)
         self.assertEqual(
             result["top_nodes_by_pagerank"],
@@ -70,7 +72,7 @@ class TestGraphAnalyticsRankings(unittest.TestCase):
             "calculate_pagerank",
             return_value={"centrality": {"alice": 0.5, "bob": 0.3, "acme": 0.2}},
         ):
-            result = mcp_server._tool_get_graph_analytics({})
+            result = _tool_get_graph_analytics({})
         self.assertNotIn("error", result, result)
         self.assertEqual(
             result["top_nodes_by_pagerank"],
@@ -79,7 +81,7 @@ class TestGraphAnalyticsRankings(unittest.TestCase):
 
     def test_reports_the_context_graph_counts(self):
         """The counts in the same response come from `find_nodes()` and `stats()`."""
-        result = mcp_server._tool_get_graph_analytics({})
+        result = _tool_get_graph_analytics({})
         self.assertNotIn("error", result, result)
         self.assertEqual(result["node_count"], 3)
         self.assertEqual(result["edge_count"], 3)
@@ -89,14 +91,14 @@ class TestGraphAnalyticsOnARealContextGraph(unittest.TestCase):
     """The tool end to end, with no stubbed calculator."""
 
     def setUp(self):
-        self._old_graph = mcp_server._graph
-        mcp_server._graph = _graph()
+        self._old_graph = session._graph
+        session._graph = _graph()
 
     def tearDown(self):
-        mcp_server._graph = self._old_graph
+        session._graph = self._old_graph
 
     def test_ranks_the_nodes_and_serialises_to_json(self):
-        result = mcp_server._tool_get_graph_analytics({})
+        result = _tool_get_graph_analytics({})
         self.assertNotIn("error", result, result)
         self.assertEqual(result["node_count"], 3)
         self.assertEqual(result["edge_count"], 3)
@@ -118,8 +120,8 @@ class TestGraphAnalyticsOnARealContextGraph(unittest.TestCase):
         contract rather than to show the ranking fix, so that a later change
         cannot quietly turn an empty graph into a zero-filled response.
         """
-        mcp_server._graph = ContextGraph(advanced_analytics=True)
-        result = mcp_server._tool_get_graph_analytics({})
+        session._graph = ContextGraph(advanced_analytics=True)
+        result = _tool_get_graph_analytics({})
         self.assertIn("error", result)
         self.assertIn("No nodes found", result["error"])
 

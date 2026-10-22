@@ -51,6 +51,10 @@ from ..utils.exceptions import ProcessingError, ValidationError
 from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Optional psycopg2 import
 try:
     import psycopg2
@@ -424,8 +428,8 @@ class ApacheAgeStore:
         if self._conn:
             try:
                 self._conn.close()
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("close() ignored an exception: %s", ignored_exc)
             self._conn = None
         self.logger.info("Disconnected from PostgreSQL/AGE")
 
@@ -1305,8 +1309,8 @@ class ApacheAgeStore:
                         )
                     except Exception:
                         stats["label_counts"][lbl_name] = 0
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("get_stats() ignored an exception: %s", ignored_exc)
 
             # Relationship type counts
             stats["relationship_type_counts"] = {}
@@ -1333,8 +1337,8 @@ class ApacheAgeStore:
                         )
                     except Exception:
                         stats["relationship_type_counts"][etype] = 0
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("get_stats() ignored an exception: %s", ignored_exc)
 
             return stats
 

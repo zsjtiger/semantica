@@ -309,6 +309,10 @@ def _stable_fingerprint(items) -> str:
 # Try to import spaCy
 from ..utils.helpers import safe_import
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 spacy, SPACY_AVAILABLE = safe_import("spacy")
 
 
@@ -535,8 +539,8 @@ def get_nlp_model():
             try:
                 _nlp_cache = spacy.load("en_core_web_sm", disable=["parser", "ner", "lemmatizer"])
                 return _nlp_cache
-            except Exception:
-                pass  # spacy.load raises OSError for a missing model
+            except Exception as ignored_exc:
+                _logger.debug("get_nlp_model() ignored an exception: %s", ignored_exc)
 
         except Exception as e:
             logger.warning(f"Failed to load spaCy model for similarity: {e}")
@@ -1721,8 +1725,8 @@ def extract_relations_similarity(
                     has_vectors = True
                     for rt in relation_types:
                         relation_vectors[rt] = guarded_nlp(rt)
-        except Exception:
-            pass
+        except Exception as ignored_exc:
+            _logger.debug("extract_relations_similarity() ignored an exception: %s", ignored_exc)
     
     for entity1 in entities:
         for entity2 in entities:
@@ -2276,7 +2280,7 @@ Entities found in text: {entities_str}"""
                 )
             except Exception as _e:
                 # Keep relations as empty if fallback fails
-                pass
+                _logger.debug("fallback relation parse ignored an exception: %s", _e)
 
         logger.info(f"Successfully extracted {len(relations)} relations using {provider}/{model} (typed)")
         _result_cache.set("relations", text, relations, **cache_params)

@@ -31,6 +31,10 @@ from ..utils.logging import get_logger
 from .document_parser import DocumentParser
 from .structured_data_parser import StructuredDataParser
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class MCPParser:
     """
@@ -213,8 +217,8 @@ class MCPParser:
                         lines = text_content.strip().split("\n")
                         if len(lines) > 1:
                             parsed["structured"] = self._parse_csv_like(text_content)
-                    except Exception:
-                        pass
+                    except Exception as ignored_exc:
+                        logger.debug("_parse_content_item() ignored an exception: %s", ignored_exc)
 
             return parsed
 

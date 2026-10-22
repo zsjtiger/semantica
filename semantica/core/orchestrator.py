@@ -34,6 +34,10 @@ from .config_manager import Config, ConfigManager
 from .lifecycle import LifecycleManager
 from .plugin_registry import PluginRegistry
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Semantica:
     """
@@ -1013,9 +1017,9 @@ class Semantica:
             try:
                 cpu_percent = process.cpu_percent(interval=0.1)
                 metrics["cpu_usage"] = cpu_percent
-            except Exception:
+            except Exception as ignored_exc:
                 # CPU percent may not be available immediately
-                pass
+                logger.debug("_collect_metrics() ignored an exception: %s", ignored_exc)
 
         except (ImportError, OSError):
             # psutil not available, use basic metrics

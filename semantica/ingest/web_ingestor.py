@@ -50,6 +50,10 @@ from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 from .ssrf import parse_bool, request_with_ssrf_guard, validate_url_for_request
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class WebContent:
@@ -158,10 +162,10 @@ class RobotsChecker:
 
             try:
                 parser.read()
-            except Exception:
+            except Exception as ignored_exc:
                 # If robots.txt not available or unreadable, assume allowed
                 # (per robots.txt spec: if file doesn't exist, all access is allowed)
-                pass
+                logger.debug("can_fetch() ignored an exception: %s", ignored_exc)
 
             # Cache parser for this domain
             self.parsers[domain] = parser

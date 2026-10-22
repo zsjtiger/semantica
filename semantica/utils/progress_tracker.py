@@ -47,6 +47,10 @@ from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, Union
 
 from .logging import get_logger
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 DISABLE_JUPYTER_PROGRESS = os.getenv("SEMANTICA_DISABLE_JUPYTER_PROGRESS", "").strip().lower() in (
     "1",
     "true",
@@ -788,8 +792,8 @@ class JupyterProgressDisplay(ProgressDisplay):
                     import os
                     is_colab = ('google.colab' in sys.modules or 
                                os.environ.get("COLAB_GPU") is not None)
-                except Exception:
-                    pass
+                except Exception as ignored_exc:
+                    logger.debug("update() ignored an exception: %s", ignored_exc)
                 
                 if self.display_handle is None:
                     # First time - create display
@@ -802,8 +806,8 @@ class JupyterProgressDisplay(ProgressDisplay):
                             # Clear and recreate for Colab compatibility
                             try:
                                 clear_output(wait=False)
-                            except Exception:
-                                pass
+                            except Exception as ignored_exc:
+                                logger.debug("update() ignored an exception: %s", ignored_exc)
                             self.display_handle = display(HTML(html), display_id=True)
                         else:
                             # Regular Jupyter - try update first
@@ -812,15 +816,15 @@ class JupyterProgressDisplay(ProgressDisplay):
                         # If update fails, create new display (works in both Jupyter and Colab)
                         try:
                             clear_output(wait=False)
-                        except Exception:
-                            pass
+                        except Exception as ignored_exc:
+                            logger.debug("update() ignored an exception: %s", ignored_exc)
                         self.display_handle = display(HTML(html), display_id=True)
             except Exception:
                 # Fallback: always create new display if update fails
                 try:
                     clear_output(wait=False)
-                except Exception:
-                    pass
+                except Exception as ignored_exc:
+                    logger.debug("update() ignored an exception: %s", ignored_exc)
                 self.display_handle = display(HTML(html), display_id=True)
 
     def show_summary(self, items: List[ProgressItem]) -> None:
@@ -1167,8 +1171,8 @@ class ProgressTracker:
                     config_str = str(ipython.config.IPKernelApp)
                     if 'google.colab' in config_str or 'colab' in config_str.lower():
                         return True
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("_detect_jupyter() ignored an exception: %s", ignored_exc)
             
             # Method 2: Check for kernel attribute (Jupyter/Colab)
             if hasattr(ipython, "kernel"):

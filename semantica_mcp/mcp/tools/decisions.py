@@ -321,7 +321,9 @@ def handle_link_decisions(args: dict) -> dict:
         try:
             edge_count = len(graph.edges)
             added = graph.add_causal_relationship(source, target, relationship)
-            new_edges = list(graph.edges)[edge_count:]
+            # The causal edge is appended first; a mutation callback may append
+            # more after it. Only this call's edge is rolled back, never those.
+            new_edges = list(graph.edges)[edge_count:edge_count + 1]
         except ValueError as exc:
             return {"error": str(exc)}
         except Exception as exc:

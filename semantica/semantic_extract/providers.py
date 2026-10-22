@@ -90,6 +90,10 @@ from ..utils.logging import get_logger
 from .config import config
 from .registry import provider_registry
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def _extract_first_json_value(text: str):
     """Scan *text* for the first top-level JSON value (object or array) and
@@ -489,8 +493,8 @@ class BaseProvider:
                                 client = instructor.from_openai(
                                     ds_client, mode=instructor.Mode.JSON
                                 )
-                        except Exception:
-                            pass
+                        except Exception as ignored_exc:
+                            logger.debug("generate_typed() ignored an exception: %s", ignored_exc)
 
                 # Global LiteLLM support - if litellm is passed in kwargs or config
                 if not client and (kwargs.get("litellm") or self.config.get("litellm")):
@@ -502,8 +506,8 @@ class BaseProvider:
                             client = instructor.from_provider(
                                 litellm_provider, api_key=self.api_key
                             )
-                        except Exception:
-                            pass
+                        except Exception as ignored_exc:
+                            logger.debug("generate_typed() ignored an exception: %s", ignored_exc)
 
                 if client:
                     # Map generate arguments to client arguments
@@ -893,8 +897,8 @@ class GeminiProvider(BaseProvider):
                 self.client = new_genai.Client(api_key=self.api_key)
                 self._use_new_genai = True
                 return
-        except Exception:
-            pass
+        except Exception as ignored_exc:
+            logger.debug("_init_client() ignored an exception: %s", ignored_exc)
         try:
             import google.generativeai as old_genai
 

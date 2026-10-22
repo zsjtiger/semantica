@@ -7,7 +7,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from semantica import mcp_server
+from semantica_mcp.mcp import server as mcp_server
+from semantica_mcp.mcp import session
 from semantica.context import ContextGraph
 
 
@@ -32,13 +33,13 @@ class TestLinkDecisionsPersistence(unittest.TestCase):
         ]
         self.initial_edges = list(self.graph.edges)
         self.graph_patch = patch.multiple(
-            mcp_server, _graph=self.graph, _kg_load_ok=True
+            session, _graph=self.graph, _load_ok=True
         )
         self.graph_patch.start()
         self.addCleanup(self.graph_patch.stop)
 
     def _call(self, name, **arguments):
-        response = mcp_server._handle(
+        response = mcp_server.SemanticaMCPServer().dispatch(
             {
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -70,7 +71,7 @@ class TestLinkDecisionsPersistence(unittest.TestCase):
     def test_link_survives_reload_through_handle(self):
         self.graph.save_to_file(str(self.path))
         self.assertTrue(self._link()["linked"])
-        mcp_server._graph = None
+        session._graph = None
         self.assertEqual(self._chain(), ["Cause"])
 
     def test_failed_save_rolls_back_only_new_edges_and_retry_works(self):
@@ -96,7 +97,7 @@ class TestLinkDecisionsPersistence(unittest.TestCase):
         self.assertEqual(self._chain(), ["Unrelated"])
 
         self.assertTrue(self._link()["linked"])
-        mcp_server._graph = None
+        session._graph = None
         self.assertCountEqual(self._chain(), ["Cause", "Unrelated"])
 
     def test_failed_save_keeps_edges_added_during_save(self):
@@ -134,9 +135,9 @@ class TestLinkDecisionsPersistence(unittest.TestCase):
     def test_unsafe_startup_file_is_not_overwritten(self):
         original = b"not a graph\n"
         self.path.write_bytes(original)
-        mcp_server._graph = None
-        graph = mcp_server._get_graph()
-        self.assertFalse(mcp_server._kg_load_ok)
+        session._graph = None
+        graph = session.get_graph()
+        self.assertFalse(session._load_ok)
         # Populate the live graph without persisting over the failed startup file.
         self.ids = [
             graph.record_decision(

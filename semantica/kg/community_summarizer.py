@@ -29,6 +29,10 @@ from .community_hierarchy import (
     compute_community_hash,
 )
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 logger = get_logger("community_summarizer")
 
 SUPPORTED_CENTRALITY_METRICS: Dict[str, str] = {
@@ -180,8 +184,8 @@ def estimate_tokens(
     if custom_counter is not None and callable(custom_counter):
         try:
             return max(0, int(custom_counter(text)))
-        except Exception:
-            pass
+        except Exception as ignored_exc:
+            _logger.debug("estimate_tokens() ignored an exception: %s", ignored_exc)
     return max(1, math.ceil(len(text) / 4.0))
 
 
@@ -1224,8 +1228,8 @@ class CommunitySummarizer:
                         entity_attr_map[n_str] = node_data
                         if "name" in node_data and node_data["name"]:
                             entity_attr_map[str(node_data["name"])] = node_data
-                except Exception:
-                    pass
+                except Exception as ignored_exc:
+                    _logger.debug("_pack_context() ignored an exception: %s", ignored_exc)
             elif isinstance(subgraph, dict):
                 sub_ents = (
                     subgraph.get("entities")
@@ -1734,8 +1738,8 @@ class CommunitySummarizer:
             val = json.loads(cleaned)
             if isinstance(val, dict):
                 return val
-        except Exception:
-            pass
+        except Exception as ignored_exc:
+            _logger.debug("_extract_json() ignored an exception: %s", ignored_exc)
 
         # Try markdown code fences ```json ... ```
         match = re.search(
@@ -1755,8 +1759,8 @@ class CommunitySummarizer:
                             obj, _ = decoder.raw_decode(block[i:])
                             if isinstance(obj, dict):
                                 return obj
-                        except Exception:
-                            pass
+                        except Exception as ignored_exc:
+                            _logger.debug("_extract_json() ignored an exception: %s", ignored_exc)
 
         # Scan text for first valid JSON object using raw_decode
         decoder = json.JSONDecoder()
@@ -1766,8 +1770,8 @@ class CommunitySummarizer:
                     obj, _ = decoder.raw_decode(cleaned[i:])
                     if isinstance(obj, dict):
                         return obj
-                except Exception:
-                    pass
+                except Exception as ignored_exc:
+                    _logger.debug("_extract_json() ignored an exception: %s", ignored_exc)
 
         raise ValueError(
             f"No valid JSON found in LLM output: {cleaned[:120]}..."
@@ -1835,8 +1839,8 @@ class CommunitySummarizer:
         if hasattr(res, "__dict__"):
             try:
                 return CommunityReportLLMSchema.model_validate(vars(res))
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                _logger.debug("_coerce_to_schema() ignored an exception: %s", ignored_exc)
         if isinstance(res, str):
             try:
                 parsed = self._extract_json(res)

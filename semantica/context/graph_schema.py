@@ -12,6 +12,10 @@ from typing import Dict, Any, List
 from ..graph_store import GraphStore
 from ..utils.logging import get_logger
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def setup_decision_schema(graph_store: GraphStore) -> None:
     """
@@ -242,9 +246,9 @@ def verify_schema(graph_store: GraphStore) -> bool:
             if not (has_composite or has_legacy):
                 logger.warning("Missing policy identity constraint (composite or legacy)")
                 return False
-        except Exception:
+        except Exception as ignored_exc:
             # Backend may not support SHOW CONSTRAINTS; skip hard failure here.
-            pass
+            logger.debug("verify_schema() ignored an exception: %s", ignored_exc)
 
         # Check for node labels
         label_checks = [

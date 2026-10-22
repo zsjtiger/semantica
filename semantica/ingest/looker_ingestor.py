@@ -106,6 +106,10 @@ from .ssrf import (
     validate_url_for_request,
 )
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # ---------------------------------------------------------------------------
 # Optional-dependency guard — mirrors the pattern in salesforce_ingestor.
 # The module always imports cleanly; the sentinel fires at instantiation
@@ -1002,8 +1006,8 @@ class LookerConnector:
             return
         try:
             session.close()
-        except Exception:  # noqa: BLE001 - cleanup must never raise
-            pass
+        except Exception as ignored_exc:  # noqa: BLE001 - cleanup must never raise
+            logger.debug("_close_client() ignored an exception: %s", ignored_exc)
 
     # ------------------------------------------------------------------
     # Public properties

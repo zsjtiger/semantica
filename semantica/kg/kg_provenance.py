@@ -54,10 +54,13 @@ Version: 1.0.0
 """
 
 from typing import Any, Dict, List, Optional
+import logging
 import uuid
 import time
 
 from ..utils.helpers import utc_now_iso
+
+logger = logging.getLogger(__name__)
 
 
 class GraphBuilderWithProvenance:
@@ -175,7 +178,7 @@ class GraphBuilderWithProvenance:
                         )
             except Exception as e:
                 # Don't fail the build if provenance tracking fails
-                pass
+                logger.debug("build() ignored a provenance error: %s", e)
 
         return result
 
@@ -250,7 +253,7 @@ class GraphBuilderWithProvenance:
                         )
             except Exception as e:
                 # Don't fail the build if provenance tracking fails
-                pass
+                logger.debug("build_single_source() ignored a provenance error: %s", e)
         
         return result
     

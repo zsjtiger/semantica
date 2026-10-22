@@ -269,12 +269,16 @@ ABDUCTIVE_REASONING = {
     "required": ["observations"],
 }
 
+# Every format export_graph accepts. The handler and the advertised schema both
+# read this tuple, so the two cannot drift apart.
+EXPORT_GRAPH_FORMATS = ("turtle", "ttl", "nt", "xml", "json-ld", "jsonld", "json", "csv", "graphml", "parquet")
+
 EXPORT_GRAPH = {
     "type": "object",
     "properties": {
         "format": {
             "type": "string",
-            "enum": ["turtle", "ttl", "nt", "xml", "json-ld", "jsonld", "json", "csv", "graphml", "parquet"],
+            "enum": list(EXPORT_GRAPH_FORMATS),
             "description": "Export format (default: json-ld)",
         },
     },
@@ -431,6 +435,67 @@ REMOVE_DOCUMENT = {
         },
     },
     "required": ["source"],
+}
+
+QUERY_GRAPH = {
+    "type": "object",
+    "properties": {
+        "mode": {
+            "type": "string",
+            "description": "node | neighbors | search (default: neighbors)",
+        },
+        "node_id": {
+            "type": "string",
+            "description": "Node id (required for node and neighbors modes)",
+        },
+        "depth": {
+            "type": "integer",
+            "description": "Hop depth for neighbors, 1-5 (default 1)",
+        },
+        "relationship_types": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Optional filter by edge type(s)",
+        },
+        "query": {
+            "type": "string",
+            "description": "Keyword for search mode, matched against node id and content",
+        },
+        "node_type": {
+            "type": "string",
+            "description": "Optional node_type filter for search mode",
+        },
+        "limit": {
+            "type": "integer",
+            "description": "Max results for neighbors and search modes",
+        },
+    },
+}
+
+UPDATE_NODE = {
+    "type": "object",
+    "properties": {
+        "node_id": {
+            "type": "string",
+            "description": "Node id to update",
+        },
+        "properties": {
+            "type": "object",
+            "description": 'Property key-values to merge onto the node, e.g. {"status": "done", "note": "..."}',
+        },
+    },
+    "required": ["node_id", "properties"],
+}
+
+DELETE_NODE = {
+    "type": "object",
+    "properties": {
+        "node_id": {
+            "type": "string",
+            "description": "Node id to archive",
+        },
+    },
+    "required": ["node_id"],
 }
 
 EMPTY = {"type": "object", "properties": {}}

@@ -41,6 +41,10 @@ from ..utils.exceptions import ProcessingError, ValidationError
 from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Optional Pinecone import
 try:
     from pinecone import Pinecone as PineconeClientLib, ServerlessSpec, PodSpec
@@ -718,8 +722,8 @@ class PineconeStore:
                 if stats and isinstance(stats, dict) and stats.get("dimension"):
                     dimension = int(stats["dimension"])
                     self.dimension = dimension
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("filter_by_metadata() ignored an exception: %s", ignored_exc)
 
         if not dimension:
             raise ProcessingError(

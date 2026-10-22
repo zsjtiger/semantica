@@ -46,6 +46,10 @@ from ..utils.exceptions import ProcessingError, ValidationError
 from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class EmailData:
@@ -159,8 +163,8 @@ class AttachmentProcessor:
             try:
                 text_content = attachment_data.decode("utf-8", errors="ignore")
                 attachment_info["text_content"] = text_content
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("process_attachment() ignored an exception: %s", ignored_exc)
         elif content_type in [
             "application/pdf",
             "application/msword",
@@ -386,8 +390,8 @@ class EmailParser:
                 soup = BeautifulSoup(email_content, "html.parser")
                 for link_tag in soup.find_all("a", href=True):
                     links.append(link_tag["href"])
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("extract_links() ignored an exception: %s", ignored_exc)
 
         # Extract URLs from text using regex
         import re
@@ -719,8 +723,8 @@ class EmailIngestor:
                 from email.utils import parsedate_to_datetime
 
                 email_date = parsedate_to_datetime(date_str)
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("process_email() ignored an exception: %s", ignored_exc)
 
         # Parse body
         body = self.parser.parse_body(email_message)
@@ -887,13 +891,13 @@ class EmailIngestor:
             try:
                 self.imap_client.close()
                 self.imap_client.logout()
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("disconnect() ignored an exception: %s", ignored_exc)
             self.imap_client = None
 
         if self.pop3_client:
             try:
                 self.pop3_client.quit()
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("disconnect() ignored an exception: %s", ignored_exc)
             self.pop3_client = None

@@ -11,6 +11,10 @@ from typing import Any, Dict, List, Optional
 from ..utils.exceptions import ProcessingError, ValidationError
 from ..utils.logging import get_logger
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 try:
     import cassandra
@@ -107,8 +111,8 @@ class CassandraConnector:
             if self.cluster is not None:
                 try:
                     self.cluster.shutdown()
-                except Exception:
-                    pass
+                except Exception as ignored_exc:
+                    logger.debug("connect() ignored an exception: %s", ignored_exc)
             self.cluster = None
             self.session = None
             self.logger.error(
@@ -124,16 +128,16 @@ class CassandraConnector:
         if self.session is not None:
             try:
                 self.session.shutdown()
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("disconnect() ignored an exception: %s", ignored_exc)
             finally:
                 self.session = None
 
         if self.cluster is not None:
             try:
                 self.cluster.shutdown()
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("disconnect() ignored an exception: %s", ignored_exc)
             finally:
                 self.cluster = None
 

@@ -49,6 +49,10 @@ import numpy as np
 from ..utils.exceptions import ProcessingError, ValidationError
 from ..utils.logging import get_logger
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Optional sqlite-vec import
 # (Loaded lazily inside SQLiteVecStore.__init__ to prevent eager loading)
 sqlite_vec = None
@@ -809,15 +813,15 @@ class SQLiteVecStore:
                 if hasattr(self, "_conn") and self._conn:
                     try:
                         self._conn.close()
-                    except Exception:
-                        pass
+                    except Exception as ignored_exc:
+                        logger.debug("close() ignored an exception: %s", ignored_exc)
                     self._conn = None
         else:
             if hasattr(self, "_conn") and self._conn:
                 try:
                     self._conn.close()
-                except Exception:
-                    pass
+                except Exception as ignored_exc:
+                    logger.debug("close() ignored an exception: %s", ignored_exc)
                 self._conn = None
 
     def __enter__(self):

@@ -15,12 +15,27 @@ The ``assertNotEqual(..., "0.4.0")`` canaries guard against regression to
 the original stale literal that triggered issue #863.
 """
 
+import json
 import unittest
 
 import semantica
-from semantica import mcp_server
+from semantica_mcp.mcp import server as mcp_server
+from semantica_mcp.mcp.resources.registry import handle_resource_read
 
 _EXPECTED = semantica.__version__
+
+
+def _server_info():
+    """serverInfo as reported by the initialize response."""
+    response = mcp_server.SemanticaMCPServer().dispatch(
+        {"jsonrpc": "2.0", "id": 1, "method": "initialize"}
+    )
+    return response["result"]["serverInfo"]
+
+
+def _read_resource(uri):
+    """Parsed JSON body of a resource read."""
+    return json.loads(handle_resource_read(uri)["text"])
 
 
 class TestMCPServerVersion(unittest.TestCase):
@@ -31,11 +46,11 @@ class TestMCPServerVersion(unittest.TestCase):
 
     def test_server_info_version_matches_package(self):
         """SERVER_INFO['version'] must equal the authoritative package version."""
-        self.assertEqual(mcp_server.SERVER_INFO["version"], _EXPECTED)
+        self.assertEqual(_server_info()["version"], _EXPECTED)
 
     def test_server_info_version_is_not_stale_literal(self):
         """Guard: SERVER_INFO must not report the original hardcoded 0.4.0."""
-        self.assertNotEqual(mcp_server.SERVER_INFO["version"], "0.4.0")
+        self.assertNotEqual(_server_info()["version"], "0.4.0")
 
     # ------------------------------------------------------------------ #
     # MCP initialize → serverInfo.version
@@ -43,7 +58,7 @@ class TestMCPServerVersion(unittest.TestCase):
 
     def test_initialize_server_info_version_matches_package(self):
         """The MCP initialize response must report the authoritative package version."""
-        response = mcp_server._handle(
+        response = mcp_server.SemanticaMCPServer().dispatch(
             {"jsonrpc": "2.0", "id": 1, "method": "initialize"}
         )
         self.assertIsNotNone(response)
@@ -54,7 +69,7 @@ class TestMCPServerVersion(unittest.TestCase):
 
     def test_initialize_server_info_version_is_not_stale_literal(self):
         """Guard: initialize must not report the original hardcoded 0.4.0."""
-        response = mcp_server._handle(
+        response = mcp_server.SemanticaMCPServer().dispatch(
             {"jsonrpc": "2.0", "id": 1, "method": "initialize"}
         )
         self.assertNotEqual(response["result"]["serverInfo"]["version"], "0.4.0")
@@ -65,12 +80,12 @@ class TestMCPServerVersion(unittest.TestCase):
 
     def test_schema_info_resource_version_matches_package(self):
         """The semantica://schema/info resource must report the authoritative package version."""
-        resource = mcp_server._read_resource("semantica://schema/info")
+        resource = _read_resource("semantica://schema/info")
         self.assertEqual(resource["version"], _EXPECTED)
 
     def test_schema_info_resource_version_is_not_stale_literal(self):
         """Guard: schema/info must not report the original hardcoded 0.4.0."""
-        resource = mcp_server._read_resource("semantica://schema/info")
+        resource = _read_resource("semantica://schema/info")
         self.assertNotEqual(resource["version"], "0.4.0")
 
     # ------------------------------------------------------------------ #
@@ -80,10 +95,10 @@ class TestMCPServerVersion(unittest.TestCase):
     def test_both_version_surfaces_are_identical(self):
         """SERVER_INFO and schema/info must report the exact same version string,
         confirming both surfaces derive from a single authoritative value."""
-        init_response = mcp_server._handle(
+        init_response = mcp_server.SemanticaMCPServer().dispatch(
             {"jsonrpc": "2.0", "id": 1, "method": "initialize"}
         )
-        schema_resource = mcp_server._read_resource("semantica://schema/info")
+        schema_resource = _read_resource("semantica://schema/info")
         self.assertEqual(
             init_response["result"]["serverInfo"]["version"],
             schema_resource["version"],

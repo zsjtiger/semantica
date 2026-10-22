@@ -87,6 +87,10 @@ from ..utils.logging import get_logger
 from .context_graph import ContextGraph
 from .decision_models import Decision, PolicyException
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 try:
     from ..kg import (
@@ -296,24 +300,24 @@ class DecisionQuery:
                     if decision.reasoning_embedding:
                         semantic_sim = self._cosine_similarity(query_embedding, decision.reasoning_embedding)
                         similarity_score += weights["semantic"] * semantic_sim
-                except Exception:
-                    pass  # Continue without semantic similarity
+                except Exception as ignored_exc:
+                    logger.debug("_find_precedents_enhanced_graph() ignored an exception: %s", ignored_exc)
             
             # Structural similarity (if Node2Vec available)
             if "node_embedder" in self.kg_components:
                 try:
                     structural_sim = self._calculate_structural_similarity(decision, scenario)
                     similarity_score += weights["structural"] * structural_sim
-                except Exception:
-                    pass  # Continue without structural similarity
+                except Exception as ignored_exc:
+                    logger.debug("_find_precedents_enhanced_graph() ignored an exception: %s", ignored_exc)
             
             # Centrality boosting (if available)
             if "centrality_calculator" in self.kg_components:
                 try:
                     centrality_boost = self._get_centrality_boost(decision.decision_id)
                     similarity_score *= (1.0 + centrality_boost)
-                except Exception:
-                    pass  # Continue without centrality boost
+                except Exception as ignored_exc:
+                    logger.debug("_find_precedents_enhanced_graph() ignored an exception: %s", ignored_exc)
             
             decision.metadata["similarity_score"] = similarity_score
             enhanced_decisions.append(decision)
@@ -1085,8 +1089,8 @@ class DecisionQuery:
             try:
                 structural_sim = self._calculate_structural_similarity(decision, scenario)
                 similarity_score += weights["structural"] * structural_sim
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("_calculate_combined_similarity() ignored an exception: %s", ignored_exc)
         
         return similarity_score
     
@@ -1115,8 +1119,8 @@ class DecisionQuery:
                 # In a full implementation, this would compare node embeddings
                 return self._calculate_text_similarity(decision.scenario, scenario) * 0.8
             
-        except Exception:
-            pass
+        except Exception as ignored_exc:
+            logger.debug("_calculate_structural_similarity() ignored an exception: %s", ignored_exc)
         
         return 0.0
     

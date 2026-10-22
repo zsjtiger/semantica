@@ -14,7 +14,10 @@ the node-to-score mapping and `rankings` contains ordered `(node, score)` pairs.
 import unittest
 from unittest import mock
 
-from semantica import mcp_server
+from semantica_mcp.mcp import server as mcp_server
+from semantica_mcp.mcp.tools.graph import _community_groups
+from semantica_mcp.mcp import session
+from semantica_mcp.mcp.tools.graph import handle_get_graph_analytics as _tool_get_graph_analytics
 from semantica.context import ContextGraph
 from semantica.kg import CentralityCalculator, CommunityDetector
 
@@ -46,12 +49,17 @@ def _two_clusters() -> ContextGraph:
     return graph
 
 
+def _community_count(payload):
+    """Number of communities in a ``detect_communities`` result."""
+    return len(_community_groups(payload))
+
+
 class _StubbedHandlerCase(unittest.TestCase):
     """Runs the handler with PageRank stubbed, so the community line is reached."""
 
     def _run(self, graph: ContextGraph) -> dict:
-        previous = mcp_server._graph
-        mcp_server._graph = graph
+        previous = session._graph
+        session._graph = graph
         patcher = mock.patch.object(
             CentralityCalculator,
             "calculate_pagerank",
@@ -59,10 +67,10 @@ class _StubbedHandlerCase(unittest.TestCase):
         )
         patcher.start()
         try:
-            return mcp_server._tool_get_graph_analytics({})
+            return _tool_get_graph_analytics({})
         finally:
             patcher.stop()
-            mcp_server._graph = previous
+            session._graph = previous
 
 
 class TestCommunityCountFromTheHandler(_StubbedHandlerCase):
@@ -96,15 +104,15 @@ class TestCommunityCountHelper(unittest.TestCase):
             "modularity": 0.0,
             "algorithm": "louvain",
         }
-        self.assertEqual(mcp_server._community_count(payload), 2)
+        self.assertEqual(_community_count(payload), 2)
 
     def test_accepts_a_plain_list_of_groups(self):
-        self.assertEqual(mcp_server._community_count([{"alice"}, {"bob"}, {"acme"}]), 3)
+        self.assertEqual(_community_count([{"alice"}, {"bob"}, {"acme"}]), 3)
 
     def test_reports_zero_for_missing_or_misshaped_groups(self):
         for payload in ({}, {"communities": None}, {"communities": 4}, None, 4, "4"):
             with self.subTest(payload=payload):
-                self.assertEqual(mcp_server._community_count(payload), 0)
+                self.assertEqual(_community_count(payload), 0)
 
 
 if __name__ == "__main__":

@@ -35,6 +35,10 @@ from ..utils.exceptions import ProcessingError, ValidationError
 from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 try:
     import duckdb
 except (ImportError, OSError):
@@ -111,8 +115,8 @@ class DuckDBIngestor:
         if hasattr(self, "conn") and self.conn:
             try:
                 self.conn.close()
-            except Exception:
-                pass
+            except Exception as ignored_exc:
+                logger.debug("__del__() ignored an exception: %s", ignored_exc)
 
     def ingest_csv(
         self,

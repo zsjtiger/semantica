@@ -36,6 +36,10 @@ from ..utils.exceptions import ProcessingError, ValidationError
 from ..utils.logging import get_logger
 from ..utils.progress_tracker import get_progress_tracker
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class SlideContent:
@@ -194,8 +198,8 @@ class PPTXParser:
                         "format": shape.image.ext,
                     }
                     images.append(image_info)
-                except Exception:
-                    pass
+                except Exception as ignored_exc:
+                    logger.debug("_parse_slide() ignored an exception: %s", ignored_exc)
 
             # Extract shape information
             if options.get("extract_shapes", False):
@@ -241,7 +245,7 @@ class PPTXParser:
                 "modified": str(core_props.modified) if core_props.modified else None,
                 "last_modified_by": core_props.last_modified_by,
             }
-        except Exception:
-            pass
+        except Exception as ignored_exc:
+            logger.debug("_extract_metadata() ignored an exception: %s", ignored_exc)
 
         return metadata
