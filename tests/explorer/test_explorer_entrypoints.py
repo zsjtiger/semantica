@@ -149,20 +149,20 @@ def test_legacy_server_mounts_editable_markdown_routes(monkeypatch):
 
 @pytest.fixture
 def reload_legacy_server(monkeypatch):
-    """Re-import ``semantica.server`` under the test's environment.
+    """Re-import the explorer app module under the test's environment.
 
-    The legacy server reads ``SEMANTICA_CORS_ORIGINS`` once, at import, so a
-    test that changes it has to re-import the module. The fixture re-imports
-    it again after the environment is restored, so later tests see the
-    module as it is by default.
+    The app reads ``SEMANTICA_CORS_ORIGINS`` once, at import (``app`` is built
+    at module level), so a test that changes it has to re-import the module.
+    The fixture re-imports it again after the environment is restored, so
+    later tests see the module as it is by default.
     """
     import importlib
 
-    from semantica import server
+    from semantica.explorer import app as explorer_app
 
-    yield lambda: importlib.reload(server)
+    yield lambda: importlib.reload(explorer_app)
     monkeypatch.undo()
-    importlib.reload(server)
+    importlib.reload(explorer_app)
 
 
 def _websocket_ack(client, origin):

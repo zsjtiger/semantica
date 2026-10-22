@@ -12,6 +12,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from .. import __version__
 from ..context.agent_memory import AgentMemory
@@ -34,10 +35,12 @@ def _read_int_env(name: str, default: int) -> int:
 
 
 def _read_explorer_settings() -> dict:
-    if "ALLOWED_ORIGINS" in os.environ:
-        raw_origins = os.environ["ALLOWED_ORIGINS"]
-    elif "EXPLORER_CORS_ORIGINS" in os.environ:
-        raw_origins = os.environ["EXPLORER_CORS_ORIGINS"]
+    # SEMANTICA_CORS_ORIGINS is the name the standalone server used; the other
+    # two are kept for existing deployments.
+    for name in ("SEMANTICA_CORS_ORIGINS", "ALLOWED_ORIGINS", "EXPLORER_CORS_ORIGINS"):
+        if name in os.environ:
+            raw_origins = os.environ[name]
+            break
     else:
         raw_origins = (
             "http://localhost:5173,http://127.0.0.1:5173,"
@@ -57,6 +60,21 @@ def _read_explorer_settings() -> dict:
             os.environ.get("EXPLORER_PROVENANCE_DB"),
         ),
     }
+
+
+class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Adds conservative security headers to every response."""
+
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        if request.url.scheme == "https":
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
 
 
 def create_app(
@@ -131,6 +149,7 @@ def create_app(
     )
 
     app.state.explorer_settings = settings
+    app.add_middleware(_SecurityHeadersMiddleware)
 
     # allow_credentials lets browsers send cookies/auth headers cross-origin.
     # Credentials aren't needed for the X-API-Key auth scheme below, and
@@ -238,7 +257,7 @@ def create_app(
             "capabilities": explorer_capabilities(agent_memory),
         }
 
-    static_dir = Path(__file__).resolve().parent.parent / "static"
+    static_dir = (Path(__file__).resolve().parent.parent / "static").resolve()
     if static_dir.is_dir():
         assets_dir = static_dir / "assets"
         if assets_dir.is_dir():
@@ -248,10 +267,18 @@ def create_app(
         async def serve_spa(full_path: str):
             if full_path.startswith("api/"):
                 raise HTTPException(status_code=404, detail="API route not found")
+            # Serve a built file only when it resolves inside static_dir; anything
+            # else falls back to index.html so the client-side router can take over.
+            requested = (static_dir / full_path).resolve(strict=False)
+            if requested.is_relative_to(static_dir) and requested.is_file():
+                return FileResponse(requested)
             index_path = static_dir / "index.html"
             if index_path.is_file():
                 return FileResponse(index_path)
-            raise HTTPException(status_code=404, detail="Frontend build missing")
+            raise HTTPException(
+                status_code=404,
+                detail="Frontend build missing. Run `npm run build` in explorer/ first.",
+            )
 
     return app
 
