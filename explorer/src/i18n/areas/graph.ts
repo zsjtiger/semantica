@@ -293,6 +293,17 @@ export const graphEn = {
     canvas: {
       fitView: 'Fit View',
     },
+    progress: {
+      preparingSession: 'Preparing graph session',
+      applyingStyle: 'Applying semantic color, sizing, and structural styling',
+      preparingRenderer: 'Preparing renderer and hydrating graph scene',
+      ready: 'Graph ready',
+      settlingLayout: 'Settling runtime layout',
+    },
+    markdownService: {
+      unreachable: 'The Markdown service could not be reached. Your draft was kept.',
+      discardConfirm: 'Discard this draft and reload the latest applied version?',
+    },
   },
 };
 
@@ -590,6 +601,17 @@ export const graphZh: typeof graphEn = {
     },
     canvas: {
       fitView: '适应视图',
+    },
+    progress: {
+      preparingSession: '正在准备图谱会话',
+      applyingStyle: '正在应用语义颜色、大小与结构样式',
+      preparingRenderer: '正在准备渲染器并加载图谱场景',
+      ready: '图谱已就绪',
+      settlingLayout: '正在稳定运行时布局',
+    },
+    markdownService: {
+      unreachable: 'Markdown 服务无法连接，已保留您的草稿。',
+      discardConfirm: '放弃此草稿并重新加载最新已应用的版本？',
     },
   },
 };

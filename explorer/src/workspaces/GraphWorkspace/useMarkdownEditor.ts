@@ -1,3 +1,4 @@
+import i18next from 'i18next';
 import {
   useCallback,
   useEffect,
@@ -44,7 +45,7 @@ function normalizeError(failure: unknown): MarkdownEditorError {
   if (failure instanceof MarkdownClientError) return failure;
   return {
     kind: "network",
-    message: "The Markdown service could not be reached. Your draft was kept.",
+    message: i18next.t('graph.markdownService.unreachable'),
   };
 }
 
@@ -148,7 +149,7 @@ export function useMarkdownEditor({
     if (!resource || saving) return;
     if (
       dirty
-      && !window.confirm("Discard this draft and reload the latest applied version?")
+      && !window.confirm(i18next.t('graph.markdownService.discardConfirm'))
     ) return;
     await beginEdit();
   }, [beginEdit, dirty, resource, saving]);
