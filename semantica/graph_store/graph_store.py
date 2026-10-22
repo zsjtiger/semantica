@@ -32,6 +32,7 @@ Author: Semantica Contributors
 License: MIT
 """
 
+import importlib
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..utils.exceptions import ValidationError
@@ -527,6 +528,17 @@ class GraphManager:
         return self.backend.create_index(label, property_name, index_type, **options)
 
 
+# backend name -> (module in this package, class, graph_store_config getter)
+_GRAPH_BACKENDS = {
+    "neo4j": ("neo4j_store", "Neo4jStore", "get_neo4j_config"),
+    "falkordb": ("falkordb_store", "FalkorDBStore", "get_falkordb_config"),
+    "neptune": ("amazon_neptune", "AmazonNeptuneStore", "get_neptune_config"),
+    "amazon_neptune": ("amazon_neptune", "AmazonNeptuneStore", "get_neptune_config"),
+    "age": ("age_store", "ApacheAgeStore", "get_age_config"),
+    "apache_age": ("age_store", "ApacheAgeStore", "get_age_config"),
+}
+
+
 class GraphStore:
     """
     Main graph store interface.
@@ -575,36 +587,14 @@ class GraphStore:
 
     def _initialize_store_backend(self) -> None:
         """Initialize the appropriate store backend based on backend type."""
-        if self.backend == "neo4j":
-            from .neo4j_store import Neo4jStore
-
-            neo4j_config = graph_store_config.get_neo4j_config()
-            neo4j_config.update(self.config)
-            self._store_backend = Neo4jStore(**neo4j_config)
-
-        elif self.backend == "falkordb":
-            from .falkordb_store import FalkorDBStore
-
-            falkordb_config = graph_store_config.get_falkordb_config()
-            falkordb_config.update(self.config)
-            self._store_backend = FalkorDBStore(**falkordb_config)
-
-        elif self.backend == "neptune" or self.backend == "amazon_neptune":
-            from .amazon_neptune import AmazonNeptuneStore
-
-            neptune_config = graph_store_config.get_neptune_config()
-            neptune_config.update(self.config)
-            self._store_backend = AmazonNeptuneStore(**neptune_config)
-
-        elif self.backend == "age" or self.backend == "apache_age":
-            from .age_store import ApacheAgeStore
-
-            age_config = graph_store_config.get_age_config()
-            age_config.update(self.config)
-            self._store_backend = ApacheAgeStore(**age_config)
-
-        else:
+        spec = _GRAPH_BACKENDS.get(self.backend)
+        if spec is None:
             raise ValidationError(f"Unknown backend: {self.backend}")
+        module_name, class_name, config_getter = spec
+        store_config = getattr(graph_store_config, config_getter)()
+        store_config.update(self.config)
+        store_cls = getattr(importlib.import_module(f".{module_name}", __package__), class_name)
+        self._store_backend = store_cls(**store_config)
 
         self._manager = GraphManager(self._store_backend)
 

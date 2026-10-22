@@ -66,6 +66,7 @@ License: MIT
 """
 
 import concurrent.futures
+import importlib
 import inspect
 import threading
 import uuid
@@ -110,6 +111,62 @@ class SearchResult(TypedDict):
     metadata: Dict[str, Any]
     vector: Optional[Any]          # np.ndarray | None
     distance: Optional[float]
+
+
+def _passthrough_kwargs(config: Dict[str, Any]) -> Dict[str, Any]:
+    return dict(config)
+
+
+def _faiss_kwargs(config: Dict[str, Any]) -> Dict[str, Any]:
+    return {**{k: v for k, v in config.items() if k != "dimension"},
+            "dimension": config.get("dimension", 768)}
+
+
+def _pgvector_kwargs(config: Dict[str, Any]) -> Dict[str, Any]:
+    connection_string = config.get("connection_string")
+    if not connection_string:
+        raise ValueError(
+            "pgvector backend requires 'connection_string' in config. "
+            "Example: VectorStore(backend='pgvector', config={"
+            "'connection_string': 'postgresql://user:pass@localhost/db'})"
+        )
+    named = {
+        "connection_string": connection_string,
+        "table_name": config.get("table_name", "vectors"),
+        "dimension": config.get("dimension", 768),
+        "distance_metric": config.get("distance_metric", "cosine"),
+    }
+    return {**{k: v for k, v in config.items() if k not in named}, **named}
+
+
+def _sqlite_kwargs(config: Dict[str, Any]) -> Dict[str, Any]:
+    db_path = config.get("db_path") or config.get("sqlite_path")
+    if not db_path:
+        raise ValueError(
+            "sqlite backend requires 'db_path' in config. "
+            "Example: VectorStore(backend='sqlite', config={'db_path': 'vectors.db'})"
+        )
+    named = {
+        "db_path": db_path,
+        "table_name": config.get("table_name", "vectors"),
+        "dimension": config.get("dimension", 768),
+        "distance_metric": config.get("distance_metric", "cosine"),
+        "read_only": config.get("read_only", False),
+    }
+    consumed = set(named) | {"sqlite_path"}
+    return {**{k: v for k, v in config.items() if k not in consumed}, **named}
+
+
+# backend name -> (module in this package, class, config -> constructor kwargs)
+_BACKEND_STORES = {
+    "pgvector": ("pgvector_store", "PgVectorStore", _pgvector_kwargs),
+    "faiss": ("faiss_store", "FAISSStore", _faiss_kwargs),
+    "weaviate": ("weaviate_store", "WeaviateStore", _passthrough_kwargs),
+    "qdrant": ("qdrant_store", "QdrantStore", _passthrough_kwargs),
+    "pinecone": ("pinecone_store", "PineconeStore", _passthrough_kwargs),
+    "milvus": ("milvus_store", "MilvusStore", _passthrough_kwargs),
+    "sqlite": ("sqlite_vec_store", "SQLiteVecStore", _sqlite_kwargs),
+}
 
 
 class VectorStore:
@@ -193,100 +250,17 @@ class VectorStore:
     def _init_backend_store(self):
         """Initialize backend-specific store instance."""
         try:
-            if self.backend == "pgvector":
-                # Import PgVectorStore
-                from .pgvector_store import PgVectorStore
-
-                # Required parameters for PgVectorStore
-                connection_string = self.config.get("connection_string")
-                table_name = self.config.get("table_name", "vectors")
-                dimension = self.config.get("dimension", 768)
-                distance_metric = self.config.get("distance_metric", "cosine")
-                
-                if not connection_string:
-                    raise ValueError(
-                        "pgvector backend requires 'connection_string' in config. "
-                        "Example: VectorStore(backend='pgvector', config={"
-                        "'connection_string': 'postgresql://user:pass@localhost/db'})"
-                    )
-                
-                # Initialize PgVectorStore
-                self._backend_store = PgVectorStore(
-                    connection_string=connection_string,
-                    table_name=table_name,
-                    dimension=dimension,
-                    distance_metric=distance_metric,
-                    **{k: v for k, v in self.config.items() 
-                       if k not in ['connection_string', 'table_name', 'dimension', 'distance_metric']}
-                )
-                self.logger.info(f"Initialized PgVectorStore backend")
-                
-            elif self.backend == "faiss":
-                from .faiss_store import FAISSStore
-                self._backend_store = FAISSStore(
-                    dimension=self.config.get("dimension", 768),
-                    **{k: v for k, v in self.config.items() if k != 'dimension'}
-                )
-                self.logger.info(f"Initialized FAISSStore backend")
-                
-            elif self.backend == "weaviate":
-                from .weaviate_store import WeaviateStore
-                self._backend_store = WeaviateStore(
-                    **self.config
-                )
-                self.logger.info(f"Initialized WeaviateStore backend")
-                
-            elif self.backend == "qdrant":
-                from .qdrant_store import QdrantStore
-                self._backend_store = QdrantStore(
-                    **self.config
-                )
-                self.logger.info(f"Initialized QdrantStore backend")
-                
-            elif self.backend == "pinecone":
-                from .pinecone_store import PineconeStore
-                self._backend_store = PineconeStore(
-                    **self.config
-                )
-                self.logger.info(f"Initialized PineconeStore backend")
-                
-            elif self.backend == "milvus":
-                from .milvus_store import MilvusStore
-                self._backend_store = MilvusStore(
-                    **self.config
-                )
-                self.logger.info(f"Initialized MilvusStore backend")
-                
-            elif self.backend == "sqlite":
-                from .sqlite_vec_store import SQLiteVecStore
-                db_path = self.config.get("db_path") or self.config.get("sqlite_path")
-                if not db_path:
-                    raise ValueError(
-                        "sqlite backend requires 'db_path' in config. "
-                        "Example: VectorStore(backend='sqlite', config={'db_path': 'vectors.db'})"
-                    )
-                
-                table_name = self.config.get("table_name", "vectors")
-                dimension = self.config.get("dimension", 768)
-                distance_metric = self.config.get("distance_metric", "cosine")
-                read_only = self.config.get("read_only", False)
-                
-                self._backend_store = SQLiteVecStore(
-                    db_path=db_path,
-                    table_name=table_name,
-                    dimension=dimension,
-                    distance_metric=distance_metric,
-                    read_only=read_only,
-                    **{k: v for k, v in self.config.items() 
-                       if k not in ['db_path', 'sqlite_path', 'table_name', 'dimension', 'distance_metric', 'read_only']}
-                )
-                self.logger.info(f"Initialized SQLite backend")
-                
-            else:
+            spec = _BACKEND_STORES.get(self.backend)
+            if spec is None:
                 # Fallback to in-memory for unknown backends
                 self.logger.warning(f"Backend '{self.backend}' not implemented, using in-memory")
                 self.backend = "inmemory"
-                
+            else:
+                module_name, class_name, build_kwargs = spec
+                store_cls = getattr(importlib.import_module(f".{module_name}", __package__), class_name)
+                self._backend_store = store_cls(**build_kwargs(self.config))
+                self.logger.info(f"Initialized {class_name} backend")
+
         except ImportError as e:
             raise ImportError(f"Backend '{self.backend}' not available: {e}. Please install required dependencies.") from e
         except Exception as e:
